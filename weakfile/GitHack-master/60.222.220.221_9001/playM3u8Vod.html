@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>ckplayer弹幕演示</title>
+
+</head>
+
+<body>
+<div id="a1"></div>
+<script type="text/javascript">
+	var playerId = "ckplayer_a1";
+</script>
+<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+<script type="text/javascript" src="ckplayer/ckplayer.js" charset="utf-8"></script>
+<script type="text/javascript" src="ckplayer/js/barrage.js" charset="utf-8"></script>
+<script type="text/javascript" src="js/player.js" charset="utf-8"></script>
+
+<script type="text/javascript">
+
+	$.getUrlParam = function(name)
+	{
+		var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+		var r = window.location.search.substr(1).match(reg);
+		if (r!=null) return unescape(r[2]); return null;
+	}
+	var play_url = $.getUrlParam("play_url");//分类id
+
+	var flashvars={
+		f : '/ckplayer/m3u8.swf',//插件地址
+		a : play_url, //文件地址
+		s : 4,
+		p : 1,
+		wh:'16:9'
+	};
+	var params= {bgcolor:'#FFF',allowFullScreen:true,allowScriptAccess:'always',wmode:'transparent'};
+	var video=[play_url];
+	CKobject.embed('/ckplayer/ckplayer.swf','a1' ,'ckplayer_a1','100%','400px',false, flashvars ,video, params);
+</script>
+</body>
+</html>

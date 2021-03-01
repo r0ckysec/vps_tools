@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title></title>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+	<script type="text/javascript">
+		var id;
+		var dataPath;
+		var appName;
+		var existence = false ;
+		var InformationIsNotCorrect ;
+
+
+		(function($){
+			$.getUrlParam = function(name)
+			{
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			}
+		})(jQuery);
+		var beforeId = $.getUrlParam("id");
+
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#information').html($.i18n.prop('EssentialInformation'));
+					$('#td_1').html($.i18n.prop('Name'));
+					$('#td_2').html($.i18n.prop('Status'));
+					$('#td_3').html($.i18n.prop('LocalStatus'));
+					$('#td_5').html($.i18n.prop('VODDirectory'));
+					$('#dosubmit').val($.i18n.prop('Determine'));
+
+					InformationIsNotCorrect = $.i18n.prop('InformationIsNotCorrect');
+				}
+			});
+			if(beforeId != null)
+			{
+				$("#child").hide();
+			}
+			else
+			{
+				$("#child").show();
+			}
+
+			createTfServerSelect('tfServerOuter');
+		});
+
+
+
+
+		function createTfServerSelect(div_id)
+		{
+			$.ajax({
+				type : "GET" ,
+				url : locationHref+"/rest/admin/vodPaths",//获取虚拟目录
+				success: function (data)
+				{
+					//解析JSON
+					var obj = data;
+					if(obj != '' )
+					{
+						var select_begin = "<select id='tf_select' name='server' class='select' ></select>"
+						$("#"+div_id).append(select_begin);
+						for(var i=0;i<obj.length;i++)
+						{
+							id = obj[i].id;
+							dataPath = obj[i].dataPath;
+							appName = obj[i].appName;
+							var option = "<option value='"+dataPath+"'>"+dataPath+"</option>"
+							$("#tf_select").append(option);
+						}
+					}
+					$("#tf_select").change(function(){
+						var id = $(this).val();
+						for(var i=0;i<obj.length;i++)
+						{
+							if(id == obj[i].id)
+							{
+								dataPath = obj[i].dataPath;
+								appName = obj[i].appName;
+							}
+						}
+					});
+				}
+			});
+		}
+
+		function addVodCategory()
+		{
+			//添加子类
+			if(beforeId != null)
+			{
+				var tf_select = $("#tf_select").val();
+				var before_main = $("#name").val();
+				var visible = $("#visible").val();
+				if(visible == "true")
+				{
+					visible = true;
+				}
+				else
+				{
+					visible = false;
+				}
+				var bPublic = $("#bPublic").val();
+				var vipLevel = parseInt($("#vipLevel").val());
+				if(bPublic == "true")
+				{
+					bPublic = true;
+					vipLevel = 0;
+				}
+				else
+				{
+					bPublic = false;
+				}
+
+				//var before_vodCategory_main = new VodCategory(beforeId,before_main,visible);
+				var before_vodCategory_main = new VodCategoryLevel(beforeId,before_main,visible,bPublic,vipLevel);
+
+				//alert(stringify(before_vodCategory_main));
+				$.ajax({
+					type: "POST",
+					async: false,
+					url: locationHref + "/rest/admin/vodTypes/"+beforeId,//创建一个点播子分类
+					data: stringify(before_vodCategory_main),
+					success: function (data)
+					{
+
+					},
+					error:function(data)
+					{
+						var errorObj = data;
+						var status = data.status;
+						var statusText = data.statusText
+						if(status == 401 || status == 400)
+						{
+							top.location.href = "login.html";
+						}
+					}
+
+				})
+			}
+			else//添加主类
+			{
+				var tf_select_main = $("#tf_select").val();
+				var name_main = $("#name").val();
+				var visible_main = $("#visible").val();
+				if(visible_main == "true")
+				{
+					visible_main = true;
+				}
+				else
+				{
+					visible_main = false;
+				}
+				var bPublic_main = $("#bPublic").val();
+				var vipLevel_main = parseInt($("#vipLevel").val());
+				if(bPublic_main == "true")
+				{
+					bPublic_main = true;
+					vipLevel_main = 0;
+				}
+				else
+				{
+					bPublic_main = false;
+				}
+
+				//var vodCategory_main = new VodCategoryInfo(name_main,visible_main);
+				var vodCategory_main = new VodCategoryInfoLevel(name_main,visible_main,bPublic_main,vipLevel_main,tf_select_main);
+				//alert(stringify(vodCategory_main))
+				$.ajax({
+					type: "POST",
+					async: false,
+					url: locationHref+"/rest/admin/vodTypes",//创建点播分类
+					data: stringify(vodCategory_main),
+					success: function(data)
+					{
+
+					},
+					error:function(data)
+					{
+						var errorObj = data;
+						var status = data.status;
+						var statusText = data.statusText
+						if(status == 401 || status == 400)
+						{
+							top.location.href = "login.html";
+						}
+					}
+
+				})
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+<div class="pad-10">
+	<div class="common-form">
+		<form id="myform" method="post" action="" name="myform">
+			<input type="hidden" name="dialog" value="add">
+			<fieldset>
+				<legend id="information">基本信息</legend>
+				<table width="100%" class="table_form">
+					<tbody>
+						<tr>
+							<td width="80" id="td_1">名称</td>
+							<td>
+								<input type="text" id="name" class="input-text" name="name" value="">
+							</td>
+						</tr>
+						<tr>
+							<td width="80" id="td_2">显示状态</td>
+							<td>
+								<select id="visible">
+									<option value="true">true</option>
+									<option value="false">false</option>
+								</select>
+							</td>
+						</tr>
+						<tbody id="child">
+							<tr>
+								<td width="80" id="td_5">点播目录</td>
+								<td>
+									<div id="tfServerOuter" style="display: inline;">
+
+									</div>
+								</td>
+							</tr>
+						</tbody>
+						<tr>
+							<td width="80" id="td_3">公开状态</td>
+							<td>
+								<select id="bPublic" onchange="catOpenStatus(this.value)">
+									<option value="true">公开</option>
+									<option value="false">私密</option>
+								</select>
+							</td>
+						</tr>
+						<tbody id="level" style="display: none;">
+							<tr>
+								<td width="80" id="td_4">分类等级</td>
+								<td>
+									<select id="vipLevel">
+										<option value="1">等级一</option>
+										<option value="2">等级二</option>
+										<option value="3">等级三</option>
+									</select>
+								</td>
+							</tr>
+						</tbody>
+					</tbody>
+				</table>
+			</fieldset>
+		</form>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html style="height: 98%;">
+<head>
+    <title></title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="/css/ztree/zTreeStyle.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="css/dialog.css" />
+
+    <script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+    <script type="text/javascript" src="/css/ztree/jquery.ztree.core.camera.js"></script>
+    <script type="text/javascript" src="js/add_edit_live.js"></script>
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <script type="text/javascript" src="js/bean.js"></script>
+    <script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/dialog.js"></script>
+    <script type="text/javascript">
+        var setting = {
+            data: {
+                key: {
+                    name:"name",
+                    children:"Profile",
+                    title:"name",
+                    url:"url"
+                }
+            },
+            callback: {
+                onClick: zTreeOnClick
+            }
+        };
+
+        function zTreeOnClick(event, treeId, treeNode)
+        {
+            $("#treeDemo").find("a").each(function(i){
+                $(this).removeClass("curSelectedNode");
+            })
+
+            $("#"+treeNode.tId+"_a").addClass("curSelectedNode");
+        }
+
+
+        $(function(){
+            var Languages = $.cookie('internationalization');
+
+            if ( Languages == null || Languages == "" )
+            {
+                Languages = 'zh' ;
+            }
+            jQuery.i18n.properties({
+                name : 'strings', //资源文件名称
+                path : '/i18n/', //资源文件路径
+                mode : 'map', //用Map的方式使用资源文件中的值
+                language : Languages,
+                encoding : 'UTF-8', // 必须写 否则中文乱码
+                callback : function() {//加载成功后设置显示内容
+                    $('#refresh').html($.i18n.prop('Search'));
+                    $('#login').html($.i18n.prop('Login'));
+
+                }
+            });
+
+            Init_license(authorization);
+            $.ajaxSetup({ cache: false });
+            var getOnvifName = getcookie("ONVIFNAME");//TODO
+            init_tree();
+			
+			
+        })
+		var progressbar={
+			init:function(){
+				var fill=document.getElementById('fill');
+				var count=0;
+				//通过间隔定时器实现百分比文字效果,通过计算CSS动画持续时间进行间隔设置
+				var timer=setInterval(function(e){
+					count++;
+					fill.innerHTML=count+'%';
+					if(count===100) 
+					clearInterval(timer);
+				},40);
+			}
+		};
+		
+        function refreshPage()
+        {
+            init_data();
+            window.location.reload();
+        }
+
+        var zNodes = new Array();
+        function init_tree()
+        {
+			//progressbar.init();
+            var getOnvif = getcookie("ONVIFOBJ");
+            if(getOnvif == "notnull")
+            {
+                window.top.art.dialog({id:"wait",content:"正在搜索中...<img width=20 src='images/loading.gif'>"});
+                $.ajax({
+                    type: "GET",
+                    async: false,
+                    url: locationHref+"/rest/admin/Onvif/list",//刷新摄像头设备列表
+                    success: function(data) {
+                        window.top.art.dialog({id:"wait"}).close();
+                        var obj = data;
+                        if (obj != null) {
+                            var count = 0;
+                            for (var i = 0; i < obj.length; i++) {
+                                var deviceIp = obj[i].deviceIp;
+                                var Profile = obj[i].Profile;
+                                var imagingXAddr = obj[i].imagingXAddr;
+                                var mediaXAddr = obj[i].mediaXAddr;
+                                var ptzXAddr = obj[i].ptzXAddr;
+                                var subNameInfo = null;
+                                if (Profile != '' && Profile != undefined) {
+                                    var subArray = new Array();
+                                    for (var j = 0; j < Profile.length; j++) {
+                                        var ProfileToken = Profile[j].ProfileToken;
+                                        var VSourceToken = Profile[j].VSourceToken;
+                                        var RtspUrl = Profile[j].RtspUrl;
+                                        var FrameRate = Profile[j].FrameRate;
+                                        var vBitRate = Profile[j].vBitRate;
+                                        var Width = Profile[j].Width;
+                                        var Height = Profile[j].Height;
+                                        var AppName = Profile[j].AppName;
+                                        var LiveName = Profile[j].LiveName;
+
+                                        var hostHome = location.hostname;
+
+                                        var suburl = "";
+                                        if(ptzXAddr == "")
+                                        {
+                                            suburl = "/onvifPlay.html?deviceIp=" + deviceIp + "&ProfileToken=" + ProfileToken + "&VSourceToken=" + VSourceToken + "&rtspUrl=" + RtspUrl +"&appName="+AppName+"&liveName="+LiveName+"";
+                                        }
+                                        else
+                                        {
+                                            suburl = "/onvifVLC.html?deviceIp=" + deviceIp + "&ProfileToken=" + ProfileToken + "&VSourceToken=" + VSourceToken + "&rtspUrl=" + RtspUrl +"&appName="+AppName+"&liveName="+LiveName+"";
+                                        }
+                                        subNameInfo = new OnvifSubCategory(LiveName, suburl);
+                                        subArray[j] = subNameInfo;
+                                    }
+                                }
+                                var url = "/onvifManager.html?deviceIp=" + deviceIp;
+                                var OnvifCategoryInfo = new OnvifCategory(deviceIp, subArray, url);
+                                zNodes[count] = OnvifCategoryInfo;
+                                count++;
+                            }
+                        }
+                        else
+                        {
+                            setcookie("ONVIFOBJ",null,1);
+                        }
+                    }
+                })
+            }
+            else {
+                init_data();
+            }
+
+        }
+
+        function init_data()
+        {
+            window.top.art.dialog({id:"waitRe",content:"正在搜索中,如为空,请重新刷新...<img width=20 src='images/loading.gif'>"});
+            $.ajax({
+                type: "GET",
+                async: false,
+                url: locationHref+"/rest/admin/Onvif/list/refresh",//获取摄像头设备列表
+                success: function(data)
+                {
+                    obj = data;
+                    window.top.art.dialog({id:"waitRe"}).close();
+                    //var obj =[{"Profile":[{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":25,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_1","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/1","VSourceToken":"Comp_1","Width":1920,"vBitRate":4096000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":25,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_2","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/2","VSourceToken":"Comp_1","Width":1920,"vBitRate":4096000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":30,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_3","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/r1","VSourceToken":"Comp_1","Width":1920,"vBitRate":4096000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":30,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_4","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/r2","VSourceToken":"Comp_1","Width":1920,"vBitRate":4096000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":30,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_5","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/r3","VSourceToken":"Comp_1","Width":1920,"vBitRate":4096000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":30,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_6","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/3","VSourceToken":"VIChn_1_1","Width":1920,"vBitRate":2048000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":30,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_7","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/4","VSourceToken":"VIChn_2_1","Width":1920,"vBitRate":2048000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":30,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_8","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/5","VSourceToken":"VIChn_3_1","Width":1920,"vBitRate":2048000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":30,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_9","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/6","VSourceToken":"VIChn_4_1","Width":1920,"vBitRate":2048000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":30,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_10","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/7","VSourceToken":"VIChn_8_1","Width":1920,"vBitRate":2048000},{"AppName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","FrameRate":30,"Height":1080,"LiveName":"uid:6c72bc67-decc-4bd0-8180-7f4971dd9b6b","ProfileToken":"RTSPServer_11","RtspUrl":"rtsp://admin:admin123456@192.168.2.235/8","VSourceToken":"Comp_3","Width":1920,"vBitRate":2048000}],"deviceIp":"192.168.2.235"},{"Profile":[{"AppName":"uid:d94f742c-0870-4988-9be4-5dc232cd8048","FrameRate":30,"Height":1080,"LiveName":"uid:d94f742c-0870-4988-9be4-5dc232cd8048","ProfileToken":"RTSPServer_1","RtspUrl":"rtsp://admin:admin123456@192.168.2.236/0","VSourceToken":"Comp_1","Width":1920,"vBitRate":2048000},{"AppName":"uid:d94f742c-0870-4988-9be4-5dc232cd8048","FrameRate":30,"Height":1080,"LiveName":"uid:d94f742c-0870-4988-9be4-5dc232cd8048","ProfileToken":"RTSPServer_2","RtspUrl":"rtsp://admin:admin123456@192.168.2.236/1","VSourceToken":"VIChn_1_1","Width":1920,"vBitRate":2048000}],"deviceIp":"192.168.2.236"},{"Profile":[{"AppName":"uid:4b6c4000-78f9-11b2-8074-f84dfcba90ff","FrameRate":25,"Height":720,"LiveName":"uid:4b6c4000-78f9-11b2-8074-f84dfcba90ff","ProfileToken":"Profile_1","RtspUrl":"rtsp://admin:admin123456@192.168.2.7:554/Streaming/Channels/101?transportmode=unicast&profile=Profile_1","VSourceToken":"VideoSource_1","Width":1280,"vBitRate":1024},{"AppName":"uid:4b6c4000-78f9-11b2-8074-f84dfcba90ff","FrameRate":25,"Height":576,"LiveName":"uid:4b6c4000-78f9-11b2-8074-f84dfcba90ff","ProfileToken":"Profile_2","RtspUrl":"rtsp://admin:admin123456@192.168.2.7:554/Streaming/Channels/102?transportmode=unicast&profile=Profile_2","VSourceToken":"VideoSource_1","Width":704,"vBitRate":1024},{"AppName":"uid:4b6c4000-78f9-11b2-8074-f84dfcba90ff","FrameRate":25,"Height":576,"LiveName":"uid:4b6c4000-78f9-11b2-8074-f84dfcba90ff","ProfileToken":"Profile_3","RtspUrl":"rtsp://admin:admin123456@192.168.2.7:554/Streaming/Channels/103?transportmode=unicast&profile=Profile_3","VSourceToken":"VideoSource_1","Width":704,"vBitRate":1024}],"deviceIp":"192.168.2.7"},{"Profile":[{"AppName":"uid:aaea78e0-b802-11b3-820a-4419b63647c1","FrameRate":25,"Height":720,"LiveName":"uid:aaea78e0-b802-11b3-820a-4419b63647c1","ProfileToken":"Profile_1","RtspUrl":"rtsp://admin:admin123456@192.168.2.3:554/Streaming/Channels/1?transportmode=unicast&profile=Profile_1","VSourceToken":"VideoSource_1","Width":1280,"vBitRate":4096},{"AppName":"uid:aaea78e0-b802-11b3-820a-4419b63647c1","FrameRate":25,"Height":480,"LiveName":"uid:aaea78e0-b802-11b3-820a-4419b63647c1","ProfileToken":"Profile_2","RtspUrl":"rtsp://admin:admin123456@192.168.2.3:554/Streaming/Channels/2?transportmode=unicast&profile=Profile_2","VSourceToken":"VideoSource_1","Width":640,"vBitRate":500}],"deviceIp":"192.168.2.3"},{"Profile":[{"AppName":"uid:d5a65a6b-da24-11b5-84c1-2857be46846e","FrameRate":25,"Height":720,"LiveName":"uid:d5a65a6b-da24-11b5-84c1-2857be46846e","ProfileToken":"Profile_1","RtspUrl":"rtsp://admin:admin123456@192.168.2.4:554/Streaming/Channels/101?transportmode=unicast&profile=Profile_1","VSourceToken":"VideoSource_1","Width":1280,"vBitRate":2048},{"AppName":"uid:d5a65a6b-da24-11b5-84c1-2857be46846e","FrameRate":25,"Height":480,"LiveName":"uid:d5a65a6b-da24-11b5-84c1-2857be46846e","ProfileToken":"Profile_2","RtspUrl":"rtsp://admin:admin123456@192.168.2.4:554/Streaming/Channels/102?transportmode=unicast&profile=Profile_2","VSourceToken":"VideoSource_1","Width":640,"vBitRate":512}],"deviceIp":"192.168.2.4"},{"Profile":[{"AppName":"uid:0ac03d4b-d180-11b5-84b6-54c41522b67a","FrameRate":25,"Height":720,"LiveName":"uid:0ac03d4b-d180-11b5-84b6-54c41522b67a","ProfileToken":"Profile_1","RtspUrl":"rtsp://admin:admin123456@192.168.2.2:554/Streaming/Channels/101?transportmode=unicast&profile=Profile_1","VSourceToken":"VideoSource_1","Width":1280,"vBitRate":2048},{"AppName":"uid:0ac03d4b-d180-11b5-84b6-54c41522b67a","FrameRate":25,"Height":288,"LiveName":"uid:0ac03d4b-d180-11b5-84b6-54c41522b67a","ProfileToken":"Profile_2","RtspUrl":"rtsp://admin:admin123456@192.168.2.2:554/Streaming/Channels/102?transportmode=unicast&profile=Profile_2","VSourceToken":"VideoSource_1","Width":352,"vBitRate":256},{"AppName":"uid:0ac03d4b-d180-11b5-84b6-54c41522b67a","FrameRate":1,"Height":288,"LiveName":"uid:0ac03d4b-d180-11b5-84b6-54c41522b67a","ProfileToken":"Profile_3","RtspUrl":"rtsp://admin:admin123456@192.168.2.2:554/Streaming/Channels/103?transportmode=unicast&profile=Profile_3","VSourceToken":"VideoSource_1","Width":352,"vBitRate":64}],"deviceIp":"192.168.2.2"}];
+                    if(obj != null)
+                    {
+                        setcookie("ONVIFOBJ","notnull",1);
+                        var count = 0;
+                        for(var i=0;i<obj.length;i++)
+                        {
+                            var deviceIp = obj[i].deviceIp;
+                            var Profile = obj[i].Profile;
+                            var imagingXAddr = obj[i].imagingXAddr;
+                            var mediaXAddr = obj[i].mediaXAddr;
+                            var ptzXAddr = obj[i].ptzXAddr;
+                            var subNameInfo = null;
+                            if(Profile != '' && Profile != undefined)
+                            {
+                                var subArray = new Array();
+                                for(var j=0;j<Profile.length ;j++)
+                                {
+                                    var ProfileToken = Profile[j].ProfileToken;
+                                    var VSourceToken = Profile[j].VSourceToken;
+                                    var RtspUrl = Profile[j].RtspUrl;
+                                    var FrameRate = Profile[j].FrameRate;
+                                    var vBitRate = Profile[j].vBitRate;
+                                    var Width = Profile[j].Width;
+                                    var Height = Profile[j].Height;
+                                    var AppName = Profile[j].AppName;
+                                    var LiveName = Profile[j].LiveName;
+
+                                    var suburl = "";
+                                    if(ptzXAddr == "")
+                                    {
+                                        suburl = "/onvifPlay.html?deviceIp=" + deviceIp + "&ProfileToken=" + ProfileToken + "&VSourceToken=" + VSourceToken + "&rtspUrl=" + RtspUrl + "";
+                                    }
+                                    else
+                                    {
+                                        suburl = "/onvifVLC.html?deviceIp=" + deviceIp + "&ProfileToken=" + ProfileToken + "&VSourceToken=" + VSourceToken + "&rtspUrl=" + RtspUrl + "";
+                                    }
+                                    subNameInfo = new OnvifSubCategory(LiveName,suburl);
+                                    subArray[j] = subNameInfo;
+                                }
+                            }
+                            var url = "/onvifManager.html?deviceIp="+deviceIp;
+                            var OnvifCategoryInfo = new OnvifCategory(deviceIp,subArray,url);
+                            zNodes[count] = OnvifCategoryInfo;
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        setcookie("ONVIFOBJ",null,1);
+                    }
+                },
+                error:function(data)
+                {
+                    var errorObj = data;
+                    var status = data.status;
+                    var statusText = data.statusText
+                    if(status == 401 || status == 400)
+                    {
+                        top.location.href = "login.html";
+                    }
+                    else if(status == 409)
+                    {
+                        window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                    }
+                }
+            })
+        }
+
+        $(document).ready(function(){
+            $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+            var treeObj=$.fn.zTree.getZTreeObj("treeDemo");
+            //treeObj.expandAll(true);  展开折叠所有节点  true  false
+            //拿到所有树节点
+            var nodes = treeObj.transformToArray(treeObj.getNodes());
+            //var nodes = treeObj.getNodes();
+            //for循环逐个修改树节点属性
+            if(nodes != "" && nodes != null)
+            {
+                for(var i = 0;i<nodes.length;i++)
+                {
+                    //更新节点
+                    nodes[i].target="vod_right";
+                    treeObj.updateNode(nodes[i]);
+                }
+                $("#treeDemo_1_a").addClass("curSelectedNode");
+                window.open(nodes[0].url, "vod_right");
+            }
+        });
+
+
+        function onvifLogin()
+        {
+            window.top.art.dialog
+            (
+                    {
+                        id:'onvifLogin',iframe:'onvifLogin.html', title:'onvifLogin', width:'350', height:'200', lock:true,window:'top'
+                    },
+                    function(){
+                        var d = window.top.art.dialog({id:'onvifLogin'}).data.iframe;
+                        d.onvifLogin();
+                        window.top.art.dialog({id:'onvifLogin'}).close()
+                        window.location.reload();
+                        return false;
+                    },
+                    function()
+                    {
+                        window.top.art.dialog({id:'onvifLogin'}).close()
+                    }
+            );void(0);
+        }
+
+    </script>
+
+    <!--<style type="text/css">
+        #progressbar{
+            position: absolute;
+            top:19px;
+            left:220px;
+            margin-left:-90px;
+            margin-top:-10px;
+            width:60%;
+            height:20px;
+            border:1px solid darkgray;
+        }
+        /*在进度条元素上调用动画*/
+        #fill{
+            animation: move 5s;
+            text-align: center;
+            background-color: #6caf00;
+        }
+        /*实现元素宽度的过渡动画效果*/
+        @keyframes move {
+            0%{
+                width:0;
+            }
+            100%{
+                width:100%;
+            }
+        }
+    </style>-->
+</head>
+
+<body style="height: 100%;">
+    <div class="pad-10" id="content" style="height: 100%;">
+        <div class="col-tab">
+            <div id="div_setting_1" class="contentList pad-10">
+                <div class="content-menu" >
+                    <button onclick="refreshPage()" class="ext_btn ext_btn_success" id="refresh">搜索</button>
+                    <button onclick="onvifLogin()" class="ext_btn ext_btn_success" id="login">登录</button>
+					 <!--进度条容器-->
+					<!--<div id="progressbar">
+						&lt;!&ndash;用来模仿进度条推进效果的进度条元素&ndash;&gt;
+						<div id="fill"></div>
+					</div>-->
+                </div>
+            </div>
+        </div>
+        <div style="width: 15%;height: 98%;border: 1px solid #c2d1d8;float: left;">
+            <ul id="treeDemo" class="ztree1"></ul>
+        </div>
+        <div style="width: 84%;height: 100%;float: left;">
+            <iframe name="vod_right" id="vod_right" src="" frameborder="no" scrolling="yes" width="100%" height="100%" allowtransparency="true"></iframe>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1">
+    <title id="title">点播列表</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+    <script type="text/javascript" src="js/ztree/jquery.ztree.core-3.5.js"></script>
+    <script type="text/javascript" src="js/ztree/jquery.ztree.excheck-3.5.js"></script>
+    <script type="text/javascript" src="js/jbase64.js"></script>
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <script type="text/javascript" src="js/dialog.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/dialog.css"/>
+    <link rel="stylesheet" type="text/css" href="css/moduleList.css">
+    <link rel="stylesheet" type="text/css" href="css/aoku.css"/>
+    <link rel="stylesheet" type="text/css" href="js/ztree/zTreeStyle/metroStyle.css">
+    <script type="text/javascript">
+        var host = window.location.hostname;
+        var port = window.location.port;
+        var currentPage = 1;
+        var currentPageCount = 10;
+
+        $(function(){
+            $("#headerHtml").load("header.html");
+            $("#bottomHtml").load("bottom.html");
+
+            init_tree();
+        })
+        $.getUrlParam = function(name)
+        {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r!=null) return unescape(r[2]); return null;
+        }
+        var liveId = $.getUrlParam("id");
+        var sub_Id = $.getUrlParam("subid");
+        var targId = -1;
+
+
+        function MainCategoryOpen(name,open,subNames,url)
+        {
+            this.name = name;
+            this.open = open;
+            this.subNames = subNames;
+            this.url = url;
+        }
+        function SubCategory(name,url)
+        {
+            this.name = name;
+            this.url = url;
+        }
+        function MainCategory(name,subNames,url)
+        {
+            this.name = name;
+            this.subNames = subNames;
+            this.url = url;
+        }
+
+        var setting = {
+            data: {
+                key: {
+                    name:"name",
+                    children:"subNames",
+                    title:"name",
+                    url:"url"
+                }
+            }
+        };
+
+        var zNodes = new Array();
+
+        function stringify(object){
+            var string = JSON.stringify(object)
+            return string.replace(/\\u([0-9a-fA-F]{2,4})/g,function(string,matched){
+                return String.fromCharCode(parseInt(matched,16))
+            })
+        }
+
+
+        var imageError = "images/56.jpg";
+        function init_tree()
+        {
+            $.ajax({
+                type: "GET",
+                async: false,
+                url: locationHref+"/rest/client/vodTypes",//获取点播分类
+                success:function(data, textStatus, request)
+                {
+                    var obj = data;
+                    if(obj == null)
+                    {
+                        //window.top.art.dialog({id:"show",content:"无分类!",time:1});
+                    }
+                    var MainCategoryInfo;
+                    for(var i=0;i<obj.length;i++)
+                    {
+                        var id = obj[i].id;
+                        var count = 0;
+                        if(id+'' == liveId)
+                        {
+                            if(sub_Id == null)
+                            {
+                                targId = liveId;
+                            }
+                            var name = obj[i].name;
+                            var subNames = obj[i].subNames;
+                            var subNameInfo = null;
+                            var bPublic = obj[i].bPublic;
+                            var vipLevel = obj[i].vipLevel;
+                            var url = "/html/moduleList.html?id="+id+'&name='+encodeURIComponent(encodeURIComponent(name));
+                            var subArray = new Array();
+                            if(subNames != null)
+                            {
+                                var subCount = 0;
+                                for(var j=0;j<subNames.length;j++)
+                                {
+                                    var subid = subNames[j].id;
+                                    if(sub_Id+"" == subid)
+                                    {
+                                        targId = subid;
+                                    }
+
+                                    var subName = subNames[j].name;
+                                    var subVisible = subNames[j].visible;
+                                    var subBPublic = subNames[j].bPublic;
+                                    var subVipLevel = subNames[j].vipLevel;
+                                    var suburl = "/html/moduleList.html?id="+id+'&subid='+subid+'&name='+encodeURIComponent(encodeURIComponent(subName));
+                                    subNameInfo = new SubCategory(subName,suburl);
+                                    if(subVisible != false)
+                                    {
+                                        var subflag = true;
+                                        if(subBPublic == true)
+                                        {
+                                            subflag = true;
+                                        }
+                                        else if(subBPublic == false && subVipLevel <= user_level)
+                                        {
+                                            subflag = true;
+                                        }
+                                        else
+                                        {
+                                            subflag = false;
+                                        }
+                                        if(subflag)
+                                        {
+                                            subArray[subCount] = subNameInfo;
+                                            subCount++;
+                                        }
+                                    }
+                                }
+                            }
+                            var catOpen = true;
+                            if(i == 0)
+                            {
+                                MainCategoryInfo = new MainCategoryOpen(name,catOpen,subArray,url);
+                            }
+                            else
+                            {
+                                MainCategoryInfo = new MainCategory(name,subArray,url);
+                            }
+                            var flag = true;
+                            if(bPublic == true)
+                            {
+                                flag = true;
+                            }
+                            else if(bPublic == false && vipLevel <= user_level)
+                            {
+                                flag = true;
+                            }
+                            else
+                            {
+                                flag = false;
+                            }
+                            if(flag)
+                            {
+                                zNodes[count] = MainCategoryInfo;
+                                count++;
+                            }
+                        }
+                        //alert(stringify(zNodes))
+                    }
+                    load_vod(currentPage,currentPageCount);
+                },
+                error:function()
+                {
+                    //parent.location.href = "/login.html";
+                }
+            })
+        }
+
+        function load_vod(current_page,current_page_count)
+        {
+            $("#moduleList").empty();
+            $.ajax({
+                type: "GET",
+                url: locationHref+"/rest/client/vodTypes/"+targId+"/"+current_page_count+"/"+current_page+"/get",//获取一个点播分类详细信息
+                success:function(data, textStatus, request)
+                {
+                    var obj = data;
+                    if (obj == null) {
+                        window.top.art.dialog({id: "vod", content: "无点播视频!", time: 1});
+                    }
+                    var total = obj.total;
+                    var items = obj.items;
+                    var visible = obj.visible;
+                    if (items != null)
+                    {
+                        var dom ="";
+                        for (var i = 0; i < items.length; i++)
+                        {
+                            var fileId = items[i].fileId;
+                            var allName = items[i].name;
+                            var createTime = items[i].createTime;
+                            var browHistory = items[i].browHistory;
+                            var name = allName.substr(allName.lastIndexOf("/") + 1, allName.length);
+                            var step = items[i].step;
+                            if (step != null) {
+                                var stepStartPlay = step.stepStartPlay;
+                                var stepStopPlay = step.stepStopPlay;
+                            }
+                            var advertising = items[i].advertising;
+                            if (advertising != null) {
+                                var ad1Path = advertising.ad1Path;
+                                var ad1Duration = advertising.ad1Duration;
+                                var ad2Path = advertising.ad2Path;
+                            }
+                            var logo = items[i].logo;
+                            if (logo != null) {
+                                var osdvisible = logo.visible;
+                                var level = logo.level;
+                                var vertical = logo.vertical;
+                                var levelShift = logo.levelShift;
+                                var verticalShift = logo.verticalShift;
+                            }
+
+                            var imgName ="";
+                            var imgResolution = "";
+                            var img_url = "";
+                            var http_play_url = replace_url(items[i].httpUrl);
+                            var rtmp_play_url_ckplayer = replace_url(items[i].rtmpUrl);
+                            var cfg = items[i].cfg;
+                            var bitrate;
+                            var frameRate;
+                            var duration = "";
+                            var format = "";
+                            var resolution = "";
+                            if(cfg != null && cfg != undefined)
+                            {
+                                frameRate = cfg.frameRate;
+                                bitrate = cfg.bitrate;
+                                var img = cfg.img;
+                                duration = cfg.duration;
+                                format = cfg.format;
+                                resolution = cfg.resolution;
+                                if(duration == undefined || format == undefined || resolution == undefined)
+                                {
+                                    duration = "";
+                                    format = "";
+                                    resolution = "";
+                                }
+                                if(img != null)
+                                {
+                                    for(var k=0;k<img.length;k++)
+                                    {
+                                        imgName = img[0].fileName;
+                                        if(imgName != undefined)
+                                        {
+                                            imgName = replace_url(imgName);
+                                        }
+                                        imgResolution = img[0].resolution;
+                                    }
+                                }
+                            }
+
+                            var name_sub = name.substr(0,name.lastIndexOf("."));
+                            var description = "";
+                            var mainTitle = "";
+                            var subTitle = "";
+                            var info = items[i].info;
+                            if(info != null)
+                            {
+                                description = info.description;
+                                subTitle = info.subTitle;
+                                mainTitle = info.mainTitle;
+                                if(mainTitle != "" )
+                                {
+                                    name_sub = mainTitle;
+                                }
+                                else if(subTitle != "")
+                                {
+                                    name_sub = subTitle;
+                                }
+                            }
+
+                            var vod_des = cutstr(description,25);
+
+                            if(i%2 == 0)
+                            {
+                                dom += '<tr>';
+                            }
+                            dom += '<td>';
+                            dom += '<div style="clear:both;" class="TitleBox">';
+                            dom += '<div style="overflow: hidden;float:left;" class="videoImage">';
+                            dom += '<a target="_blank" href="/html/vodInfo.html?cateId='+targId+'&allName='+fileId+'&page='+current_page+'">';//name='+rtmp_play_url_ckplayer+'&
+                            dom += '<img width="100" height="100" border="0" alt="01" src="'+imgName+'" onerror="javascript:this.src=\''+imageError+'\'">';
+                            dom += '<div class="duration_css" style="color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); opacity: 0.5; position: relative;left: 46px;  bottom: 18px; width: 53px;height:15px;">'+duration+'</div>';
+                            dom += '</a>';
+                            dom += '</div>';
+                            dom += '<div style="float:left;">';
+                            dom += '<div class="text-float-left TitleIcon">';
+                            dom += '</div>';
+                            dom += '<div class="Title text-wrap1">';
+                            dom += '<a target="_blank" href="vodInfo.html?cateId='+targId+'&allName='+fileId+'&page='+current_page+'">';//name='+rtmp_play_url_ckplayer+'&
+                            dom += ''+name_sub+'';
+                            dom += '</a>&nbsp;';
+                            dom += '</div>';
+                            dom += '<div class="Intro text-wrap1">';
+                            dom += '<span></span>&nbsp;';
+                            dom += '</div>';
+                            dom += '<div class="User text-wrap1">';
+                            dom += '<ul class="VideoListBox" style="overflow: visible;">';
+                            dom += '<li class="VideoName">';
+                            dom += '<span>观看 : '+browHistory+'</span>&nbsp;&nbsp;&nbsp;<span>时长 : '+duration+'</span>';
+                            dom += '</li>';
+                           /* dom += '<li class="VideoName">';
+                            dom += '<span>时长 : '+duration+'</span>';
+                            dom += '</li>';*/
+                            dom += '<li class="VideoName">';
+                            dom += '<span>上传时间 : '+createTime+'</span>';
+                            dom += '</li>';
+                            dom += '<li class="VideoName">';
+                            if(description == "" && vod_des == "")
+                            {
+                                vod_des = "无简介";
+                                description = "无简介";
+                            }
+                            dom += '<span onmouseover="show_addr(\'fw_oper_'+fileId+'\')" onmouseout="close_addr(\'fw_oper_'+fileId+'\')" style="overflow: hidden;">简介 : '+vod_des+'</span>';
+                            dom += '<div id="fw_oper_'+fileId+'"  style="position: relative;top:0px;border: 1px solid #000;display: none;width: 200px;background-color: #ffffcc;">'+description+'</div>';
+                            dom += '</li>';
+                            dom += '</ul>&nbsp;';
+                            dom += '</div>';
+                            dom += '</div>';
+                            dom += '</div>';
+                            dom += '</td>';
+
+                            if(i%2 != 0 || i== items.length-1)
+                            {
+                                dom += '</tr>';
+                            }
+                        }
+                        $("#moduleList").append(dom);
+                    }
+
+                    var page = Math.ceil(total/current_page_count);
+                    var page_dom = '<a href="javascript:void(0)"  onclick="load_vod(1,'+current_page_count+')">首页</a>';
+                    if(current_page-1>0)
+                    {
+                        page_dom+='<a href="javascript:void(0)" onclick="load_vod('+(current_page-1)+','+current_page_count+')">上一页</a>';
+                    }
+                    var page_arr = calculatePageIndex(total,page,5);
+                    for(var z=page_arr[0];z<=page_arr[1];z++)
+                    {
+                        if(z == current_page)
+                        {
+                            page_dom+=' <font color="red"><b>'+z+'</b></font>';
+                        }
+                        else
+                        {
+                            page_dom+='<a href="javascript:void(0)" onclick="load_vod('+z+','+current_page_count+')" class="Library_Page_NoPage">'+z+'</a>';
+                        }
+                    }
+                    if(current_page+1<=page)
+                    {
+                        page_dom+='<a href="javascript:void(0)" onclick="load_vod('+(current_page+1)+','+current_page_count+')">下一页</a>';
+                    }
+                    page_dom+='<a href="javascript:void(0)" onclick="load_vod('+page+','+current_page_count+')">尾页</a>';
+                    $("#page").html(page_dom);
+                },
+                error:function()
+                {
+                    //top.location.href = "/login.html";
+                }
+            })
+        }
+
+        function show_addr(id)
+        {
+            $("#"+id).show();
+        }
+
+        function close_addr(id)
+        {
+            $("#"+id).hide();
+        }
+
+        function calculatePageIndex(currentPage,totalPage,viewPageCount)
+        {
+            var startPage = 0 ;
+            var endPage = 0;
+            var arr = new Array();
+            // 如果总页面小于 页面 分页显示页数
+            if (totalPage <= viewPageCount) {
+                startPage = 1;
+                endPage = totalPage;
+                arr[0] = startPage;
+                arr[1] = endPage;
+
+                return arr;
+            }
+
+            //计算出中间值
+            var n = Math.ceil(viewPageCount/2)-1;
+            startPage = currentPage - n;
+
+            //如果当前页己经小于起始页
+            if (startPage <= 1) {
+                startPage = 1;
+                // 因为两个边界的页码数也要显示
+                endPage = startPage + (viewPageCount - 1);
+                arr[0] = startPage;
+                arr[1] = endPage;
+
+                return arr;
+            }
+
+            endPage = currentPage + n;
+
+            //前页页面显示的值是积数 还是偶数
+            if (viewPageCount % 2 == 0) {
+                startPage += 1;
+            }
+            if (endPage > totalPage) {
+                endPage = totalPage;
+                // 因为两个边界的页码数也要显示
+                startPage = totalPage - (viewPageCount - 1);
+            }
+            arr[0] = startPage;
+            arr[1] = endPage;
+
+            return arr;
+        }
+
+        function replace_url(url)
+        {
+            var host = window.location.hostname;
+            var before = url.substr(0,url.indexOf("//")+2);
+            var after = "";
+
+            if(url.substring(before.length).lastIndexOf(":") != -1)
+            {
+                after = url.substr(url.lastIndexOf(":"));
+            }
+            else
+            {
+                var temp = url.substring(before.length);
+                after = temp.substring(temp.indexOf("/"));
+            }
+
+            return (before+host+after);
+        }
+
+
+        function cutstr(str,len)
+        {
+            var str_length = 0;
+            var str_len = 0;
+            var str_cut = new String();
+            str_len = str.length;
+            for(var i = 0;i<str_len;i++)
+            {
+                var a = str.charAt(i);
+                str_length++;
+                if(escape(a).length > 4)
+                {
+                    //中文字符的长度经编码之后大于4
+                    str_length++;
+                }
+                str_cut = str_cut.concat(a);
+                if(str_length>=len)
+                {
+                    str_cut = str_cut.concat("...");
+                    return str_cut;
+                }
+            }
+            //如果给定字符串小于指定长度，则返回源字符串；
+            if(str_length<len){
+                return  str;
+            }
+        }
+
+        $(document).ready(function(){
+            $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+            var treeObj=$.fn.zTree.getZTreeObj("treeDemo");
+            treeObj.expandAll(true);  //展开折叠所有节点  true  false
+            //拿到所有树节点
+            var nodes = treeObj.transformToArray(treeObj.getNodes());
+            //var nodes = treeObj.getNodes();
+            //for循环逐个修改树节点属性
+            var t_id = "treeDemo_1";
+            var current_url = window.location.pathname+window.location.search;
+            if(nodes != null && nodes != "")
+            {
+                for(var i = 0;i<nodes.length;i++)
+                {
+                    //更新节点
+                    nodes[i].target="_self";
+                    if(current_url == nodes[i].url)
+                    {
+                        t_id = nodes[i].tId;
+                    }
+                    treeObj.updateNode(nodes[i]);
+                }
+
+                $("#"+t_id+"_a").addClass("curSelectedNode");
+            }
+
+        });
+    </script>
+
+</head>
+<body>
+<!-- 头搜索 -->
+<div id="headerHtml"></div>
+
+<div style="margin:0px auto;width:100%;display:inline-block;-ms-overflow-x:hidden;">
+    <div style="margin:0px auto;width:980px;-ms-overflow-x:hidden;">
+        <div style="overflow:hidden;width: 980px; height:auto;">
+            <div class="TreeBox" style="float: left;width :200px;">
+                <div class="treelistbox" style="width: 100%;overflow-x: hidden;">
+                    <div style="clear: both;" class="TitleBox">
+                        <div class="text-float-left TitleIcon"></div>
+                        <div style="height: auto;" id="treeList" class="Title">
+                            <ul style="width: 146px; -moz-user-select: none;" class="ztree" id="treeDemo">
+
+                            </ul>
+                        </div>
+                        <div style="clear: both; display: none" class="SubBox"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="moduleListSearch" style="float: left;" class="TreeBoxTwo">
+                <div style="clear: both;"></div>
+                <div style="clear: both;"></div>
+                <div style="clear: both;" class="videoInfo clearfix" id="divVideoList">
+                    <table cellspacing="0" border="0" id="paging_brother" style="width:100%">
+                        <tbody id="moduleList">
+
+                        </tbody>
+                    </table>
+                    <div align="left" id="page" class="PageNav" width="100%">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 底部搜索 -->
+<div id="bottomHtml"></div>
+</body>
+</html>

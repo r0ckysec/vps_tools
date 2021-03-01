@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<link href="css/dialog.css" rel="stylesheet" type="text/css" />
+
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/jquery.corner.js"></script>
+	<script type="text/javascript" src="js/admin_common.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#td_1').html($.i18n.prop('UserName'));
+					$('#td_2').html($.i18n.prop('Timeout'));
+					$('#td_5').html($.i18n.prop('PassWord'));
+				}
+			});
+		});
+
+		$(function(){
+			init_onvif()
+		})
+
+		function init_onvif()
+		 {
+			 //初使化
+			 $.ajax({
+				 type: "GET",
+				 async: false,
+				 url: locationHref+"/rest/admin/Onvif/env",
+				  success: function(data)
+				  {
+					if(data == "")
+						return;
+						var obj = data;
+						var username = obj.username;
+						var password = obj.password;
+						var timeout = obj.timeout;
+
+						$("#username").val(username);
+						$("#password").val(password);
+						$("#timeout").val(timeout);
+				  },
+				 error:function(data)
+				 {
+					 var errorObj = data;
+					 var status = data.status;
+					 var statusText = data.statusText
+					 if(status == 401 || status == 400)
+					 {
+						 top.location.href = "login.html";
+					 }
+					 else if(status == 409)
+					 {
+						 window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					 }
+				 }
+			 })//ajax end
+		 };
+
+		function onvifLogin()
+		{
+			var username = $("#username").val();
+			var password = $("#password").val();
+			var timeout = parseInt($("#timeout").val());
+			var info = new OnvifSet(username,password,timeout);
+			$.ajax({
+				type: "POST",
+				async: false,
+				data: stringify(info),
+				url: locationHref+"/rest/admin/Onvif/env",//修改ip
+				success:function(data)
+				{
+				 	setcookie("ONVIFNAME",111,1);
+					window.location.reload();
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+					else if(status == 409)
+					{
+						window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					}
+				}
+			})
+		}
+	</script>
+<title></title>
+</head>
+<body id="live_body_id" >
+
+<form name="myform" id="myform" action="" method="post">
+
+ <table width="100%" class="table_form">
+  <!-- 隐藏字段 -->
+ <input type="hidden" name="action" value="modify_ip" />
+ <input type="hidden" name="mac_addr" id="mac_addr" value="" />
+ <input type="hidden" name="dialog"  value="modifyip" />
+ 	<tr>
+		<td width="100px" id="td_1">用户名:</td>
+		<td>
+			<input type="input" name="username" id="username" value="">
+		</td>
+	</tr>
+	<tr>
+		<td id="td_5">密码:	</td>
+		<td>
+			<input class="input-text" type="password" name="password" id="password" value="">
+		</td>
+	</tr>
+	 <tr>
+		 <td width="100px" id="td_2">超时时间:</td>
+		 <td>
+			 <input type="input" name="timeout" id="timeout" value="0">
+		 </td>
+	 </tr>
+  </table>
+</form>
+</body>
+</html>
+
+

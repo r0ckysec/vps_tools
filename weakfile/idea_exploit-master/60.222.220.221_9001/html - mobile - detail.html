@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;" name="viewport" />
+    <title>视频详细</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" >
+    <link href="css/ionicons.css" rel="stylesheet">
+    <link href="css/jquery.bxslider.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.min.js"></script>
+    <script src="js/respond.min.js"></script>
+    <script src="js/common.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div id="container" style="overflow:hidden;">
+    <div id="header_load" style="width:100%;"></div>
+    <div style="margin-top: 15px;"></div>
+    <div id="mainbody">
+        <div class="container">
+            <div class="row" style="margin-left: -30px;margin-right: -30px;">
+                <div class="video-container">
+                    <div class="player">
+                        <!-- *************************************************************************** -->
+                        <!-- *************************  player start *********************************** -->
+                        <div id="swfContent"></div>
+                        <script src="js/jquery-1.11.2.min.js"></script>
+                        <script type="text/javascript">
+                            var isLive = false;//是否是直播，true=是,false=普通
+                            var id = ""; //视频Id
+                            var appName = "live";
+                            var liveName = "live1";
+                            var playerId = "ckplayer_swfContent";
+                        </script>
+                        <script type="text/javascript" src="../../ckplayer/js/offlights.js"></script>
+                        <script type="text/javascript" src="../../ckplayer/ckplayer.js" charset="utf-8"></script>
+                        <script type="text/javascript" src="../../ckplayer/js/player.js" charset="utf-8"></script>
+                        <script type="text/javascript">
+                            //如果你不需要某项设置，可以直接删除，注意var flashvars的最后一个值后面不能有逗号
+                            var playTime = "Time${mediaId}";
+                            var sessionUser = "${session.user}";
+                            //alert(id);
+                            var visitTime = getVisitTime(playTime);
+                            //alert(visitTime);
+
+                           /* function timeHandler(t) {
+                                if (t > -1) {
+                                    if(sessionUser==null || sessionUser=="")
+                                    {
+                                        SetCookie(playTime, t);
+                                    }
+                                    else
+                                    {
+                                        setVodTime(id,t);
+                                    }
+                                }
+                            }*/
+
+                            function getVisitTime(playTime)
+                            {
+                                var visitTime = "";
+                                if(sessionUser==null || sessionUser=="" )
+                                {
+                                    visitTime = getCookie(playTime)
+                                }
+                                else
+                                {
+                                    $.ajax({
+                                        type: "POST",
+                                        async:false,
+                                        url: "/ui/user/updateJsonUserVFoot.action?mediaId="+id,
+                                        //处理CGI返回的JSON数据
+                                        success: function(data)
+                                        {
+                                            var str = $.trim(data);
+                                            var obj = $.evalJSON(str);
+                                            if(obj.visitTime == null)
+                                            {
+                                                visitTime = 0;
+                                            }
+                                            else
+                                            {
+                                                visitTime = obj.visitTime;
+                                            }
+
+                                        }
+                                    });
+                                }
+
+                                return visitTime;
+                            }
+
+                            function setVodTime(mediaId,visitTmie)
+                            {
+                                $.ajax({
+                                    type: "POST",
+                                    async:false,
+                                    url: "/ui/user/updateUserVFoot.action?mediaId="+mediaId+"&visitTmie="+visitTmie+"",
+                                    //处理CGI返回的JSON数据
+                                    success: function()
+                                    {
+                                        //alert("success");
+                                    }
+                                });
+
+                            }
+
+                            function playHandler() {
+                                //alert('因为注册了监听播放，所以弹出此内容，删除监听将不再弹出');
+                                removePlayListener();
+                                CKobject.getObjectById(playerId).videoSeek(getVisitTime(playTime));
+                                addTimeListener();
+                            }
+                            function removePlayListener() {//删除播放监听事件
+                                if (CKobject.getObjectById(playerId).getType()) {//说明使用html5播放器
+                                    CKobject.getObjectById(playerId).removeListener('play', playHandler);
+                                } else {
+                                    CKobject.getObjectById(playerId).removeListener('play','playHandler');
+                                }
+                            }
+                            function addTimeListener() {//增加时间监听
+                                if (CKobject.getObjectById(playerId).getType()) {//说明使用html5播放器
+                                    CKobject.getObjectById(playerId).addListener('time', timeHandler);
+                                } else {
+                                    CKobject.getObjectById(playerId).addListener('time', 'timeHandler');
+                                }
+                            }
+                            //写cookies函数
+                            function SetCookie(name, value)//两个参数，一个是cookie的名子，一个是值
+                            {
+                                var Days = 7; //此 cookie 将被保存 30 天
+                                var exp = new Date(); //new Date("December 31, 9998");
+                                exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+                                document.cookie = name + "=" + escape(value) + ";expires="+ exp.toGMTString();
+                            }
+                            function getCookie(name)//取cookies函数
+                            {
+                                var arr = document.cookie.match(new RegExp("(^| )" + name
+                                        + "=([^;]*)(;|$)"));
+                                //alert("arr:"+arr);
+                                if (arr != null)
+                                    return unescape(arr[2]);
+                                return null;
+                            }
+
+                            //---------------------------------------------------------------
+                        </script>
+
+                        <!-- ***************************  player end *********************************** -->
+                        <!-- *************************************************************************** -->
+                        <!--<div class="video-share">
+                          <p class="pull-left">
+                            <a href="##"><span class="icon ion-archive"></span></a>
+                            <a href="##"><span class="icon ion-thumbsup"></span></a>
+                            <a href="##"><span class="icon ion-star"></span></a>
+                            <a href="##"><span class="icon ion-share"></span></a>
+                          </p>
+                          <p class="pull-right"><span>北极星独家</span> &nbsp;<a href="##" class="btn-link">订阅</a></p>
+                        </div>
+                        </div><!-- End Video-container -->
+                        <div class="video-detail">
+                            <div class="tab">
+                                <div class="tab-cont">
+                                    <div id="detail">
+                                        <!--<h3 style="font-size: 14px;">详情名称</h3>
+                                        <p>时长:00:00:00</p>
+                                        <p>创建时间:2017-06-02 12:00:00</p>
+                                        <p>播放次数:0</p>
+                                        <p>简介:111111111111111111111</p>-->
+                                    </div><!-- End Item -->
+                                </div><!-- End Tab -->
+
+                            </div>
+                        </div><!-- End Row -->
+                    </div><!-- End Container -->
+                </div><!-- End Mainbody -->
+                <!-- Start Footer -->
+                <div id="bottom_load" style="width:100%;"></div>
+                <!-- End Footer -->
+                <script src="js/jquery.bxslider.min.js"></script>
+                <script src="js/bootstrap.min.js"></script>
+                <script src="js/jquery.idTabs.min.js"></script>
+                <script src="js/common.js"></script>
+                <script src="js/jquery.json-2.4.js"></script>
+                <script src="js/cookie.js" type="text/javascript"></script>
+                <script type="text/javascript">
+                    var host = window.location.hostname;
+                    var port = window.location.port;
+                    (function($){
+                        $.getUrlParam = function(name)
+                        {
+                            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+                            var r = window.location.search.substr(1).match(reg);
+                            if (r!=null) return unescape(r[2]); return null;
+                        }
+                    })(jQuery);
+
+                    function TipInfo(words,time)
+                    {
+                        this.words = words;
+                        this.time = time;
+                    }
+
+                    var beforeFileId = $.getUrlParam("name");//文件id
+                    var beforeVodId = $.getUrlParam("catId");//分类id
+                    var beforeFlag =  $.getUrlParam("flag");//分件类型
+                    var currentPage =  $.getUrlParam("page");//分件类型
+
+                    var player;
+                    var tipArray = new Array();
+                    var playUrl = "";
+                    var cnsrt = "";
+                    var headEndTime_str = 0;
+                    var tailStartTime_str = 1000000000000000000000000000000000000000000000000000000000000000000000;
+                    var bAdvertTime = "";
+                    var bAdvertCon = "";
+                    var pAdvertCon = "";
+                    var pAdvertTime = "";
+
+                    $(function(){
+                        $("#header_load").load("header.html");
+                        $("#bottom_load").load("bottom.html");
+                        $("#nav_detail").hide();
+                        if(beforeVodId == null)
+                        {
+                            beforeVodId = "";
+                        }
+
+                        $.ajax({
+                            type: "GET",
+                            url: locationHref+"/rest/client/vodTypes/"+beforeFileId+"/0/0/marker",//获取标注
+                            async: false,
+                            success:function(data, textStatus, request)
+                            {
+                                var tiptime = "";
+                                var tipcontent = "";
+                                var tipTime_str = "";
+                                var tipContent_str = "";
+                                var tipobj = data;
+                                var items = tipobj.items;
+                                if(items != null)
+                                {
+                                    for(var i=0;i<items.length;i++)
+                                    {
+                                        tipTime_str = parseInt(items[i].markerTime);
+                                        tipContent_str = items[i].marker+"";
+                                        var tipInfo = new TipInfo(tipContent_str,tipTime_str);
+                                        tipArray[i] = tipInfo;
+                                        if(i==0)
+                                        {
+                                            tiptime += items[i].markerTime+"";
+                                            tipcontent += items[i].marker+"";
+                                        }
+                                        else
+                                        {
+                                            tiptime += "|"+items[i].markerTime;
+                                            tipcontent += "|"+items[i].marker;
+                                        }
+                                    }
+                                }
+                                load_detail_page(beforeFileId,tiptime,tipcontent);
+                            },
+                            error: function () {
+
+                            }
+                        })
+
+                    })
+
+
+
+                    function load_detail_page(befFileId,tipTime,tipContent)
+                    {
+                        $.ajax({
+                            type: "GET",
+                            url: locationHref+"/rest/client/vodTypes/"+beforeVodId+"/"+befFileId+"/fileInfo",//获取文件信息
+                            async: false,
+                            success:function(data, textStatus, request)
+                            {
+                                var item = data;
+                                if(item != null)
+                                {
+                                    var fileId = item.fileId;
+                                    var allName = item.name;
+                                    var video_name = allName.substr(allName.lastIndexOf("/")+1,allName.length);
+                                    var vodTypeId = item.vodTypeId;
+                                    var mediaTypeId = item.mediaTypeId;
+                                    var createTime = item.createTime;
+                                    var browHistory = item.browHistory;
+                                    var hotFlags = item.hotFlags;
+                                    var step = item.step;
+                                    var advertising = item.advertising;
+                                    var logo = item.logo;
+                                    if(logo != null)
+                                    {
+                                        var osdvisible = logo.visible;
+                                        var level = logo.level;
+                                        var vertical = logo.vertical;
+                                        var levelShift = logo.levelShift;
+                                        var verticalShift = logo.verticalShift;
+                                    }
+
+                                    var imgName;
+                                    var imgResolution;
+                                    var img_url;
+                                    var http_play_url =  encodeURI(encodeURI(replace_url(item.httpUrl)));
+                                    var rtmp_play_url_ckplayer = encodeURI(encodeURI(replace_url(item.rtmpUrl)));
+                                    var cfg = item.cfg;
+                                    var bitrate;
+                                    var frameRate;
+                                    var duration = "";
+                                    var format = "";
+                                    var resolution = "";
+                                    if(cfg != null && cfg != undefined)
+                                    {
+                                        frameRate = cfg.frameRate;
+                                        bitrate = cfg.bitrate;
+                                        var img = cfg.img;
+                                        duration = cfg.duration;
+                                        format = cfg.format;
+                                        resolution = cfg.resolution;
+                                        if(duration == undefined || format == undefined || resolution == undefined)
+                                        {
+                                            duration = "";
+                                            format = "";
+                                            resolution = "";
+                                        }
+                                        if(img != null)
+                                        {
+                                            for(var k=0;k<img.length;k++)
+                                            {
+                                                imgName = img[0].fileName;
+                                                if(imgName != undefined)
+                                                {
+                                                    imgName = replace_url(imgName);
+                                                }
+                                                imgResolution = img[k].resolution;
+                                            }
+                                        }
+                                    }
+
+                                    var description = "";
+                                    var mainTitle = "";
+                                    var subTitle = "";
+                                    var info = item.info;
+                                    var name = video_name.substr(0,video_name.lastIndexOf("."));
+                                    if(info != null)
+                                    {
+                                        description = info.description;
+                                        subTitle = info.subTitle;
+                                        mainTitle = info.mainTitle;
+
+                                        if(mainTitle != "" )
+                                        {
+                                            name = mainTitle;
+                                        }
+                                        else if(subTitle != "")
+                                        {
+                                            name = subTitle;
+                                        }
+                                    }
+
+                                    var dom = '<h3 style="font-size: 14px;">详情名称:'+name+'</h3>';
+                                    dom += '<p>时长:'+duration+'</p>';
+                                    dom += '<p>创建时间:'+createTime+'</p>';
+                                    dom += '<p>播放次数:'+browHistory+'</p>';
+                                    dom += '<p>简介:'+description+'</p>';
+                                    $("#detail").append(dom);
+
+                                    playUrl = http_play_url;
+
+                                    var mediaId = "";
+
+                                    //alert(typeof mediaId);
+                                    //标注
+                                    var tiptime = tipTime;
+                                    var tipcontent = tipContent;
+                                    //字幕
+                                    cnsrt = "";
+                                    if (cnsrt == "" && cnsrt.length == 0) {
+                                        cnsrt = "";
+                                    } else {
+                                        cnsrt = "";//"/admin/mediaInfo/subtitle/data/" + cnsrt;
+                                    }
+
+                                    var ensrt = "";
+                                    if (ensrt == "" && ensrt.length == 0) {
+                                        ensrt = "";
+                                    } else {
+                                        ensrt = "";
+                                    }
+                                    //跳播
+                                    var headEndTime = "";
+                                    var tailStartTime = "";
+                                    if(step != null)
+                                    {
+                                        headEndTime = step.stepStartPlay;
+                                        if(headEndTime != "")
+                                        {
+                                            headEndTime_str = step.stepStartPlay;
+                                        }
+                                        tailStartTime = step.stepStopPlay;
+                                        if(tailStartTime)
+                                        {
+                                            tailStartTime_str = step.stepStopPlay;
+                                        }
+                                    }
+                                    //广告
+                                    var bAdvertUrl = "";
+                                    var pAdvertUrl = "";
+                                    if(advertising != null)
+                                    {
+                                        bAdvertCon = advertising.ad1Path;
+                                        bAdvertTime = advertising.ad1Duration+"";
+                                        var ad2Path = advertising.ad2Path;
+                                    }
+
+                                    var flashvars = get_flash_var(playUrl, tiptime, tipcontent, cnsrt, ensrt,headEndTime, tailStartTime, bAdvertTime, bAdvertCon, bAdvertUrl,pAdvertCon, pAdvertUrl);
+                                    var params = {
+                                        bgcolor : '#FFF',
+                                        allowFullScreen : true,
+                                        allowScriptAccess : 'always'
+                                    };//这里定义播放器的其它参数如背景色（跟flashvars中的b不同），是否支持全屏，是否支持交互
+                                    //var video = [''+playUrl+'->video/mp4'];
+                                    var video = [""+decodeURI(playUrl)+"->video/mp4"];
+                                   // var video = [''];
+                                    CKobject.embed('../../ckplayer/ckplayer.swf', 'swfContent', playerId, '100%','200', false, flashvars, video, params);
+
+                                    //player = embed_mobile_player(false,playUrl,tipArray,cnsrt,"",null,headEndTime_str,tailStartTime_str,bAdvertCon,bAdvertTime,pAdvertCon,pAdvertTime,false,true);
+
+
+                                    var  url;
+                                    if(user_id == null)
+                                    {
+                                        user_id = '';
+                                        url = locationHref+"/rest/client/clientUsers/"+user_id+"/userInfo";//添加用户记录
+                                    }
+                                    else
+                                    {
+                                        url = locationHref+"/rest/client/clientUsers/"+user_id+"/userInfo";//添加用户记录
+                                    }
+                                    $.ajax({
+                                        type: "POST",
+                                        url: url,
+                                        data:'{"type":3,"record":"'+user_name+'浏览视频'+name+'","typeId":"'+beforeVodId+'","fileUrl":"'+playUrl+'","fileId":"'+beforeFileId+'","flag":"'+beforeFlag+'","page":"'+currentPage+'"}',
+                                        success:function(data, textStatus, request)
+                                        {
+                                        },
+                                        error:function(data)
+                                        {
+
+                                        }
+                                    })
+                                }
+
+                            },
+                            error: function () {
+
+                            }
+                        })
+                    }
+
+                    function replace_url(url)
+                    {
+                        var host = window.location.hostname;
+                        var before = url.substr(0,url.indexOf("//")+2);
+                        var after = "";
+
+                        if(url.substring(before.length).lastIndexOf(":") != -1)
+                        {
+                            after = url.substr(url.lastIndexOf(":"));
+                        }
+                        else
+                        {
+                            var temp = url.substring(before.length);
+                            after = temp.substring(temp.indexOf("/"));
+                        }
+
+                        return (before+host+after);
+                    }
+
+                  /*  function loadedHandler()
+                    {
+                        player.addListener('time', timeHandler); //监听播放时间
+                    }
+
+                    var isFirst = true;
+                    function timeHandler(t)
+                    {
+                        if(t >= tailStartTime_str && isFirst == true)
+                        {
+                            player = embed_mobile_player(false,playUrl,tipArray,cnsrt,"",null,864000000,"",bAdvertCon,bAdvertTime,pAdvertCon,pAdvertTime,false,true);
+                            isFirst = false ;
+                            return;
+                        }
+                    }*/
+                </script>
+            </div>
+            </div><!-- Container -->
+        </div>
+    </div>
+</body>
+</html>

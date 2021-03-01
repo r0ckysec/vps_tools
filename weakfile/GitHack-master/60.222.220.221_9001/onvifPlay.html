@@ -1,0 +1,367 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<title>VLC Plugin test page</TITLE>
+<style>
+  .inputTrackerInput {
+        height:20;
+        width:30;
+        font-family : Arial, Helvetica, sans-serif;
+        font-size : 12px;
+  }
+</style>
+<head>
+    <script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+    <script type="text/javascript" src="js/bean.js"></script>
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <script type="text/javascript" src="ckplayer/ckplayer.js" charset="utf-8"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link href="css/sp.css" rel="stylesheet" type="text/css" />
+    <link href="css/reset.css" rel="stylesheet" type="text/css" />
+    <link href="css/system.css" rel="stylesheet" type="text/css" />
+    <link href="css/table_form.css" rel="stylesheet" type="text/css" />
+    <link href="css/dialog.css" rel="stylesheet" type="text/css" />
+</head>
+
+<script language="JavaScript">
+
+    (function($){
+        $.ajaxSetup({ cache: false });
+        $.getUrlParam = function(name)
+        {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r!=null) return unescape(r[2]); return null;
+        };
+    })(jQuery);
+    var locationHref =  window.location.protocol+"//"+window.location.host;
+    var ProfileToken = $.getUrlParam("ProfileToken");
+    var deviceIp = $.getUrlParam("deviceIp"); //"192.168.2.7";//
+    var VSourceToken = $.getUrlParam("VSourceToken");
+    var rtspUrl = $.getUrlParam("rtspUrl");
+    var appName = $.getUrlParam("appName");
+    var liveName = $.getUrlParam("liveName");
+	var count = 0;
+
+    $(function(){
+        Init_license(authorization);
+        var Languages = $.cookie('internationalization');
+
+        if ( Languages == null || Languages == "" )
+        {
+            Languages = 'zh' ;
+        }
+        jQuery.i18n.properties({
+            name : 'strings', //资源文件名称
+            path : '/i18n/', //资源文件路径
+            mode : 'map', //用Map的方式使用资源文件中的值
+            language : Languages,
+            encoding : 'UTF-8', // 必须写 否则中文乱码
+            callback : function() {//加载成功后设置显示内容
+                $('#toBack').val($.i18n.prop('Back'));
+                $('#refresh').val($.i18n.prop('Refresh'));
+            }
+        });
+        init_page_refresh();
+    })
+
+    function init_page_refresh()
+    {
+		var liveLength;
+		$.ajax({
+            type:"GET",
+            url:locationHref+"/rest/admin/lives",//获取频道数量
+            async: false,
+            success:function(data)
+            {
+				liveLength = parseInt(data.length);
+			}
+		})
+	
+        $.ajax({
+            type:"GET",
+            url:locationHref+"/rest/admin/lives/bitRate/get",//获取频道的码流
+            async: false,
+            success:function(data)
+            {
+                var flag = true;//创建频道
+                if(data != "")
+                {
+                    for(var i=0;i<data.length;i++)
+                    {
+                        if(data[i].liveName.indexOf(liveName) != -1)//包含,就是已存在
+                        {
+                            flag = false; //不创建
+                        }
+                    }
+                }
+
+                var arr = new Array();
+                var urlInfo = new Urls(rtspUrl);
+                arr[0] = urlInfo;
+                var pullStream = new PullStream(rtspUrl,arr,'','');
+                var live = new LiveChannelInfo(deviceIp,appName,true,'d:/data',0,false,false,false,1,'flv','',false,240,'',7,false,true,0,true,
+                        liveName,1,null,false,true,false,true,false,0,null,1,0,5,'234.4.5.6:9000',false,0,null,pullStream,null,2);
+                if(flag == true)
+                {
+					if(liveCount == "无限制" || liveLength <= liveCount)
+					{
+						$.ajax({
+							type:"POST",
+							url:locationHref+"/rest/admin/lives",//添加直播频道
+							async: false,
+							data: stringify(live),
+							dataType:"json",
+							success:function(liveData)
+							{
+								if(data != "")
+								{
+									var bitrateFlag = false;
+									var timeOut;
+									$.ajax({
+										type:"GET",
+										url:locationHref+"/rest/admin/lives/bitRate/get",//获取频道的码流
+										async: false,
+										success:function(dataObj)
+										{
+											for(var i=0;i<dataObj.length;i++)
+											{
+												if(dataObj[i].appName == appName && dataObj[i].liveName == liveName && dataObj[i].bitRate == 0)
+												{
+													var play_url = $("#targetTextField").val();
+													var swfpath = "StrobeMediaPlayback.swf";
+													var streamType = "live";
+													var dom = get_default_player_dom(play_url,swfpath,streamType,'600px','450px');
+													$("#main_player").append(dom);
+													timeOut = setInterval(function(){
+														$.ajax({
+															type:"GET",
+															url:locationHref+"/rest/admin/lives/bitRate/get",//获取频道的码流
+															async: false,
+															success:function(getdata)
+															{
+																var flag = false;
+																for(var i=0;i<getdata.length;i++)
+																{
+																	$("#getStream").html("正在获取直播流,如时间过长,请确认源状态");
+																	if(getdata[i].appName == appName && getdata[i].liveName == liveName && getdata[i].bitRate != 0 && count == 0)
+																	{
+																		count++;
+																		$("#main_player").empty();
+																		var hostHome = location.hostname;
+																		var rtmpUrl = 'rtmp://'+hostHome+':1935/'+appName+'/'+liveName+'';
+
+																		$("#targetTextField").val(rtmpUrl);
+																		var play_url = $("#targetTextField").val();
+																		var swfpath = "StrobeMediaPlayback.swf";
+																		var streamType = "live";
+																		var dom = get_default_player_dom(play_url,swfpath,streamType,'600px','450px');
+																		$("#main_player").append(dom);
+																		flag = true;
+																		$("#getStream").html("正在直播");
+																	}
+																}
+																if(flag == true)
+																{
+																	bitrateFlag = true;
+																	clearInterval(timeOut);
+																}
+															},
+															error:function(data)
+															{
+																var errorObj = data;
+																var status = data.status;
+																var statusText = data.statusText
+																if(status == 401 || status == 400)
+																{
+																	top.location.href = "login.html";
+																}
+															}
+														});
+													},3000);
+												}
+												else if(dataObj[i].appName == appName && dataObj[i].liveName == liveName && dataObj[i].bitRate != 0)
+												{
+													var hostHome = location.hostname;
+													var rtmpUrl = 'rtmp://'+hostHome+':1935/'+appName+'/'+liveName+'';
+
+													$("#targetTextField").val(rtmpUrl);
+													var play_url = $("#targetTextField").val();
+													var swfpath = "StrobeMediaPlayback.swf";
+													var streamType = "live";
+													var dom = get_default_player_dom(play_url,swfpath,streamType,'600px','450px');
+													$("#main_player").append(dom);
+													$("#getStream").html("正在直播");
+												}
+											}
+										}
+									})
+								}
+								else
+								{
+									var play_url = $("#targetTextField").val();
+									var swfpath = "StrobeMediaPlayback.swf";
+									var streamType = "live";
+									var dom = get_default_player_dom(play_url,swfpath,streamType,'600px','450px');
+									$("#main_player").append(dom);
+									timeOut = setInterval(function(){
+										$.ajax({
+											type:"GET",
+											url:locationHref+"/rest/admin/lives/bitRate/get",//获取频道的码流
+											async: false,
+											success:function(getdata)
+											{
+												var flag = false;
+												for(var i=0;i<getdata.length;i++)
+												{
+													$("#getStream").html("正在获取直播流,如时间过长,请确认源状态");
+													if(getdata[i].appName == appName && getdata[i].liveName == liveName && getdata[i].bitRate != 0 && count == 0)
+													{
+														count++;
+														$("#main_player").empty();
+														var hostHome = location.hostname;
+														var rtmpUrl = 'rtmp://'+hostHome+':1935/'+appName+'/'+liveName+'';
+
+														$("#targetTextField").val(rtmpUrl);
+
+														var play_url = $("#targetTextField").val();
+														var swfpath = "StrobeMediaPlayback.swf";
+														var streamType = "live";
+														var dom = get_default_player_dom(play_url,swfpath,streamType,'600px','450px');
+														$("#main_player").append(dom);
+														$("#getStream").html("正在直播");
+														flag = true;
+													}
+												}
+												if(flag == true)
+												{
+													clearInterval(timeOut);
+												}
+											},
+											error:function(data)
+											{
+												var errorObj = data;
+												var status = data.status;
+												var statusText = data.statusText
+												if(status == 401 || status == 400)
+												{
+													top.location.href = "login.html";
+												}
+											}
+										});
+									},3000);
+								}
+							},
+							error:function(data)
+							{
+								var errorObj = data;
+								var status = data.status;
+								var statusText = data.statusText
+								if(status == 401 || status == 400)
+								{
+									top.location.href = "login.html";
+								}
+							}
+						});
+					}
+					else 
+					{
+						window.top.art.dialog({id:"mesg",content:"当前频道数已超过权限所允许的最大限制,请重新授权或删除多余频道!",time:3});
+						var hostHome = location.hostname;
+						var rtmpUrl = 'rtmp://'+hostHome+':1935/'+appName+'/'+liveName+'';
+
+						$("#targetTextField").val(rtmpUrl);
+						
+						var play_url = $("#targetTextField").val();
+						var swfpath = "StrobeMediaPlayback.swf";
+						var streamType = "live";
+						var dom = get_default_player_dom(play_url,swfpath,streamType,'600px','450px');
+						$("#main_player").append(dom);
+						
+						$("#getStream").html("无直播频道,请先创建频道");
+					}
+                }
+                else
+                {
+                    var hostHome = location.hostname;
+                    var rtmpUrl = 'rtmp://'+hostHome+':1935/'+appName+'/'+liveName+'';
+
+                    $("#targetTextField").val(rtmpUrl);
+                    var play_url = $("#targetTextField").val();
+                    var swfpath = "StrobeMediaPlayback.swf";
+                    var streamType = "live";
+                    var dom = get_default_player_dom(play_url,swfpath,streamType,'600px','450px');
+                    $("#main_player").append(dom);
+					
+					$("#getStream").html("正在直播");
+                }
+            },
+            error:function(data)
+            {
+                var errorObj = data;
+                var status = data.status;
+                var statusText = data.statusText
+                if(status == 401 || status == 400)
+                {
+                    top.location.href = "login.html";
+                }
+            }
+        });
+    }
+
+    function toBack()
+    {
+        window.location.href = "onvifManager.html?deviceIp="+deviceIp+"&ProfileToken="+ProfileToken+"&VSourceToken="+VSourceToken+"&rtspUrl="+rtspUrl+"";
+    }
+
+    function get_default_player_dom(play_url,swfpath,streamType,width,height)
+    {
+        play_url = play_url.replace("|","/");
+        var swfpath = "/StrobeMediaPlayback.swf";
+        dom = "<object style='background:#000' wmode='transparent' width='"+width+"' height='"+height+"'  id='StrobeMediaPlayback_object_' type='application/x-shockwave-flash' classid='clsid:d27cdb6e-ae6d-11cf-96b8-444553540000'>";
+        dom+="<param name='movie' value='"+swfpath+"' />";
+        dom+="<param name='quality' value='high' />";
+        dom+="<param name='bgcolor' value='#000000' />";
+        dom+="<param name='allowfullscreen' value='true' />";
+        dom+="<param name='flashvars'	value='&src="+play_url+"&autoHideControlBar=true&streamType="+streamType+"&autoPlay=true' />";
+        dom+="<embed style='background:#000' wmode='transparent' src='"+swfpath+"' width='"+width+"' height='"+height+"' id='StrobeMediaPlayback_embed' quality='high'";
+        dom+="bgcolor='#000000' name='StrobeMediaPlayback' allowfullscreen='true'";
+        dom+="pluginspage='http://www.adobe.com/go/getflashplayer'";
+        dom+="flashvars='&src="+play_url+"&autoHideControlBar=true&streamType="+streamType+"&autoPlay=true'";
+        dom+="type='application/x-shockwave-flash'>";
+        dom+="</embed>";
+        dom+="</object>";
+        return dom;
+    }
+
+    function onFresh()
+    {
+        window.location.reload();
+    }
+</script>
+
+<body onClose="close();">
+<div>
+
+</div>
+	<div style="background-color: #F1F1F1;">
+		<div style="float: left;display: inline;">
+			<input type=button class="ext_btn ext_btn_success" id="toBack" value=" 返回 " onClick='toBack()'>
+			<input type=button class="ext_btn ext_btn_success" id="refresh" value=" 刷新 " onClick='onFresh()'>
+		</div>
+		<span style="color: red;float: left;width:432px;height:28px;">频道已自动创建，创建后不会自动删除，若需删除，请在直播频道列表中手动删除</span>
+	</div>
+
+<div style="width: 100%; background-color: white; float: left;">
+    <input type="hidden" size="90" id="targetTextField" value="rtsp://admin:admin123456@192.168.2.7">
+	<div style="display:inline;">
+			<span style="float:left;">状态:</span><span id="getStream" style="color:red;">正在获取直播流,如时间过长,请确认源状态</span>
+		</div>
+    <div id="main_player" style="float: left"></div>
+</div>
+</body>
+</HTML>

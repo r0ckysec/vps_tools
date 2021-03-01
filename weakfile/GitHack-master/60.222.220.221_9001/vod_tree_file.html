@@ -1,0 +1,896 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>点播媒体列表</title>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" type="text/css" href="css/common.css">
+	<!--<link rel="stylesheet" type="text/css" href="css/style.css">-->
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="stylesheet" type="text/css" href="css/sp.css" />
+	<link rel="stylesheet" type="text/css" href="css/reset.css" />
+	<link rel="stylesheet" type="text/css" href="css/system.css" />
+	<link rel="stylesheet" type="text/css" href="css/table_form.css" />
+	<link rel="stylesheet" type="text/css" href="css/dialog.css" />
+
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/jquery.corner.js"></script>
+	<script type="text/javascript" src="js/admin_common.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="js/jquery.zclip.min.js"></script>
+	<!--<script type="text/javascript" src="ckplayer/js/offlights.js"></script>
+	<script type="text/javascript" src="ckplayer/ckplayer.js" charset="utf-8"></script>-->
+	<script type="text/javascript" src="js/player.js" charset="utf-8"></script>
+	<script type="text/javascript" src="js/cookie.js" charset="utf-8"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+	<script type="text/javascript" src="js/media.js"></script>
+	<style type="text/css">
+		.red-point{
+			position: relative;
+		}
+
+		.red-point::before{
+			content: " ";
+			border: 3px solid red;/*设置红色*/
+			border-radius:3px;/*设置圆角*/
+			position: absolute;
+			z-index: 1000;
+			right: 0%;
+			margin-right: 0px;
+			margin-top: 0px;
+		}
+
+		.green-point{
+			position: relative;
+		}
+
+		.green-point::before{
+			content: " ";
+			border: 3px solid green;/*设置红色*/
+			border-radius:3px;/*设置圆角*/
+			position: absolute;
+			z-index: 1000;
+			right: 0%;
+			margin-right: 0px;
+			margin-top: 0px;
+		}
+	</style>
+	<script type="text/javascript">
+		(function($){
+			$.getUrlParam = function(name)
+			{
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			}
+		})(jQuery);
+		var FailedToGetData ;
+		var VideoPlay ;
+		var Watch ;
+		var InSearch ;
+		var VideoCapture ;
+		var ReferenceAddress ;
+		var HomePage;
+		var PreviousPage ;
+		var NextPage ;
+		var Shadowe ;
+		var InTotal ;
+		var Page ;
+		var NumberOfData ;
+		var BuildingPage ;
+		var　UploadMedia ;
+		var Screenshot ;
+		var Delete;
+		var Description;
+		var DeleteMediaAll;
+		var RemoveMedia;
+		var Remove;
+		var HotFlag;
+		var FocusFlag;
+		var Hot;
+		var Focus;
+		var FocusMedia;
+		var	HotMedia;
+		var MediaLib;
+		var UnRemove;
+		var NoVodMedia;
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#Search').val($.i18n.prop('Search'));
+					$('#search').html($.i18n.prop('Search'));
+					$('#type').html($.i18n.prop('Type'));
+					$('#th_1').html($.i18n.prop('SerialNumber'));
+					$('#th_2').html($.i18n.prop('MediaName'));
+					$('#th_3').html($.i18n.prop('MediaDes'));
+					$('#th_4').html($.i18n.prop('ManagementOper'));
+					$('#th_5').html($.i18n.prop('MainTitle'));
+					$('#th_6').html($.i18n.prop('subtitle'));
+					$('#th_7').html($.i18n.prop('LookHistory'));
+					$('#delRecord').html($.i18n.prop('Delete'));
+					$('#addMedia').val($.i18n.prop('AddMediaFromLib'));
+					$('#focus_click').html($.i18n.prop('Hot'));
+					$('#hot_click').html($.i18n.prop('Recommend'));
+
+					FailedToGetData = $.i18n.prop('FailedToGetData') ;
+					VideoPlay = $.i18n.prop('VideoPlay') ;
+					Screenshot = $.i18n.prop('Screenshot') ;
+					Watch = $.i18n.prop('Watch') ;
+					BuildingPage = $.i18n.prop('BuildingPage') ;
+					InSearch = $.i18n.prop('InSearch') ;
+					VideoCapture = $.i18n.prop('VideoCapture') ;
+					ReferenceAddress = $.i18n.prop('ReferenceAddress') ;
+					HomePage = $.i18n.prop('HomePage') ;
+					PreviousPage = $.i18n.prop('PreviousPage') ;
+					NextPage = $.i18n.prop('NextPage') ;
+					Shadowe = $.i18n.prop('Shadowe') ;
+					InTotal = $.i18n.prop('InTotal') ;
+					Page = $.i18n.prop('Page') ;
+					NumberOfData = $.i18n.prop('NumberOfData') ;
+					BuildingPage = $.i18n.prop('BuildingPage') ;
+					UploadMedia　=　$.i18n.prop('UploadMedia') ;
+					Delete = $.i18n.prop('Delete') ;
+					Description = $.i18n.prop('Description') ;
+					DeleteMediaAll = $.i18n.prop('DeleteMediaAll') ;
+					RemoveMedia = $.i18n.prop('RemoveMedia') ;
+					Remove = $.i18n.prop('Remove') ;
+					HotFlag = $.i18n.prop('HotFlag') ;
+					FocusFlag = $.i18n.prop('FocusFlag') ;
+					Hot = $.i18n.prop('Hot') ;
+					Focus = $.i18n.prop('Focus');
+					FocusMedia = $.i18n.prop('FocusMedia');
+					HotMedia = $.i18n.prop('HotMedia');
+					MediaLib = $.i18n.prop('MediaLib');
+					UnRemove = $.i18n.prop('UnRemove');
+					NoVodMedia = $.i18n.prop('NoVodMedia');
+				}
+			});
+		});
+
+		var host = window.location.hostname;
+		var port = window.location.port;
+		var beforeId = $.getUrlParam("id");
+		var beforeName = decodeURIComponent($.getUrlParam("name"));
+		var beforeVisible = $.getUrlParam("visible");
+		var beforeVipLevel = parseInt($.getUrlParam("vipLevel"));
+		var beforeBPublic = $.getUrlParam("bPublic");
+		var itemNum = 10;//一页显示多少条
+		var pageNum = 1;//当前页
+		var imageurl = "../images/video.jpg";
+		$(function(){
+			if(beforeVisible == "true")
+			{
+				beforeVisible = true ;
+			}
+			else
+			{
+				beforeVisible = false;
+			}
+
+			if(beforeBPublic == "true")
+			{
+				beforeBPublic = true ;
+			}
+			else
+			{
+				beforeBPublic = false;
+			}
+			init_whole_medias(pageNum,itemNum);
+		})
+
+		//page_size : 每页显示条数
+		//currentPage : 页码
+		function init_whole_medias(currentPage,page_size)
+		{
+			$("#main_body").empty();
+			if(beforeId == "")
+			{
+				$("#delRecord").hide();
+				$("#focus_click").hide();
+				$("#hot_click").hide();
+			}
+			else
+			{
+				$("#delRecord").show();
+				$("#focus_click").show();
+				$("#hot_click").show();
+			}
+			var search_url;
+			var search_key = $("#key").val();
+			if(search_key == "")
+			{
+				search_url = locationHref + "/rest/admin/vodTypes/" + beforeId + "/" + page_size + "/" + currentPage+"/get";//获取一个点播分类详细信息
+			}
+			else
+			{
+				if(beforeId == "")
+				{
+					search_url = locationHref+"/rest/admin/vodTypes/"+page_size+"/"+currentPage+"/"+search_key+"/search";//搜索未命名分类视频
+				}
+				else
+				{
+					search_url = locationHref + "/rest/admin/vodTypes/" + beforeId + "/" + page_size + "/" + currentPage+"/"+search_key+"/search";//搜索某个点播分类视频
+				}
+			}
+
+			var count = 0;
+			$.ajax({
+				type: "GET",
+				url: search_url,
+				success: function(data)
+				{
+					//var obj = $.parseJSON(data);
+					var obj = data;
+					if(obj == null)
+					{
+						window.top.art.dialog({id:"vod",content:NoVodMedia+"!",time:1});
+					}
+					var total = obj.total;
+					var items = obj.items;
+					var visible = obj.visible;
+					if(items != '')
+					{
+						for(var i=0;i<items.length;i++)
+						{
+							count++;
+
+							var fileId = items[i].fileId;
+							var allName = items[i].name;
+							var name = allName.substr(allName.lastIndexOf("/")+1,allName.length);
+							var http_play_url = replace_url(items[i].httpUrl);
+							var rtmp_play_url_ckplayer = replace_url(items[i].rtmpUrl);
+
+							var step = items[i].step;
+							if(step != '' && step != undefined)
+							{
+								var stepStartPlay = step.stepStartPlay;
+								var stepStopPlay = step.stepStopPlay;
+							}
+							var advertising = items[i].advertising;
+							if(advertising != '' && advertising != undefined)
+							{
+								var ad1Path = advertising.ad1Path;
+								var ad1Duration = advertising.ad1Duration;
+								var ad2Path = advertising.ad2Path;
+							}
+							var logo = items[i].logo;
+							if(logo != '' && logo != undefined)
+							{
+								var osdvisible = logo.visible;
+								var level = logo.level;
+								var vertical = logo.vertical;
+								var levelShift = logo.levelShift;
+								var verticalShift = logo.verticalShift;
+							}
+							var cfg = items[i].cfg;
+							var duration = "";
+							var imgName = "";
+							var imgResolution = "";
+							var resolution = "";
+							if(cfg != '' && cfg != undefined)
+							{
+								duration = cfg.duration;
+								if (duration == undefined) {
+									duration = "";
+								}
+
+								var img = cfg.img;
+								if(img != '' && img != undefined)
+								{
+									for(var k=0;k<img.length;k++)
+									{
+										imgName = img[k].name;
+										imgResolution = img[k].resolution;
+									}
+								}
+								resolution = cfg.resolution
+							}
+
+							var description = "";
+							var mainTitle = "";
+							var subTitle = "";
+							var info = items[i].info;
+							if(info != '' && info != undefined)
+							{
+								description = info.description;
+								subTitle = info.subTitle;
+								mainTitle = info.mainTitle;
+							}
+							var des_str = "";
+							if(description != '' && description != undefined)
+							{
+								des_str = cutstr(description,20);
+							}
+							var hotFlags = items[i].hotFlag;
+							var focusFlags = items[i].focusFlag;
+							var browHistory = items[i].browHistory;
+							var hot_img = "";
+							var focus_img = "";
+							if(hotFlags == true)
+							{
+								hot_img = '<img width="17px" height="16px" src="/images/recommend.png" onerror="javascript:this.src=\''+imageurl+'\'"/>';
+
+							}
+
+							if(focusFlags == true)
+							{
+								focus_img = '<img width="17px" height="16px" src="/images/hot.png" onerror="javascript:this.src=\''+imageurl+'\'"/>';
+							}
+
+							var dom = '<tr>';
+							dom += '<td align="center">';
+							if(description == undefined)
+							{
+								dom += '<input type="checkbox" class="inputcheckbox"  name="mediainfoIds" descrip="'+des_str+'" value="' + fileId + '" path="'+allName+'">';
+							}
+							else
+							{
+								dom += '<input type="checkbox" class="inputcheckbox"  name="mediainfoIds" descrip="'+description+'" value="' + fileId + '" path="'+allName+'">';
+							}
+							dom += '</td>';
+							dom+= '<td align="left">'+count+'</td>';
+							dom += '<td align="left" >';
+							dom+= '<div style="float:left;display: inline;">';
+							dom+= '<img width="80px" height="60px" src="data:image/jpeg;base64,'+imgName+'" onerror="javascript:this.src=\''+imageurl+'\'"/>';
+							dom+= '</div>';
+							dom+= '<div style="float:left;margin-left: 2px;display: inline;">';
+							dom+= '<p style="color: #0B90C4;width :230px;height: 20px;;overflow: hidden;" title="'+name+'">'+name+'</p>';
+							dom+= '<p>媒体时间:'+duration+'</p>';
+							dom+= '<p>分辨率:'+resolution+'</p>';
+							dom+= '</div>';
+							dom+= '<div style="float:left;margin-left: 2px;display: inline;">';
+							dom+= ''+focus_img+' '+hot_img+'';
+							dom+= '</div>';
+							dom+= '</td>';
+							dom+= '<td align="center">'+browHistory+'</td>';
+							dom+= '<td align="center" title="'+mainTitle+'" style="overflow: hidden;">'+mainTitle+'</td>';
+							dom+= '<td align="center" title="'+subTitle+'" style="overflow: hidden;">'+subTitle+'</td>';
+							if(description == undefined)
+							{
+								dom+= '<td align="center" title="'+description+'" onmouseover="show_addr(\'fw_oper_'+fileId+'\')" onmouseout="close_addr(\'fw_oper_'+fileId+'\')" style="overflow: hidden;">'+des_str+'</td>';
+							}
+							else
+							{
+								dom+= '<td align="center" title="'+description+'" onmouseover="show_addr(\'fw_oper_'+fileId+'\')" onmouseout="close_addr(\'fw_oper_'+fileId+'\')" style="overflow: hidden;">'+des_str+'</td>';
+							}
+
+							dom+= '<td align="center">';
+							dom+= '<a  href="javascript:;" onclick="play(\''+http_play_url+'\')" class="ext_btn ext_btn_submit ext_btn_size">HTTP '+Watch+'</a>&nbsp;';
+							dom+= '<a  href="javascript:;" onclick="play(\''+rtmp_play_url_ckplayer+'\')" class="ext_btn ext_btn_submit ext_btn_size">RTMP  '+Watch+'</a>&nbsp;';
+							dom+= '<a  href="javascript:;" onclick="descriptionVod(\''+encodeURI(encodeURI(name))+'\',\''+beforeId+'\',\''+fileId+'\',\''+encodeURI(encodeURI(description))+'\')" class="ext_btn ext_btn_submit ext_btn_size">'+Description+'</a>&nbsp;';
+							if(beforeId == "")
+							{
+								dom+= '<a  href="javascript:;" onclick="deleteVod(\''+fileId+'\')" class="ext_btn_red ext_btn_size">'+Delete+'</a>';
+							}
+							dom+= '</td>';
+							dom+= '</tr>';
+							$("#main_body").append(dom);
+						}
+					}
+					//------------------------------------------------------------------------------------------------------------
+
+					var pages = Math.ceil(total/page_size);
+					var page_dom = '<div class="pager Library_Page" >';
+					page_dom+='<span class="Library_Page_1">'+InTotal+'<font color="red">'+pages+'</font>&nbsp;'+Page+',<font color="red">'+total+'</font>'+NumberOfData+'&nbsp;&nbsp;</span>';
+					page_dom+='<a href="javascript:void(0)"  onclick="init_whole_medias(1,'+page_size+')">'+HomePage+'</a>';//首页
+					if(currentPage-1>0)
+					{
+						page_dom+='<a href="javascript:void(0)" onclick="init_whole_medias('+(currentPage-1)+','+page_size+')">'+PreviousPage+'</a>';//上一页
+					}
+					var page_arr = calculatePageIndex(currentPage,pages,5);
+					for(var i=page_arr[0];i<=page_arr[1];i++)
+					{
+						if(i == currentPage)
+						{
+							page_dom+='<a href="javascript:void(0)" style="background-color: #3EAFE0" class="Library_Page_NoPage">'+i+'</a>';
+						}
+						else
+						{
+							page_dom+='<a href="javascript:void(0)" onclick="init_whole_medias('+i+','+page_size+')" class="Library_Page_NoPage">'+i+'</a>';
+						}
+					}
+					if(currentPage+1<=pages)
+					{
+						page_dom+='<a href="javascript:void(0)" onclick="init_whole_medias('+(currentPage+1)+','+page_size+')">'+NextPage+'</a>';//下一页
+					}
+					page_dom+='<a href="javascript:void(0)" onclick="init_whole_medias('+pages+','+page_size+')">'+Shadowe+'</a>';//尾页
+					page_dom+='</div>';
+					$("#pager_outer").html(page_dom)
+				},
+				error: function()
+				{
+					top.location.href = "/login.html";
+				}
+			})
+		}
+
+		function show_addr(id)
+		{
+			$("#"+id).show();
+		}
+
+		function close_addr(id)
+		{
+			$("#"+id).hide();
+		}
+
+		function cutstr(str,len)
+		{
+			var str_length = 0;
+			var str_len = 0;
+			var str_cut = new String();
+			str_len = str.length;
+			for(var i = 0;i<str_len;i++)
+			{
+				var a = str.charAt(i);
+				str_length++;
+				if(escape(a).length > 4)
+				{
+					//中文字符的长度经编码之后大于4
+					str_length++;
+				}
+				str_cut = str_cut.concat(a);
+				if(str_length>=len)
+				{
+					str_cut = str_cut.concat("...");
+					return str_cut;
+				}
+			}
+			//如果给定字符串小于指定长度，则返回源字符串；
+			if(str_length<len){
+				return  str;
+			}
+		}
+
+		//分页
+		function calculatePageIndex(currentPage,totalPage,viewPageCount)
+		{
+			var startPage = 0 ;
+			var endPage = 0;
+			var arr = new Array();
+			// 如果总页面小于 页面 分页显示页数
+			if (totalPage <= viewPageCount) {
+				startPage = 1;
+				endPage = totalPage;
+				arr[0] = startPage;
+				arr[1] = endPage;
+
+				return arr;
+			}
+
+			//计算出中间值
+			var n = Math.ceil(viewPageCount/2)-1;
+			startPage = currentPage - n;
+
+			//如果当前页己经小于起始页
+			if (startPage <= 1) {
+				startPage = 1;
+				// 因为两个边界的页码数也要显示
+				endPage = startPage + (viewPageCount - 1);
+				arr[0] = startPage;
+				arr[1] = endPage;
+
+				return arr;
+			}
+
+			endPage = currentPage + n;
+
+			//前页页面显示的值是积数 还是偶数
+			if (viewPageCount % 2 == 0) {
+				startPage += 1;
+			}
+			if (endPage > totalPage) {
+				endPage = totalPage;
+				// 因为两个边界的页码数也要显示
+				startPage = totalPage - (viewPageCount - 1);
+			}
+			arr[0] = startPage;
+			arr[1] = endPage;
+
+			return arr;
+		}
+
+		// 播放视频
+		function play(url)
+		{
+			if(url.indexOf("rtmp://")==-1)
+			{
+				url = encodeURI(encodeURI(url));
+			}
+			var play_url = url;//not user ckplayer play rtmp
+			var dom = embed_flash_player(play_url,600,400);
+			var share_dom = init_share_player(play_url)
+
+			var whole_dom = dom+share_dom;
+			window.top.art.dialog
+			(
+					{
+						id:'playVideo',content:whole_dom, title:VideoPlay, width:'600', height:'400', lock:true
+					},
+					function(){
+						var d = window.top.art.dialog({id:'playVideo'}).data;
+						alert(d);
+						return false;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'playVideo'}).close()
+					}
+			);void(0);
+
+		}
+
+		function descriptionVod(name,id,fileId,des)
+		{
+			window.top.art.dialog
+			(
+					{
+						id:'description',iframe:'vod_description.html?name='+name+'&id='+id+'&fileId='+fileId+'&des='+des, title:Description, width:'600', height:'300', lock:true
+					},
+					function(){
+						var d = window.top.art.dialog({id:'description'}).data.iframe;
+						d.descriptionVod();
+						window.top.art.dialog({id:'description'}).close();
+						window.location.reload();
+						return false;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'description'}).close()
+					}
+			);void(0);
+		}
+
+
+		//删除
+		function deleteVod(id)
+		{
+			window.top.art.dialog
+			(
+					{
+						id:'del',content:DeleteMediaAll, title:Delete,lock:true
+					},
+					function(){
+						delVod(id);
+						window.top.art.dialog({id:'del'}).close()
+						window.location.reload();
+						return true;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'del'}).close()
+					}
+			)
+		}
+		function delVod(id)
+		{
+			var delMediaInfo = new DelMediaInfo(id);
+			var array = new Array();
+			array[0] = delMediaInfo;
+			var mediaToCategory = new MediaToCategoryLevel(beforeName,beforeVisible,array,beforeBPublic,beforeVipLevel);
+			$.ajax({
+				type:"PUT",
+				url: locationHref+"/rest/admin/vodTypes/"+id+"/"+3+"/put",//1,编辑   2,添加   3,删除//编辑一个媒体分类
+				data:stringify(mediaToCategory),
+				async: false,
+				contentType: "application/json; charset=utf-8",
+				success:function(data){
+
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+					else if(status == 409)
+					{
+						window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					}
+				}
+			})
+		}
+
+		//删除分类里的媒体文件
+		function deleteAllMedia()
+		{
+			//alert(beforeId)
+
+			if(!checkSelect("mediainfoIds"))
+			{
+				window.top.art.dialog({id:'dg_test34243', content:UnRemove+'!',time:0.5});
+				return false;
+			}
+
+			window.top.art.dialog
+			(
+					{
+						id:'lock',content:RemoveMedia, title:Remove,lock:true
+					},
+					function(){
+						var count = 0;
+						var array = new Array();
+						var ids = document.getElementsByName("mediainfoIds");
+						var str = "";
+						//拼接以ID和@组合而成的字符串
+						for(var i=0;i<ids.length;i++) {
+							//如果多选框没有选中 , 让其选中
+							if (ids[i].checked == true && i != 0) {
+								ids[i].checked = true;
+								str += '{"fileId":"' + ids[i].value + '","description":"' + $(ids[i]).attr("descrip")+  '"}';
+								var deleteInfo = new DeleteCategory(ids[i].value,$(ids[i]).attr("descrip"));
+								array[count] = deleteInfo;
+								count++;
+							}
+						}
+						//var cat_str = new Category(beforeName,beforeVisible,array);
+						var cat_str = new Category(beforeName,beforeVisible,array,beforeBPublic,beforeVipLevel);
+						//alert(stringify(cat_str))
+
+						$.ajax({
+							type: "PUT",
+							async: false,
+							url: locationHref+"/rest/admin/vodTypes/"+beforeId+"/"+3+"/put",//编辑一个点播分类 删除文件
+							data: stringify(cat_str),
+							success: function(data)
+							{
+								window.top.art.dialog({id:'lock'}).close()
+								window.location.reload();
+								return true;
+
+							},
+							error:function(data)
+							{
+								var errorObj = data;
+								var status = data.status;
+								var statusText = data.statusText
+								if(status == 401 || status == 400)
+								{
+									top.location.href = "login.html";
+								}
+								else if(status == 409)
+								{
+									window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+								}
+							}
+						})
+					},
+					function()
+					{
+						window.top.art.dialog({id:'lock'}).close()
+					}
+			)
+		}
+
+
+		//焦点  2
+		function focusAllVod()
+		{
+			if(!checkSelect("mediainfoIds"))
+			{
+				window.top.art.dialog({id:'dg_test34243', content:FocusMedia+'!',time:0.5});
+				return false;
+			}
+
+			window.top.art.dialog
+			(
+					{
+						id:'focus',content:FocusFlag, title:Focus,lock:true
+					},
+					function(){
+						var count = 0;
+						var array = new Array();
+						var ids = document.getElementsByName("mediainfoIds");
+						//拼接以ID和@组合而成的字符串
+						for(var i=0;i<ids.length;i++) {
+							//如果多选框没有选中 , 让其选中
+							if (ids[i].checked == true && i != 0) {
+								ids[i].checked = true;
+								var focusVod = new FocusVod(ids[i].value,2,true);
+								array[count] = focusVod;
+								count++;
+							}
+						}
+
+						//alert(stringify(array))
+						$.ajax({
+							type: "PUT",
+							async: false,
+							url: locationHref+"/rest/admin/vodTypes/setflags",//设置视频热点,焦点，推荐
+							data: stringify(array),
+							success: function(data)
+							{
+								window.top.art.dialog({id:'focus'}).close()
+								window.location.reload();
+								return true;
+
+							},
+							error:function(data)
+							{
+								var errorObj = data;
+								var status = data.status;
+								var statusText = data.statusText
+								if(status == 401 || status == 400)
+								{
+									top.location.href = "login.html";
+								}
+								else if(status == 409)
+								{
+									window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+								}
+							}
+						})
+					},
+					function()
+					{
+						window.top.art.dialog({id:'focus'}).close()
+					}
+			)
+		}
+
+		//热点  1
+		function hotAllVod()
+		{
+			if(!checkSelect("mediainfoIds"))
+			{
+				window.top.art.dialog({id:'dg_test34243', content:HotMedia+'!',time:0.5});
+				return false;
+			}
+
+			window.top.art.dialog
+			(
+					{
+						id:'hot',content:HotFlag, title:Hot,lock:true
+					},
+					function(){
+						var count = 0;
+						var array = new Array();
+						var ids = document.getElementsByName("mediainfoIds");
+						//拼接以ID和@组合而成的字符串
+						for(var i=0;i<ids.length;i++) {
+							//如果多选框没有选中 , 让其选中
+							if (ids[i].checked == true && i != 0) {
+								ids[i].checked = true;
+								var hotVod = new HotVod(ids[i].value,1,true);
+								array[count] = hotVod;
+								count++;
+							}
+						}
+						$.ajax({
+							type: "PUT",
+							async: false,
+							url: locationHref+"/rest/admin/vodTypes/setflags",//设置视频热点,焦点，推荐
+							data: stringify(array),
+							success: function(data)
+							{
+								window.top.art.dialog({id:'hot'}).close()
+								window.location.reload();
+								return true;
+
+							},
+							error:function(data)
+							{
+								var errorObj = data;
+								var status = data.status;
+								var statusText = data.statusText
+								if(status == 401 || status == 400)
+								{
+									top.location.href = "login.html";
+								}
+								else if(status == 409)
+								{
+									window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+								}
+							}
+						})
+					},
+					function()
+					{
+						window.top.art.dialog({id:'hot'}).close()
+					}
+			)
+		}
+
+		function choose_medias()
+		{
+			window.top.art.dialog
+			(
+					{
+						id:'medias',iframe:'choose_media_tree.html?beforeId='+beforeId+'&beforeName='+beforeName+'&beforeVisible='+beforeVisible+'&beforeVipLevel='+beforeVipLevel+'&beforeBPublic='+beforeBPublic, title:MediaLib, width:'960', height:'600', lock:true
+					},
+					function(){
+						var d = window.top.art.dialog({id:'medias'}).data.iframe;
+						var ss = d.document.getElementById('media_right').contentWindow;
+						ss.addMediaToCategory();
+						window.top.art.dialog({id:'medias'}).close();
+						window.location.reload();
+						return false;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'medias'}).close()
+					}
+			);void(0);
+		}
+
+	</script>
+</head>
+
+<body>
+<div class="pad-10" id="content" >
+	<div class="content-menu" >
+		<form action="#" method="post">
+			<table width="100%" cellspacing="0" class="search-form">
+				<tbody>
+				<tr>
+					<td>
+						<input type="button" value="从媒体库添加视频" class="ext_btn ext_btn_success" id="addMedia" onclick="choose_medias()" style="display: inline;">
+						<input type="text" class="input-text" name="key" id="key" value="">
+						<input type="button" value="搜索" class="button" onclick="init_whole_medias(pageNum,itemNum)" id="Search">
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+
+	<form name="myform" id="myform" action="#" method="post">
+		<input type="hidden" id="media_path" value=""/>
+
+		<div class="table-list">
+			<table width="100%" class="list_table">
+				<thead>
+				<tr>
+					<th width="5%">
+						<input value="" id="check_box" name="mediainfoIds" onclick="selectall('mediainfoIds');" type="checkbox">
+					</th>
+					<th width="5%" align="left" id="th_1">序号</th>
+					<th width="40%" id="th_2">媒体名称</th>
+					<th width="5%" id="th_7">观看次数</th>
+					<th width="10%" id="th_5">主标题</th>
+					<th width="10%" id="th_6">副标题</th>
+					<th width="10%" id="th_3">媒体描述</th>
+					<th width="15%" id="th_4">管理操作</th>
+				</tr>
+				</thead>
+				<tbody id="main_body">
+				</tbody>
+			</table>
+			<div class="btncms" style="position:relative">
+				<!--<a  href="javascript:;" onclick="remmondAllVod()" class="ext_btn ext_btn_success">推荐</a>-->
+				<a  href="javascript:;" id="focus_click" onclick="focusAllVod()" class="ext_btn ext_btn_success">热点</a>
+				<a  href="javascript:;" id="hot_click" onclick="hotAllVod()" class="ext_btn ext_btn_success">推荐</a>
+				<a  id="delRecord" href="javascript:;" onclick="deleteAllMedia()" class="ext_btn_red ext_btn_large">删除</a>
+			</div>
+		</div>
+		<div>
+			<div style="float: right;" id="pager_outer">
+
+			</div>
+		</div>
+		<input type="submit" class="dialog" value="确定" id="dosubmit" name="dosubmit">
+	</form>
+</div>
+</body>
+</html>

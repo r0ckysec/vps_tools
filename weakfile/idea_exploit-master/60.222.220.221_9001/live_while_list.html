@@ -1,0 +1,2077 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link href="css/sp.css" rel="stylesheet" type="text/css" />
+    <link href="css/reset.css" rel="stylesheet" type="text/css" />
+    <link href="css/system.css" rel="stylesheet" type="text/css" />
+    <link href="css/table_form.css" rel="stylesheet" type="text/css" />
+    <link href="css/dialog.css" rel="stylesheet" type="text/css" />
+    <link href="css/live.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="js/dialog/jquery.ui.all.css"/>
+
+    <script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+    <script type="text/javascript" src="js/dialog/jquery.bgiframe-2.1.2.js"></script>
+    <script type="text/javascript" src="js/dialog/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="js/dialog/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="js/dialog/jquery.ui.mouse.js"></script>
+    <script type="text/javascript" src="js/dialog/jquery.ui.draggable.js"></script>
+    <script type="text/javascript" src="js/dialog/jquery.ui.position.js"></script>
+    <script type="text/javascript" src="js/dialog/jquery.ui.resizable.js"></script>
+    <script type="text/javascript" src="js/dialog/jquery.ui.dialog.js"></script>
+    <script type="text/javascript" src="js/ref_encode.js"></script>
+    <script type="text/javascript" src="js/jquery.form.js"></script>
+    <script type="text/javascript" src="js/encoder.js" ></script>
+    <script type="text/javascript" src="js/time2.js" ></script>
+
+    <script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+    <script type="text/javascript" src="js/jquery.corner.js"></script>
+    <script type="text/javascript" src="js/admin_common.js"></script>
+    <script type="text/javascript" src="js/dialog.js"></script>
+    <script type="text/javascript" src="js/live.js"></script>
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <script type="text/javascript" src="js/jbase64.js"></script>
+    <script type="text/javascript" src="js/search.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+    <script type="text/javascript" src="js/add_edit_live.js"></script>
+    <script type="text/javascript" src="js/bean.js"></script>
+    <script type="text/javascript" src="js/timeTrans.js"></script>
+    <style type="text/css">
+        .title{height:20px}
+        .title .t{width: 70px;text-align: center;}
+        .title .i{width:323px;text-align:center}
+        .item{height:30px;width:1020px;}
+        .item a{display:block;float:left;margin-right:5px; width:23px;height:23px;background:#ededed;border:1px solid #e0e0e0;cursor:pointer;text-align:center;line-height: 23px;font-size:18px;font-weight: bold;}
+        .item a:hover{text-decoration:none;}
+        .f{float: left;}
+        .c{text-align: center}
+        .ftstart{display:block;width:70px;height:25px;line-height:25px;float:left;margin-left:10px;text-align:center;}
+        .id{display:block;width:70px;height:25px;line-height:25px;float:left;margin-left:10px;text-align:center;}
+        .fpath{display:block;width:500px;height:25px;line-height:25px;float:left;margin-left:8px;text-align:center;}
+        .ui-dialog-titlebar{
+            background: rgba(0, 0, 0, 0) -moz-linear-gradient(center top , #3580cf, #85b2e3) repeat scroll 0 0;
+            box-shadow: none;
+            border:none;
+            color:#fff;
+            border-bottom-style: none;
+            background:url('js/dialog/dialog/images/dialog_bar_bg.jpg') repeat-x;
+        }
+        .item-startTime{width:60px;}
+        .item-stopTime{width:60px;}
+        .item-time{width:110px;}
+    </style>
+    <script type="text/javascript">
+        var  DirectCurrentSource ;// 流源
+        var Encoder ;// 编码器
+        var  PullFlow ;// 拉流
+        var TranscodingSubStream ; //转码子流
+        var InsertFlow ; // 插播流
+        var GeneralLive ; // 普通直播
+        var ReturnBroadcastMode ; // 回播模式
+        var CarouselMode ; // 轮播模式
+        var GuidedMode ;//  导播模式
+        var Manual ; // 手动
+        var Timing ; //  定时
+        var StreamingVideo ; // 有流则录像
+        var NotLiveState ; // 未直播状态
+        var BeingBroadcastLive ;//  正在直播
+        var　Computer ; // 电脑
+        var ComputerWatch ; // 电脑观看
+        var MobilePhone ;// 手机
+        var MobileViewing ;// 移动观看
+        var Delete ;// 删除
+        var Alias ;// 别名
+        var ChannelType ;// 频道类型
+
+        var NoForwardingStream ;// 未转发流
+        var IsForwardingFlow ;// 正在转发流
+        var TS_NoFlow  ;// TS未发流
+        var TS_IsForwardingFlow ;// TS正在发流
+        var HLS_NoFlow ;// HLS未发流
+        var HLS_IsForwardingFlow ;// HLS正在发流
+        var NoVideo ;//  未录像
+        var BeingVideo ;// 正在录像
+        var TimingVideo ;// 定录
+        var TimingVideos ;// 定时录像
+        var Carousel ;// 轮播
+        var　VirtualLive ;// (轮播)虚拟直播
+        var Director ;// 导播
+        var StartRecording ;// 开录
+        var StopVideo ;// 停录
+        // var StopFlow ;// 断流
+        // var SendFlow ;// 发流
+        var Type ;// 类型
+        var PushMode ;// 推方式
+        var PullMode ;// 拉方式
+        var VideoMode ;// 录像方式
+        var StreamSize ;// 码流大小
+        var Bypass ;// 转流
+        var ForwardingStream ;// 转发流
+        var Subflow ;// 子流
+        var AddSubStream ;// 添加子码流
+        var Spots ;// 插播
+        var LiveSpots ;// 直播插播
+        var Edit ;// 编辑
+        var HomePage ;// 首页
+        var PreviousPage ;// 上一页
+        var NextPage ;// 下一页
+        var　Shadowe ;// 尾页
+        var InTotal ;// 共
+        var Page ;// 页
+        var NumberOfData ;// 条数据
+        var BuildingPage ; // 正在构建页面
+        var FailedToGetData ; // 获取数据失败
+        var DeleteMethod ;// 确定要删除吗
+        var DeleteLiveChannel ;// 删除直播频道
+        var DeleteLiveStream ;// 删除子直播流
+        var BeingDeleted ;// 正在删除
+        var AddWhileLiveList ; // 添加直播列表
+        var AddLiveChildStream ; // 添加直播子码流
+        var CarouselList ; // 轮播列表
+        var AddLiveSpots ; // 添加直播插播
+        var NoChoice ; // 您未选择任何直播频道
+        var SelectTheProtocolToGenerate_URL ; // 选择要生成URL的协议
+        var MobilePlay ; // 移动播放
+        var EditWhileLive ; // 编辑直播
+        var ForwardingFlowConfiguration ; // 转发流配置
+        var LiveIntroduction ; // 直播简介
+        var BeingLoaded ; // 正在加载
+        var Grouping;
+        var SelectVideo;
+        var DataNotEmpty;
+
+
+        var CurrentLive;
+        var TransferStatus;
+        var PlayList;
+        var Mode;
+        var TimeFrame;
+        var Name;
+        var VideoPath;
+        var Save;
+        var Timingmode;
+        var Manualmode;
+        var Close;
+        var Open;
+
+        $(function(){
+            Init_license(authorization);
+            var Languages = $.cookie('internationalization');
+            if ( Languages == null || Languages == "" )
+            {
+                Languages = 'zh' ;
+            }
+            jQuery.i18n.properties({
+                name : 'strings', //资源文件名称
+                path : '/i18n/', //资源文件路径
+                mode : 'map', //用Map的方式使用资源文件中的值
+                language : Languages,
+                encoding : 'UTF-8', // 必须写 否则中文乱码
+                callback : function() {//加载成功后设置显示内容
+                    $('#addLiveChannel').html($.i18n.prop('AddWhileLiveChannel'));
+                    $('#display').html($.i18n.prop('ShowAll'));
+                    $('#channel_1').html($.i18n.prop('CommonChannel'));
+                    $('#channel_2').html($.i18n.prop('CallbackChannel'));
+                    $('#channel_3').html($.i18n.prop('CarouselChannel'));
+                    $('#channel_4').html($.i18n.prop('TVChannel'));
+                    $('#search').val($.i18n.prop('Search'));
+                    $('#ListHeader_1').html($.i18n.prop('ChannelInformation'));
+                    $('#ListHeader_2').html($.i18n.prop('ChannelInformation'));
+                    $('#ListHeader_3').html($.i18n.prop('StatusBar'));
+                    $('#ListHeader_4').html($.i18n.prop('ChannelProperties'));
+                    $('#ListHeader_5').html($.i18n.prop('ViewingMode'));
+                    $('#ListHeader_6').html($.i18n.prop('Operation'));
+                    $("#playTime").html($.i18n.prop('CurrentLive'));
+
+                    Name = $.i18n.prop('Name');
+                    Type = $.i18n.prop('Type');
+                    VideoPath = $.i18n.prop('VideoPath');
+                    Encoder = $.i18n.prop('Encoder') ;
+                    PullFlow = $.i18n.prop('PullFlow') ;
+                    TranscodingSubStream = $.i18n.prop('TranscodingSubStream') ;
+                    InsertFlow = $.i18n.prop('InsertFlow') ;
+                    GeneralLive = $.i18n.prop('GeneralLive') ;
+                    ReturnBroadcastMode = $.i18n.prop('ReturnBroadcastMode') ;
+                    CarouselMode = $.i18n.prop('CarouselMode') ;
+                    GuidedMode = $.i18n.prop('GuidedMode') ;
+                    Manual = $.i18n.prop('Manual') ;
+                    Timing = $.i18n.prop('Timing') ;
+                    StreamingVideo = $.i18n.prop('StreamingVideo') ;
+                    NotLiveState = $.i18n.prop('NotLiveState') ;
+                    BeingBroadcastLive = $.i18n.prop('BeingBroadcastLive') ;
+                    Computer = $.i18n.prop('Computer') ;
+                    ComputerWatch = $.i18n.prop('ComputerWatch') ;
+                    MobilePhone = $.i18n.prop('MobilePhone') ;
+                    MobileViewing = $.i18n.prop('MobileViewing') ;
+                    Delete = $.i18n.prop('Delete') ;
+                    Alias = $.i18n.prop('Alias') ;
+                    ChannelType = $.i18n.prop('ChannelType') ;
+
+                    NoForwardingStream = $.i18n.prop('NoForwardingStream') ;
+                    IsForwardingFlow = $.i18n.prop('IsForwardingFlow') ;
+                    TS_NoFlow = $.i18n.prop('TS_NoFlow') ;
+                    TS_IsForwardingFlow = $.i18n.prop('TS_IsForwardingFlow') ;
+                    HLS_NoFlow = $.i18n.prop('HLS_NoFlow') ;
+                    HLS_IsForwardingFlow = $.i18n.prop('HLS_IsForwardingFlow') ;
+                    NoVideo = $.i18n.prop('NoVideo') ;
+                    BeingVideo = $.i18n.prop('BeingVideo') ;
+                    TimingVideo = $.i18n.prop('TimingVideo') ;
+                    TimingVideos = $.i18n.prop('TimingVideos') ;
+                    Carousel = $.i18n.prop('Carousel') ;
+                    VirtualLive = $.i18n.prop('VirtualLive') ;
+                    Director = $.i18n.prop('Director') ;
+                    StartRecording = $.i18n.prop('StartRecording') ;
+                    StopVideo = $.i18n.prop('StopVideo') ;
+                    //StopFlow = $.i18n.prop('StopFlow') ;
+                    // SendFlow = $.i18n.prop('SendFlow') ;
+                    Type = $.i18n.prop('Type') ;
+                    PushMode = $.i18n.prop('PushMode') ;
+                    DirectCurrentSource = $.i18n.prop('CurrentSource') ;
+                    Encoder = $.i18n.prop('Encoder') ;
+                    PullFlow = $.i18n.prop('PullFlow') ;
+                    PullMode = $.i18n.prop('PullMode') ;
+                    VideoMode = $.i18n.prop('VideoMode') ;
+                    StreamSize = $.i18n.prop('StreamSize') ;
+                    Bypass = $.i18n.prop('Bypass') ;
+                    ForwardingStream = $.i18n.prop('ForwardingStream') ;
+                    Subflow = $.i18n.prop('Subflow') ;
+                    AddSubStream = $.i18n.prop('AddSubStream') ;
+                    Spots = $.i18n.prop('Spots') ;
+                    LiveSpots = $.i18n.prop('LiveSpots') ;
+                    Edit = $.i18n.prop('Edit') ;
+                    HomePage = $.i18n.prop('HomePage') ;
+                    PreviousPage = $.i18n.prop('PreviousPage') ;
+                    NextPage = $.i18n.prop('NextPage') ;
+                    Shadowe = $.i18n.prop('Shadowe') ;
+                    InTotal = $.i18n.prop('InTotal') ;
+                    Page = $.i18n.prop('Page') ;
+                    NumberOfData = $.i18n.prop('NumberOfData') ;
+                    BuildingPage = $.i18n.prop('BuildingPage') ;
+                    FailedToGetData = $.i18n.prop('FailedToGetData') ;
+                    DeleteMethod = $.i18n.prop('DeleteMethod') ;
+                    DeleteLiveChannel = $.i18n.prop('DeleteLiveChannel') ;
+                    DeleteLiveStream = $.i18n.prop('DeleteLiveStream') ;
+                    BeingDeleted = $.i18n.prop('BeingDeleted') ;
+
+                    AddWhileLiveList = $.i18n.prop('AddWhileLiveList') ;
+                    AddLiveChildStream = $.i18n.prop('AddLiveChildStream') ;
+                    CarouselList = $.i18n.prop('CarouselList') ;
+                    AddLiveSpots = $.i18n.prop('AddLiveSpots') ;
+                    NoChoice = $.i18n.prop('NoChoice') ;
+                    SelectTheProtocolToGenerate_URL = $.i18n.prop('SelectTheProtocolToGenerate_URL') ;
+                    MobilePlay = $.i18n.prop('MobilePlay') ;
+                    EditWhileLive = $.i18n.prop('EditWhileLive') ;
+                    ForwardingFlowConfiguration = $.i18n.prop('ForwardingFlowConfiguration') ;
+                    LiveIntroduction = $.i18n.prop('LiveIntroduction') ;
+                    BeingLoaded = $.i18n.prop('BeingLoaded') ;
+                    Grouping = $.i18n.prop('Grouping');
+                    SelectVideo = $.i18n.prop('SelectVideo');
+                    DataNotEmpty = $.i18n.prop('DataNotEmpty');
+
+                    CurrentLive = $.i18n.prop('CurrentLive');
+                    TransferStatus = $.i18n.prop('TransferStatus');
+                    PlayList = $.i18n.prop('PlayList');
+                    Mode = $.i18n.prop('Mode');
+                    TimeFrame = $.i18n.prop('TimeFrame');
+                    Save = $.i18n.prop('Save');
+
+                    Open = $.i18n.prop('Open');
+                    Close = $.i18n.prop('Close');
+                    Manualmode = $.i18n.prop('Manualmode');
+                    Timingmode = $.i18n.prop('Timingmode');
+
+                }
+            });
+        });
+
+        (function($){
+            $.getUrlParam = function(name)
+            {
+                var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if (r!=null) return unescape(r[2]); return null;
+            }
+        })(jQuery);
+
+        String.prototype.replaceAll  = function(s1,s2){
+            return this.replace(new RegExp(s1,"gm"),s2);
+        }
+
+        var maxId = 0;
+        var total_count = 1;
+        $(function(){
+            $.ajaxSetup({ cache: false });
+            $(".btn").corner("3px");
+            build_whole_page1(4,total_count);
+            refreshStream();
+        })
+        var main_body_count =0;
+        function build_whole_page1(liveType,total_count)
+        {
+            var page_count = 0;
+            var page_size = 0;
+            var while_count = 0;
+            window.top.art.dialog({id:"wait",content:BuildingPage+"...<img width=20 src='images/loading.gif'>"});
+            $("#main_body").empty();
+            $("#item_body").empty();
+            $("#liveAlias").empty();
+            $("tr[live_item='liveItem']").hide();
+            $("tr[live_alias='live_alias']").hide();
+            $.ajax({
+                type:"GET",
+                url:locationHref+"/rest/admin/lives",//获取直播频道
+                async: false,
+                success:function(data)
+                {
+                    var obj = null;
+                    try
+                    {
+                        obj = data;
+                    }
+                    catch(e)
+                    {
+                        window.top.art.dialog({id:"mesg",content:FailedToGetData+"!",time:1});
+                        window.top.art.dialog({id:"wait"}).close();
+                        return ;
+                    }
+                    for(var i=0;i<obj.length;i++)
+                    {
+                        var right = obj[i]["right"];
+                        if(right == liveType)
+                        {
+                            var length = obj.length;
+                            var id = obj[i]['id'];
+                            var name = obj[i]['name'];
+                            var name1 = name.replaceAll("/","_");
+                            var appName = obj[i]['appName'];
+                            var alias = obj[i]['alias'];
+                            var createdDate = obj[i]['createdDate'];
+                            var dataPath = obj[i]["dataPath"];
+                            var liveStatus = obj[i]["liveStatus"];
+                            var publishStatus = obj[i]["publishStatus"];
+                            var recordEnabled = obj[i]["recordEnabled"];
+                            var recordStatus = obj[i]["recordStatus"];
+                            var recordType = obj[i]["recordType"];
+                            var enableHLS = obj[i]["enableHLS"];
+                            var enableTS = obj[i]["enableTS"];
+                            var tsAddress = obj[i]["tsAddress"];
+                            var format = obj[i]["format"];
+                            var tsStatus = obj[i]["tsStatus"];
+                            var hlsStatus = obj[i]["hlsStatus"];
+                            var push = obj[i]["push"];
+                            var lazyPull = obj[i]["lazyPull"];
+                            var recordAppend = obj[i]["recordAppend"];
+                            var flvKeyframe = obj[i]["flvKeyframe"];
+                            var playback = obj[i]["playback"];
+                            var keepPlaybackDays = obj[i]["keepPlaybackDays"];
+                            var liveProperty = obj[i]["liveProperty"];
+                            var ip = obj[i]["ip"];
+                            var type = obj[i]["type"];
+                            var outputMode = obj[i]["outputMode"];
+                            var intervalTime = obj[i]["intervalTime"];
+                            var timeToApend = obj[i]["timeToApend"];
+
+                            //获取转发流
+                            var forwardUrls = obj[i]["forwardUrls"];
+                            //获取子码流
+                            var outputs = obj[i]["outputs"];
+                            var listItem = obj[i]["listItem"];
+
+                            //初使用化流来源
+                            var stream_from = "";
+                            if(type == 0 && ip != "")
+                                stream_from = DirectCurrentSource+ ":"+Encoder+ ip ;
+                            else if(type == 1)
+                                stream_from = DirectCurrentSource+ ":"+PullFlow + ip;
+                            else if(type == 2)
+                                stream_from = DirectCurrentSource+ ":"+TranscodingSubStream +ip;
+                            else if(type == 3)
+                                stream_from = DirectCurrentSource+ ":"+InsertFlow +ip;
+                            //初使化频道类型
+                            var live_channel_type = "";
+
+                            if(right == 1 || right ==0)
+                                live_channel_type = GeneralLive;
+                            else if(right == 3)
+                                live_channel_type = ReturnBroadcastMode;
+                            else if(right == 4)
+                                live_channel_type = CarouselMode;
+                            else if(right == 5)
+                                live_channel_type = GuidedMode;
+                            //初使化录像方式
+                            var record_type = "";
+                            if(recordType == 0)
+                                record_type = Manual;
+                            else if(recordType ==1)
+                                record_type = Timing;
+                            else if(recordType ==2)
+                                record_type = StreamingVideo;
+                            //初使化正在直播图片显示状态
+                            var live_status = "";
+                            if(liveStatus)
+                                live_status = '<img src="images/icons/live.gif" title="'+BeingBroadcastLive+'">&nbsp';
+                            else
+                                live_status = '<img src="images/icons/live.png" title="'+NotLiveState+'">&nbsp';
+                            //初使化录像图片显示状态
+                            var record_status = "";
+                            if(recordStatus)
+                                record_status = '<img src="images/icons/record.gif" title="'+BeingVideo+'">&nbsp';
+                            else
+                                record_status = '<img src="images/icons/record.png" title="'+NoVideo+'">&nbsp';
+                            //初使化正在转发流图片显示状态以及正在转发流的列表
+                            var forward_urls = "";
+                            var forward_status = "";
+                            if(forwardUrls != '')
+                            {
+                                for(var j=0;j<forwardUrls.length;j++)
+                                {
+                                    var status = forwardUrls[j]["status"];
+                                    var furl = forwardUrls[j]["url"];
+                                    if(status == true)
+                                    {
+                                        forward_urls+=furl;
+                                        forward_urls+="&nbsp;&nbsp;";
+                                    }
+                                }
+                            }
+                            if(forward_urls != "")
+                                forward_status = '<img src="images/icons/stream.gif" title="'+IsForwardingFlow+':'+forward_urls+'">&nbsp';
+                            else
+                                forward_status = '<img src="images/icons/stream.png" title="'+NoForwardingStream+'">&nbsp';
+
+                            //初使化TS图片显示状态
+                            var ts_status = "";
+                            if(tsStatus)
+                                ts_status = '<img src="images/icons/ts.gif" title="'+TS_IsForwardingFlow+':'+tsAddress+'">&nbsp';
+                            else
+                                ts_status = '<img src="images/icons/ts.png" title="'+TS_NoFlow+'">&nbsp';
+                            //初使化HLS图片显示状态
+                            var hls_status = "";
+                            if(hlsStatus)
+                                hls_status = '<img src="images/icons/hls.gif" title="'+HLS_IsForwardingFlow+'">&nbsp';
+                            else
+                                hls_status = '<img src="images/icons/hls.png" title="'+HLS_NoFlow+'">&nbsp';
+
+                            //初使化定录功能
+                            var time_config = "";
+                            //在直播频道模式为 回播,轮播时不启用定录功能
+                            //录像方式设置为手动录像,有流即录像时不启用定录功能
+                            if(right != 3 & right != 4 && recordType != 2 && recordType != 0)
+                            {
+                                time_config = '<a href="javascript:;" onclick="timeConfig('+id+','+right+')"  class="ext_btn ext_btn_submit ext_btn_size" title="'+TimingVideos+'">'+TimingVideo+'</a>&nbsp';
+                            }
+
+
+                            var mvlist;
+                            var transfId;
+                            var items;
+                            var pom= "";
+                            var com ='';
+                            var mvName="";
+                            var startTime="";
+                            var stopTime="";
+                            var listId = "";
+                            var tranStatus = ""
+
+                            var week = -1;
+                            var date = "";
+                            var sub_week = -1;
+                            var sub_date = "";
+                            var whileType;
+                            var whileMode;
+                            itemstatus = '<img src="images/icons/live.gif" title="正在播放">&nbsp';
+                            if(listItem != '')
+                            {
+                                mvlist = listItem.mvlist;
+                                transfId = listItem.transfId;
+                                var tranStatus_mode = false;
+                                if(transfId == "-1" || transfId == "")
+                                {
+                                    tranStatus_mode = false;
+                                }
+                                else
+                                {
+                                    tranStatus_mode = true;
+                                }
+                                whileType = listItem.type;
+                                whileMode = listItem.mode;
+                                var tran = transferInfo(transfId);
+                                //var tran = listItem.vTransfer;
+                                if(tran == true)
+                                {
+                                    tranStatus = Open;
+                                }
+                                else
+                                {
+                                    tranStatus = Close;
+                                }
+                                if(mvlist != '')
+                                {
+                                    if(whileMode == 0)  //多列表
+                                    {
+                                        for(var x=0;x<mvlist.length;x++)
+                                        {
+                                            if(x == 0)
+                                            {
+                                                listId = mvlist[x].listId;
+                                                mvName = mvlist[x].name;
+                                                startTime = mvlist[x].startTime;
+                                                stopTime = mvlist[x].stopTime;
+                                                items = mvlist[x].items;
+                                                pom+= '<tr live_id="'+id+'" live_item="liveItem" name="first_mv'+id+'" style="display: none;">';
+                                                pom+= '<td colspan="1">';
+                                                pom+= '<div style="float: left">';
+                                                pom+= '<span class="id" id="td_1">'+Name+'</span>';
+                                                pom+= '<span class="ftstart" title="" id="type">'+Type+'</span>';
+                                                pom+= '<span class="fpath" id="video_path">'+VideoPath+'</span>';
+                                                pom+= '</div>';
+                                                pom+= '<div id="items">';
+                                                pom+= '<div id="main_body1">';
+                                                if(items != '')
+                                                {
+                                                    for(var y=0;y<items.length;y++)
+                                                    {
+                                                        var itemid = items[y].id;
+                                                        var itemname = items[y].name;
+                                                        if(itemname == undefined)
+                                                        {
+                                                            itemname = "";
+                                                        }
+                                                        var itemtype = items[y].type;
+                                                        var itemvalue = items[y].value;
+                                                        var itemvalue_str = itemvalue.substr(itemvalue.lastIndexOf("/")+1,itemvalue.length);
+                                                        var itemstatus = items[y].status;
+                                                        var itemduration = items[y].duration;
+                                                        var itemstarttime = items[y].startTime;
+                                                        var itemastoptime = items[y].stopTime;
+                                                        pom+= '<div class="item">';
+                                                        pom+= '<div class="f c">';
+                                                        pom+= '<input type="hidden" id="itemid" value="'+itemid+'" size="10" class="input-text" readonly="readonly"/>';
+                                                        pom+= '<input type="text" id="itemname" value="'+itemname+'" size="10" class="input-text"/>';
+                                                        pom+= '<input type="text" id="item_type" name="item_type" value="'+itemtype+'" size="10" class="input-text" readonly="readonly" style="background-color: #90a2bc;">';
+                                                        if(itemstatus == true)
+                                                        {
+                                                            pom+= '<input type="text" id="flv" name="flv" class="input-text" value="'+itemvalue_str+'" style="background-color: #7cd689;" readonly size="80">';
+                                                        }
+                                                        else
+                                                        {
+                                                            pom+= '<input type="text" id="flv" name="flv" class="input-text" value="'+itemvalue_str+'" readonly size="80">';
+                                                        }
+                                                        pom+= '<input type="text" id="item_duration" name="item_duration" readonly value="'+itemduration+'" size="10" class="input-text">';
+                                                        pom+= '<input type="button" class="button"  onclick="chooseDialog(this,\''+tran+'\',\''+itemvalue+'\')" id="SelectVideo"  value="'+SelectVideo+'" style="margin-left:18px;"/><br/>';
+                                                        pom+= '</div>';
+                                                        pom+= '<a href="javascript:;" onclick="m_add(this)" title="添加" id="add">+</a>';
+                                                        pom+= '<a href="javascript:;" onclick="m_remove(this)" title="移除" id="Remove">-</a>';
+                                                        pom+= '</div>';
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    pom+= '<div class="item">';
+                                                    pom+= '<div class="f c">';
+                                                    pom+= '<input type="hidden" id="itemid" value="0" size="10" class="input-text" readonly="readonly"/>';
+                                                    pom+= '<input type="text" id="itemname" value="" size="10" class="input-text"/>';
+                                                    pom+= '<input type="text" id="item_type" name="item_type" value="file" size="10" class="input-text" readonly="readonly" style="background-color: #90a2bc;">';
+                                                    pom+= '<input type="text" id="flv" name="flv" class="input-text" readonly value="" size="80">';
+                                                    pom+= '<input type="text" id="item_duration" name="item_duration" readonly value="" size="10" class="input-text">';
+                                                    pom+= '<input type="button" class="button"  onclick="chooseDialog(this,\''+tran+'\',\''+itemvalue+'\')" id="SelectVideo"  value="'+SelectVideo+'" style="margin-left:18px;"/><br/>';
+                                                    pom+= '</div>';
+                                                    pom+= '<a href="javascript:;" onclick="m_add(this)" title="添加" id="add">+</a>';
+                                                    pom+= '<a href="javascript:;" onclick="m_remove(this)" title="移除" id="Remove">-</a>';
+                                                    pom+= '</div>';
+                                                }
+                                                pom+= '</div>';
+                                                pom+= '</div>';
+                                                pom+= '</td>';
+                                                pom+= '</tr>';
+                                            }
+
+                                        }
+                                    }
+                                    else    //单列表
+                                    {
+                                        if(whileType == 0)//天循环
+                                        {
+                                            for(var x=0;x<mvlist.length;x++)
+                                            {
+                                                listId = mvlist[x].listId;
+                                                //week = mvlist[x].week;
+                                                //date = mvlist[x].date;
+                                                items = mvlist[x].items;
+                                                if(items != '')
+                                                {
+                                                    pom+= '<tr live_id="'+id+'" live_item="liveItem" name="first_mv'+id+'" style="display: none;">';
+                                                    pom+= '<td colspan="1">';
+                                                    pom+= '<div style="float: left">';
+                                                    pom+= '<span class="id" id="td_1">'+Name+'</span>';
+                                                    pom+= '<span class="id" id="">开始时间</span>';
+                                                    pom+= '<span class="id" id="">结束时间</span>';
+                                                    pom+= '<span class="ftstart" title="" id="type">'+Type+'</span>';
+                                                    pom+= '<span class="fpath" id="video_path">'+VideoPath+'</span>';
+                                                    pom+= '</div>';
+                                                    pom+= '<div id="items">';
+                                                    pom+= '<div id="main_body1">';
+                                                    for(var y=0;y<items.length;y++)
+                                                    {
+                                                        var itemid = items[y].id;
+                                                        var itemname = items[y].name;
+                                                        if(itemname == undefined)
+                                                        {
+                                                            itemname = "";
+                                                        }
+                                                        var itemtype = items[y].type;
+                                                        var itemvalue = items[y].value;
+                                                        var itemvalue_str = itemvalue.substr(itemvalue.lastIndexOf("/")+1,itemvalue.length);
+                                                        var itemduration = items[y].duration;
+                                                        var itemstarttime = items[y].startTime;
+                                                        var itemastoptime = items[y].stopTime;
+                                                        var itemstatus = items[y].status;
+                                                        pom+= '<div class="item">';
+                                                        pom+= '<div class="f c">';
+                                                        pom+= '<input type="hidden" id="itemid" value="'+itemid+'" size="10" class="input-text" readonly="readonly"/>';
+                                                        pom+= '<input type="text" id="itemname" value="'+itemname+'" size="10" class="input-text"/>';
+                                                        pom+= '<input type="text" id="itemStartTime" value="'+itemstarttime+'" size="10" class="input-text item-startTime"/>';
+                                                        pom+= '<input type="text" id="itemStopTime" value="'+itemastoptime+'" size="10" class="input-text item-stopTime"/>';
+                                                        pom+= '<input type="text" id="item_type" name="item_type" value="'+itemtype+'" size="10" class="input-text" readonly="readonly" style="background-color: #90a2bc;">';
+                                                        if(itemstatus == true)
+                                                        {
+                                                            pom+= '<input type="text" id="flv" name="flv" class="input-text" value="'+itemvalue_str+'" style="background-color: #7cd689;" readonly size="70">';
+                                                        }
+                                                        else
+                                                        {
+                                                            pom+= '<input type="text" id="flv" name="flv" class="input-text" value="'+itemvalue_str+'" readonly size="70">';
+                                                        }
+                                                        pom+= '<input type="hidden" id="flv" name="flv" class="input-text" value="'+itemvalue+'" readonly size="70">';
+                                                        pom+= '<input type="text" id="item_duration" name="item_duration" readonly value="'+itemduration+'" size="10" class="input-text item-time">';
+                                                        pom+= '<input type="button" class="button"  onclick="chooseDialog_simple(this,\''+tranStatus_mode+'\',\''+itemvalue+'\',\''+id+'\')" id="SelectVideo"  value="'+SelectVideo+'" style="margin-left:18px;"/><br/>';
+                                                        pom+= '</div>';
+                                                        pom+= '<a href="javascript:;" onclick="m_add_simple(this)" title="添加" id="add">+</a>';
+                                                        pom+= '<a href="javascript:;" onclick="m_remove_simple(this)" title="移除" id="Remove">-</a>';
+                                                        pom+= '</div>';
+                                                    }
+                                                    pom+= '</div>';
+                                                    pom+= '</div>';
+                                                    pom+= '</td>';
+                                                    pom+= '</tr>';
+                                                }
+                                            }
+                                        }
+                                        else if(whileType == 1)//周循环
+                                        {
+                                            for(var x=0;x<mvlist.length;x++)
+                                            {
+                                                var getweek = new Date().getDay();//0周日  1周一  2周二  3周三  4周四  5周五 6周六
+                                                week = mvlist[x].week;
+                                                if ((getweek == 0 && parseInt(week) == 6) || (getweek == (parseInt(week) + 1)))
+                                                {
+                                                    sub_week = mvlist[x].week;
+                                                    //date = mvlist[x].date;
+                                                    items = mvlist[x].items;
+                                                    listId = mvlist[x].listId;
+                                                    if (items != '') {
+                                                        pom += '<tr live_id="' + id + '" live_item="liveItem" name="first_mv' + id + '" style="display: none;">';
+                                                        pom += '<td colspan="1">';
+                                                        pom += '<div style="float: left">';
+                                                        pom += '<span class="id" id="td_1">' + Name + '</span>';
+                                                        pom += '<span class="id" id="">开始时间</span>';
+                                                        pom += '<span class="id" id="">结束时间</span>';
+                                                        pom += '<span class="ftstart" title="" id="type">' + Type + '</span>';
+                                                        pom += '<span class="fpath" id="video_path">' + VideoPath + '</span>';
+                                                        pom += '</div>';
+                                                        pom += '<div id="items">';
+                                                        pom += '<div id="main_body1">';
+
+                                                        for (var y = 0; y < items.length; y++) {
+                                                            var itemid = items[y].id;
+                                                            var itemname = items[y].name;
+                                                            if (itemname == undefined) {
+                                                                itemname = "";
+                                                            }
+                                                            var itemtype = items[y].type;
+                                                            var itemvalue = items[y].value;
+                                                            var itemvalue_str = itemvalue.substr(itemvalue.lastIndexOf("/") + 1, itemvalue.length);
+                                                            var itemduration = items[y].duration;
+                                                            var itemstarttime = items[y].startTime;
+                                                            var itemastoptime = items[y].stopTime;
+                                                            var itemstatus = items[y].status;
+                                                            pom += '<div class="item">';
+                                                            pom += '<div class="f c">';
+                                                            pom += '<input type="hidden" id="itemid" value="' + itemid + '" size="10" class="input-text" readonly="readonly"/>';
+                                                            pom += '<input type="text" id="itemname" value="' + itemname + '" size="10" class="input-text"/>';
+                                                            pom += '<input type="text" id="itemStartTime" value="' + itemstarttime + '" size="10" class="input-text item-startTime"/>';
+                                                            pom += '<input type="text" id="itemStopTime" value="' + itemastoptime + '" size="10" class="input-text item-stopTime"/>';
+                                                            pom += '<input type="text" id="item_type" name="item_type" value="' + itemtype + '" size="10" class="input-text" readonly="readonly" style="background-color: #90a2bc;">';
+                                                            if (itemstatus == true) {
+                                                                pom += '<input type="text" id="flv" name="flv" class="input-text" value="' + itemvalue_str + '" style="background-color: #7cd689;" readonly size="70">';
+                                                            }
+                                                            else {
+                                                                pom += '<input type="text" id="flv" name="flv" class="input-text" value="' + itemvalue_str + '" readonly size="70">';
+                                                            }
+                                                            pom += '<input type="hidden" id="flv" name="flv" class="input-text" value="' + itemvalue + '" readonly size="70">';
+                                                            pom += '<input type="text" id="item_duration" name="item_duration" readonly value="' + itemduration + '" size="10" class="input-text item-time">';
+                                                            pom += '<input type="button" class="button"  onclick="chooseDialog_simple(this,\'' + tranStatus_mode + '\',\'' + itemvalue + '\',\''+id+'\')" id="SelectVideo"  value="' + SelectVideo + '" style="margin-left:18px;"/><br/>';
+                                                            pom += '</div>';
+                                                            pom += '<a href="javascript:;" onclick="m_add_simple(this)" title="添加" id="add">+</a>';
+                                                            pom += '<a href="javascript:;" onclick="m_remove_simple(this)" title="移除" id="Remove">-</a>';
+                                                            pom += '</div>';
+                                                        }
+                                                        pom += '</div>';
+                                                        pom += '</div>';
+                                                        pom += '</td>';
+                                                        pom += '</tr>';
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else//不循环
+                                        {
+                                            for(var x=0;x<mvlist.length;x++)
+                                            {
+                                                var getdate = new Date();//0周日  1周一  2周二  3周三  4周四  5周五 6周六
+                                                date = mvlist[x].date;
+                                                if (getCurrentTime(getdate) == date)
+                                                {
+                                                    sub_date = mvlist[x].date;
+                                                    //week = mvlist[x].week;
+                                                    items = mvlist[x].items;
+                                                    listId = mvlist[x].listId;
+                                                    if (items != '') {
+                                                        pom += '<tr live_id="' + id + '" live_item="liveItem" name="first_mv' + id + '" style="display: none;">';
+                                                        pom += '<td colspan="1">';
+                                                        pom += '<div style="float: left">';
+                                                        pom += '<span class="id" id="td_1">' + Name + '</span>';
+                                                        pom += '<span class="id" id="">开始时间</span>';
+                                                        pom += '<span class="id" id="">结束时间</span>';
+                                                        pom += '<span class="ftstart" title="" id="type">' + Type + '</span>';
+                                                        pom += '<span class="fpath" id="video_path">' + VideoPath + '</span>';
+                                                        pom += '</div>';
+                                                        pom += '<div id="items">';
+                                                        pom += '<div id="main_body1">';
+
+                                                        for (var y = 0; y < items.length; y++) {
+                                                            var itemid = items[y].id;
+                                                            var itemname = items[y].name;
+                                                            if (itemname == undefined) {
+                                                                itemname = "";
+                                                            }
+                                                            var itemtype = items[y].type;
+                                                            var itemvalue = items[y].value;
+                                                            var itemvalue_str = itemvalue.substr(itemvalue.lastIndexOf("/") + 1, itemvalue.length);
+                                                            var itemduration = items[y].duration;
+                                                            var itemstarttime = items[y].startTime;
+                                                            var itemastoptime = items[y].stopTime;
+                                                            var itemstatus = items[y].status;
+                                                            pom += '<div class="item">';
+                                                            pom += '<div class="f c">';
+                                                            pom += '<input type="hidden" id="itemid" value="' + itemid + '" size="10" class="input-text" readonly="readonly"/>';
+                                                            pom += '<input type="text" id="itemname" value="' + itemname + '" size="10" class="input-text"/>';
+                                                            pom += '<input type="text" id="itemStartTime" value="' + itemstarttime + '" size="10" class="input-text item-startTime"/>';
+                                                            pom += '<input type="text" id="itemStopTime" value="' + itemastoptime + '" size="10" class="input-text item-stopTime"/>';
+                                                            pom += '<input type="text" id="item_type" name="item_type" value="' + itemtype + '" size="10" class="input-text" readonly="readonly" style="background-color: #90a2bc;">';
+                                                            if (itemstatus == true) {
+                                                                pom += '<input type="text" id="flv" name="flv" class="input-text" value="' + itemvalue_str + '" style="background-color: #7cd689;" readonly size="70">';
+                                                            }
+                                                            else {
+                                                                pom += '<input type="text" id="flv" name="flv" class="input-text" value="' + itemvalue_str + '" readonly size="70">';
+                                                            }
+                                                            pom += '<input type="hidden" id="flv" name="flv" class="input-text" value="' + itemvalue + '" readonly size="70">';
+                                                            pom += '<input type="text" id="item_duration" name="item_duration" readonly value="' + itemduration + '" size="10" class="input-text item-time">';
+                                                            pom += '<input type="button" class="button"  onclick="chooseDialog_simple(this,\'' + tranStatus_mode + '\',\'' + itemvalue + '\',\''+id+'\')" id="SelectVideo"  value="' + SelectVideo + '" style="margin-left:18px;"/><br/>';
+                                                            pom += '</div>';
+                                                            pom += '<a href="javascript:;" onclick="m_add_simple(this)" title="添加" id="add">+</a>';
+                                                            pom += '<a href="javascript:;" onclick="m_remove_simple(this)" title="移除" id="Remove">-</a>';
+                                                            pom += '</div>';
+                                                        }
+                                                        pom += '</div>';
+                                                        pom += '</div>';
+                                                        pom += '</td>';
+                                                        pom += '</tr>';
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            //初使化轮播功能
+                            var while_play = "";
+                            if(right == 4)
+                                while_play = '<a href="javascript:;" onclick="whilePlayList('+id+','+right+','+whileType+','+whileMode+')" class="ext_btn ext_btn_submit ext_btn_size">'+Carousel+'</a>&nbsp';
+                            //初使化导播功能
+                            var guid_play = "";
+                            if(right == 5)
+                                guid_play = '<a href="live_guid_play.html?id='+id+'" target="_blank"  class="ext_btn ext_btn_submit ext_btn_size" title="'+Director+'">'+Director+'</a>&nbsp';
+                            //初使化停录和开录按钮功能
+                            var record_button = "";
+                            //liveProperty 为1时候，允许推流，不允许发布，不允许录像；为3时候，不允许推流，不允许发布，不允许录像
+                            if(liveProperty !=1 && liveProperty != 3 && recordEnabled)
+                            {
+                                // 直播组为访谈,回播,轮播,定时时,录像按钮不能使用
+                                if(right != 3 && right != 4 && recordType!=1)
+                                {
+                                    if(recordStatus)
+                                        record_button = '<a href="javaScript:;" onclick="stop_record(\''+appName+'\',\''+name+'\',\''+right+'\')" class="ext_btn ext_btn_submit ext_btn_size">'+StopVideo+'</a>&nbsp';
+                                    else
+                                        record_button = '<a href="javaScript:;" onclick="start_record(\''+appName+'\',\''+name+'\',\''+right+'\')" class="ext_btn ext_btn_submit ext_btn_size">'+StartRecording+'</a>&nbsp';
+                                }
+                            }
+                            var replace_play = "";
+                            if(right != 4 & right != 5)
+                            {
+                                replace_play = '<a href="javascript:;" onclick="liveReplace('+id+','+right+')" class="ext_btn ext_btn_submit ext_btn_size" title="'+LiveSpots+'">'+Spots+'</a>&nbsp';
+                            }
+                            //分组
+                            var group_opr = '<a href="javascript:;" onclick="add_group('+id+','+right+')" class="ext_btn ext_btn_submit ext_btn_size" title="'+Grouping+'">'+Grouping+'</a>&nbsp';
+                            //初使化是否含有子码流
+                            var sub_stream = "";
+                            if(outputs != '')
+                            {
+                                for(var jj=0;jj<outputs.length;jj++)
+                                {
+                                    var width = outputs[jj]["width"];
+                                    var height = outputs[jj]["height"];
+                                    var frameRate = outputs[jj]["frameRate"];
+                                    var vBitRate = outputs[jj]["vBitRate"];
+                                    var sub_stream_name =  outputs[jj]["name"];
+                                    var sub_stream_liveStatus = outputs[jj]["liveStatus"];
+
+                                    var substream_create_type = "";
+                                    var substream_live_status = "";
+                                    if(outputMode == 0)
+                                    {
+                                        substream_create_type = Type+":"+PushMode+"&nbsp;......";
+                                    }
+                                    else
+                                    {
+                                        substream_create_type =  Type+':'+PullMode+'&nbsp;width:'+width+';height:'+height+';frameRate:'+frameRate+';bitRate:'+vBitRate+'';
+                                    }
+                                    if(sub_stream_liveStatus)
+                                        substream_live_status = '<img src="images/icons/live.gif" title="'+BeingBroadcastLive+'">&nbsp';
+                                    else
+                                        substream_live_status = '<img src="images/icons/live.png" title="'+NotLiveState+'">&nbsp';
+
+                                    sub_stream+='<tr height="16" id="40" >';
+                                    sub_stream+='<td  align="center">';
+                                    sub_stream+='<input title="'+sub_stream_liveStatus+'" value="'+id+'" type="checkbox" name="'+appName+'/'+name+'/'+sub_stream_name+'" id="box'+(i+1)+'_'+(jj+1)+'" onclick="show_pre(\''+(i+1)+'_'+(jj+1)+'\',\''+appName+'/'+name+'/'+sub_stream_name+'\')"/>';
+                                    sub_stream+='</td>';
+                                    sub_stream+='<td  align="left">	';
+                                    sub_stream+='<div style="float: left;">';
+                                    sub_stream+='└────';
+                                    sub_stream+='</div>';
+                                    sub_stream+='<div style="float: left;margin-left: 10px; color:#000;">';
+                                    sub_stream+='<p style="text-align: left;color: #145FA8;overflow:hidden; ">'+appName+'/'+name+'/'+sub_stream_name+'';
+                                    sub_stream+='</p>';
+                                    sub_stream+='</div>';
+                                    sub_stream+='</td>';
+                                    sub_stream+='<td  align="center">';
+                                    sub_stream+='<p style="text-align: left;">'+StreamSize+':<span id="stream_'+appName+'_'+name1+'_'+sub_stream_name+'">...</span></p>';
+                                    sub_stream+='</td>';
+                                    sub_stream+='<td  align="left" colspan="2">';
+                                    sub_stream+=''+substream_live_status+'';
+                                    sub_stream+=''+substream_create_type+'';
+                                    sub_stream+='</td>';
+                                    sub_stream+='<td  align="left">';
+                                    sub_stream+='<a target="_blank" href="play_live.html?id='+id+'&substream='+sub_stream_name+'&right='+right+'" id="show" title="'+ComputerWatch+'" class="ext_btn ext_btn_submit ext_btn_size">'+Computer+'</a>&nbsp';
+                                    sub_stream+='<a  href="javascript:;" onclick="mobilePlay(\''+id+'\',\''+sub_stream_name+'\')" title="'+MobileViewing+'" class="ext_btn ext_btn_submit ext_btn_size">'+MobilePhone+'</a>';
+                                    sub_stream+='<td  align="left">';
+                                    sub_stream+='<a href="javascript:;" onclick="delSubStream(\''+id+'\',\''+sub_stream_name+'\')" title="'+Delete+'" class="sp_a_but_cir sp_a_but_padding btn btn-danger">'+Delete+'</a>';
+                                    sub_stream+='</td>';
+                                    sub_stream+='</tr>';
+                                }
+                            }
+
+
+                            //原mvlist位置-------------------
+                            com+= ''+CurrentLive+':<span style="color: red;margin-right: 10px;" id="liveAlias">'+alias+'</span>';
+                            com+= ''+TransferStatus+':<span style="color: red;margin-right: 10px;" id="livetranStatus">'+tranStatus+'</span>';
+                            com+= ''+PlayList+':<span style="color: red;" id="liveMvName">'+mvName+'</span>';
+                            com+= '<input type="hidden" id="listId'+id+'" name="listId" size="5" readonly class="input-text" value="'+listId+'">';
+                            com+= '<div id="manualObj" style="display: inline;margin-left: 10px;">'+TimeFrame+':<span style="color: red;" id="time_start_stop">'+startTime+'-'+stopTime+'</span></div>';
+                            com+= '<input type="button" id="submitList" class="ext_btn ext_btn_success ext_btn_size" value="'+Save+'" style="margin-right: 10px;" onclick="submitItem('+id+','+sub_week+','+sub_date+','+whileMode+','+whileType+','+listId+')"></td>';
+                            $("#item_body").append(pom);
+
+                            if(while_count == (total_count-1)*5)
+                            {
+                                $("tr[name='first_mv"+id+"']").show();
+                                $("tr[name='live_alias"+id+"']").show();
+                                $("#liveAlias").append(alias);
+                                $("#playTime").html(com);
+                                changLive(id,alias,mvName,startTime,stopTime,whileMode,tranStatus,sub_week,sub_date,whileType,listId);
+                            }
+                            while_count++;
+
+                            //整个dom构建数
+                            var dom = '<tr>';
+                            dom+= '<td align="center">';
+                            dom+= '<input  title="'+liveStatus+'" value="'+id+'" type="checkbox" name="'+appName+'/'+name+'" id="box'+(i+1)+'" onclick="show_pre1('+(i+1)+',\''+appName+'/'+name+'\','+id+',\''+alias+'\',\''+mvName+'\',\''+startTime+'\',\''+stopTime+'\',\''+tranStatus+'\',\''+whileMode+'\')"/>';
+                            dom+= '</td>';
+                            dom+= '<td align="center" onclick="changLive('+id+',\''+alias+'\',\''+mvName+'\',\''+startTime+'\',\''+stopTime+'\',\''+whileMode+'\',\''+tranStatus+'\',\''+sub_week+'\',\''+sub_date+'\',\''+whileType+'\',\''+listId+'\')">';
+                            dom+= '<div style="float: left;">';
+                            dom+= '<img src="images/boardcast.jpg" width="40px" height="39px"  />';
+                            dom+= '</div>';
+                            dom+= '<div style="float: left;margin-left: 10px; color:#000;">';
+                            dom+= '<p style="text-align: left;color: #145FA8;overflow:hidden; ">'+appName+'/'+name+'</p>';
+                            dom+= '<p style="text-align: left;">'+Alias+':'+alias+'</p>';
+                            dom+= '<td align="left" onclick="changLive('+id+',\''+alias+'\',\''+mvName+'\',\''+startTime+'\',\''+stopTime+'\',\''+whileMode+'\',\''+tranStatus+'\',\''+sub_week+'\',\''+sub_date+'\',\''+whileType+'\',\''+listId+'\')">';
+                            dom+= '<p style="text-align: left;">'+VideoMode+':'+record_type+'</p>';
+                            dom+= '<p style="text-align: left;">'+StreamSize+':<span id="stream_'+appName+'_'+name1+'">...</span></p>	';
+                            dom+= '</td>';
+                            dom+= '<td  align="left" onclick="changLive('+id+',\''+alias+'\',\''+mvName+'\',\''+startTime+'\',\''+stopTime+'\',\''+whileMode+'\',\''+tranStatus+'\',\''+sub_week+'\',\''+sub_date+'\',\''+whileType+'\',\''+listId+'\')">';
+                            dom+= ''+live_status+'';
+                            dom+= ''+record_status+'';
+                            dom+= ''+forward_status+'';
+                            dom+= '<div name="ts_oper" style="display:none">';
+                            dom+= ''+ts_status+'';
+                            dom+= '</div>';
+                            dom+= '<div name="hls_oper" style="display:none">';
+                            dom+= ''+hls_status+'';
+                            dom+= '</div>';
+                            dom+= '</td>';
+                            dom+= '<td  align="left">';
+                            dom+= ''+time_config+'';
+                            dom+= '<div name="fw_oper" style="display:inline">';
+                            dom+= '<a href="javascript:;" onclick="furl('+id+','+right+')" class="ext_btn ext_btn_submit ext_btn_size" title="'+ForwardingStream+'">'+Bypass+'</a>&nbsp';
+                            dom+= '</div>';
+                            dom+= '<a href="javascript:;" onclick="addSubStream('+id+','+right+')" class="ext_btn ext_btn_submit ext_btn_size" title="'+AddSubStream+'">'+Subflow+'</a>&nbsp';
+                            dom+= ''+replace_play+'';
+                            dom+= ''+while_play+'';
+                            dom+= ''+guid_play+'';
+                            //dom+= ''+group_opr+'';
+                            dom+= '</td>';
+                            dom+= '<td  align="left">';
+                            dom+= '<a target="_blank" href="play_live.html?id='+id+'&right='+right+'" id="show" title="'+ComputerWatch+'" class="ext_btn ext_btn_submit ext_btn_size">'+Computer+'</a>&nbsp';
+                            dom+= '<a  href="javascript:;" onclick="mobilePlay('+id+')" title="'+MobileViewing+'" class="ext_btn ext_btn_submit ext_btn_size" title="'+MobileViewing+'">'+MobilePhone+'</a>&nbsp';
+                            dom+= '</td>';
+                            dom+= '<td  align="left">';
+                            dom+= '<a href="javascript:;" onclick="delDialog('+id+')" title="'+Delete+'" class="ext_btn_red ext_btn_size">'+Delete+'</a>&nbsp';
+                            dom+= '<a href="javascript:;" onclick="editDialog('+id+','+right+')" id="edit" title="'+Edit+'" class="sp_a_but_cir sp_a_but_padding btn btn-info">'+Edit+'</a>&nbsp';
+                            dom+= ''+record_button+'';
+                            dom+= '</td>';
+                            dom+= '</tr>';
+                            dom+= ''+sub_stream+'';
+                            if(liveType == 0)
+                            {
+                                if(i>=(total_count-1)*5 && i<(total_count-1)*5+5)
+                                {
+                                    $("#main_body").append(dom);
+                                }
+                            }
+                            else if(right == liveType)
+                            {
+                                if(page_size>=(total_count-1)*5 &&  page_size <(total_count-1)*5+5)
+                                {
+                                    $("#main_body").append(dom);
+                                }
+                                page_size++;
+                            }
+
+                        }
+                    }
+
+                    /*page_size = 100;
+                     total_count = 2;*/
+                    page_count = Math.ceil(page_size/5);
+                    var page_dom = '<div class="pager Library_Page" >';
+                    page_dom+='<span class="Library_Page_1">'+InTotal+'<font color="red">'+page_count+'</font>&nbsp;'+Page+',<font color="red">'+page_size+'</font>'+NumberOfData+'&nbsp;&nbsp;</span>';
+                    page_dom+='<a href="javascript:void(0)"  onclick="build_whole_page1('+liveType+',1)">'+HomePage+'</a>';
+                    if(total_count-1>0)
+                    {
+                        page_dom+='<a href="javascript:void(0)" onclick="build_whole_page1('+liveType+','+(total_count-1)+')">'+PreviousPage+'</a>';
+                    }
+                    var page_arr = calculatePageIndex(total_count,page_count,5);
+                    for(var z=page_arr[0];z<=page_arr[1];z++)
+                    {
+                        if(z == total_count)
+                        {
+                            page_dom+='<a href="javascript:void(0)" style="background-color: #3EAFE0" class="Library_Page_NoPage">'+z+'</a>';
+                        }
+                        else
+                        {
+                            page_dom+='<a href="javascript:void(0)" onclick="build_whole_page1('+liveType+','+z+')" class="Library_Page_NoPage">'+z+'</a>';
+                        }
+                    }
+                    if(total_count+1<=page_count)
+                    {
+                        page_dom+='<a href="javascript:void(0)" onclick="build_whole_page1('+liveType+','+(total_count+1)+')">'+NextPage+'</a>';
+                    }
+                    page_dom+='<a href="javascript:void(0)" onclick="build_whole_page1('+liveType+','+page_count+')">'+Shadowe+'</a>';
+                    page_dom+='</div>';
+
+                    $("#pager_outer").html(page_dom);
+                }
+            })
+            setTimeout(function(){
+                init_license();
+            },300)
+        }
+
+
+        function transferInfo(transfId)
+        {
+            var tranStatus;
+            $.ajax({
+                type: "GET",
+                async:false,
+                url: locationHref+"/rest/admin/transfer/"+transfId+"/transferPlan",//获取转码方案
+                success: function(transferData)
+                {
+                    var tranObj = transferData;
+                    if(tranObj != '')
+                    {
+                        tranStatus = tranObj.vTransfer;
+                    }
+                },
+                error:function()
+                {
+
+                }
+            })
+
+            return tranStatus;
+        }
+
+
+        function changeTimeForWhile(sendId)
+        {
+
+            $($("#item_body").find("tr[name='first_mv"+sendId+"']").find("div").get(1)).find(".item").each(function(e) {
+            //$("#main_body1").find(".item").each(function(i){
+                var startTime = $(this).find("div").find(".item-startTime").val();
+                var mediaTime= $(this).find("div").find(".item-time").val();
+                if(mediaTime != null && mediaTime != "")
+                {
+                    var stopTime = formatSecond(parseSecond(startTime) + parseSecond(mediaTime));
+                    $(this).find("div").find(".item-stopTime").val(stopTime);
+                    $(this).next(".item").find("div").find(".item-startTime").val(stopTime);
+                }
+            })
+        }
+
+        //选择视频
+        function chooseDialog(obj,status,path_url)
+        //function chooseDialog(obj,path_url)
+        {
+            window.top.art.dialog
+            (
+                    {
+                        id:'choose',iframe:"/media_while_choose.html?type="+status+"&path="+encodeURI(encodeURI(path_url)), title:SelectVideo, width:'800', height:'520', lock:true
+                        //id:'choose',iframe:"/media_while_choose.html?path="+path_url, title:'选择视频', width:'800', height:'520', lock:true
+                    },
+                    function()
+                    {
+                        var d = window.top.art.dialog({id:'choose'}).data.iframe;
+                        var form = d.document.getElementById('dosubmit');
+                        form.click();
+                        var mediapath = d.document.getElementById('media_path').value;
+                        var check_flag = d.document.getElementById('check_flag').value;
+                        if (mediapath != "" && mediapath != null && check_flag == "true") {
+                            $(obj).prev("input").val(mediapath)
+                            window.top.art.dialog({id:'choose'}).close()
+                        }
+
+                        return false;
+                    },
+                    function()
+                    {
+                        window.top.art.dialog({id:'24fsf5'}).close()
+                    }
+            );void(0);
+        }
+        function chooseDialog_simple(obj,status,path_url,id)
+        //function chooseDialog(obj,path_url)
+        {
+            window.top.art.dialog
+            (
+                    {
+                        id:'choose',iframe:"/media_while_choose.html?type="+status+"&path="+path_url, title:SelectVideo, width:'800', height:'520', lock:true
+                        //id:'choose',iframe:"/media_while_choose.html?path="+path_url, title:'选择视频', width:'800', height:'520', lock:true
+                    },
+                    function()
+                    {
+                        var d = window.top.art.dialog({id:'choose'}).data.iframe;
+                        var form = d.document.getElementById('dosubmit');
+                        form.click();
+                        var mediapath = d.document.getElementById('media_path').value;
+                        var check_flag = d.document.getElementById('check_flag').value;
+                        var mediatime = d.document.getElementById('media_time').value;
+                        if (mediapath != "" && mediapath != null && check_flag == "true") {
+                            var itemvalue_show = mediapath.substr(mediapath.lastIndexOf('/')+1,mediapath.length);
+                            var itemname_show = itemvalue_show.substr(0,itemvalue_show.lastIndexOf('.'))
+                            $(obj).prev("input").prev("input").prev("input").prev("input").prev("input").prev("input").prev("input").val(itemname_show);//别名显是
+                            $(obj).prev("input").prev("input").prev("input").val(itemvalue_show);//显示视频路径赋值
+                            $(obj).prev("input").prev("input").val(mediapath);//视频全路径赋值
+                            $(obj).prev("input").val(mediatime);//视频时间
+                            changeTimeForWhile(id);
+                            window.top.art.dialog({id:'choose'}).close()
+                        }
+
+                        return false;
+                    },
+                    function()
+                    {
+                        window.top.art.dialog({id:'24fsf5'}).close()
+                    }
+            );void(0);
+        }
+
+        //轮播跳转方法
+        function whilePlayList(id,type,whileType,whileMode)
+        {
+            setcookie("WeekSave","Init",30);
+            whileType = parseInt(whileType); //0,天循环  1,周循环  2,不循环
+            whileMode = parseInt(whileMode); //0,多列表  1,单列表
+            if(type == 4)//lunbo
+            {
+                if(whileMode == 0)//多列表,只针对天循环
+                {
+                    window.top.art.dialog
+                    (
+                            {
+                                id:'lunbo',iframe:'live_while_play_list.html?id='+id+'&right='+type+'&whileType='+whileType+'&whileMode='+whileMode, title:CarouselList, width:'1000', height:'600', lock:true,window:'top'
+                            },
+                            function(){
+                                window.top.art.dialog({id:'lunbo'}).close()
+                                window.location.reload();
+                                return false;
+                            },
+                            function()
+                            {
+                                window.top.art.dialog({id:'lunbo'}).close()
+                            }
+                    );void(0);
+                }
+                else//单列表
+                {
+                    if(whileType == 0)//天循环
+                    {
+                       /* window.top.art.dialog
+                        (
+                                {
+                                    id:'lunbo2',iframe:'live_while_play_day.html?id='+id+'&right='+type+'&whileType='+whileType+'&whileMode='+whileMode, title:CarouselList, width:'1000', height:'600', lock:true,window:'top'
+                                },
+                                function(){
+                                    var d = window.top.art.dialog({id:'lunbo2'}).data.iframe;
+                                    d.addSimpleWhile();
+                                    window.top.art.dialog({id:'lunbo2'}).close()
+                                    window.location.reload();
+                                    return false;
+                                },
+                                function()
+                                {
+                                    window.top.art.dialog({id:'lunbo2'}).close()
+                                }
+                        )*/
+                        redirect('live_while_play_day.html?id='+id+'&right='+type+'&whileType='+whileType+'&whileMode='+whileMode);
+                    }
+                    else if(whileType == 1)//周循环
+                    {
+                        redirect('live_while_play_simpleweek.html?id='+id+'&right='+type+'&whileType='+whileType+'&whileMode='+whileMode);
+                    }
+                    else//不循环
+                    {
+                        redirect('live_while_play_week.html?id='+id+'&right='+type+'&whileType='+whileType+'&whileMode='+whileMode);
+                    }
+                }
+            }
+        }
+
+        var change_time;
+        //点击切换频道任务
+        function changLive(id,alias,mvName,start,stop,sendwhileMode,tranStatus,sendweek,senddate,sendwhileType,sendListId)
+        //function changLive(id,alias,manual,mvName,start,stop)
+        {
+            //alert("changeLive"+id+"====="+sendweek+"====="+senddate+"====="+sendwhileMode+"====="+sendwhileType);
+            if(change_time != undefined)
+            {
+                clearInterval(change_time);
+            }
+            //alert(id+"-"+alias+"-"+manual+"-"+mvName+"-"+start+"-"+stop);
+            $("#liveAlias").empty();
+            $("#liveMancal").empty();
+            $("#liveMvName").empty();
+            $("#time_start_stop").empty();
+            $("#livetranStatus").empty();
+
+            $("tr[live_item='liveItem']").hide();
+
+            $("tr[name='first_mv"+id+"']").show();
+            $("#liveAlias").append(alias);
+            $("#liveMvName").append(mvName);
+            $("#time_start_stop").append(start+'-'+stop);
+            $("#livetranStatus").append(tranStatus);
+            $("#submitList").removeAttr("onclick");
+            $("#submitList").unbind( "click" )
+            $("#submitList").bind("click", function(){
+                submitItem(id,sendweek,senddate,sendwhileMode,sendwhileType,sendListId);
+            });
+
+            change_time= setInterval(function()
+            {
+                if(sendwhileMode == 0 || sendwhileMode == "0")//多列表
+                {
+                    $.ajax({
+                        type:"GET",
+                        url:locationHref+"/rest/admin/lives/"+id,//获取一个直播频道
+                        async: false,
+                        success:function(data)
+                        {
+                            var  obj = data;
+                            var listItem = obj.listItem;
+                            var mvlist = listItem.mvlist;
+                            if(mvlist != null)
+                            {
+                                for(var a=0;a<mvlist.length;a++)
+                                {
+                                    var items = mvlist[a].items;
+                                    if(items != null)
+                                    {
+                                        for(var i=0;i<items.length;i++)
+                                        {
+                                            var status = items[i].status;
+                                            var item_id = items[i].id;
+                                            if(status == true)
+                                            {
+                                                $($("#item_body").find("tr[name='first_mv"+id+"']").find("div").get(1)).find(".item").each(function(e) {
+                                                    var dom_item_id = "";
+                                                    $(this).find("input").each(function (f) {
+                                                        if(f == 0)
+                                                        {
+                                                            dom_item_id = $(this).val();
+                                                            //alert(dom_item_id);
+                                                        }
+                                                        if(f == 3)
+                                                        {
+                                                            if(dom_item_id != "" && item_id == dom_item_id)
+                                                            {
+                                                                $($("#item_body").find("tr[name='first_mv"+id+"']").find("div").get(1)).find(".item").each(function(e) {
+                                                                    $(this).find("input[name='flv']").each(function (k) {
+                                                                        $(this).css("background-color","");
+                                                                    })
+                                                                })
+                                                                $(this).css("background-color","#7cd689");
+                                                            }
+                                                        }
+                                                    })
+                                                })
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        error:function(data)
+                        {
+                            var errorObj = data;
+                            var status = data.status;
+                            var statusText = data.statusText
+                            if(status == 401 || status == 400)
+                            {
+                                top.location.href = "login.html";
+                            }
+                            else if(status == 409)
+                            {
+                                window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                            }
+                        }
+                    })
+                }
+                else//单列表
+                {
+                    $.ajax({
+                        type:"GET",
+                        url:locationHref+"/rest/admin/lives/"+id+"/lunbo/oneList",//获取一个直播频道
+                        success: function (data) {
+                            var obj = data;
+                            var mvlist = obj.mvlist;
+                            for(var a=0;a<mvlist.length;a++)
+                            {
+                                var week = mvlist[a].week;
+                                var date = mvlist[a].date;
+                                var flag = true;
+                                var items = mvlist[a].items;
+                                if(sendwhileType == 1 || sendwhileType == "1")
+                                {
+                                    var getweek = new Date().getDay();//0周日  1周一  2周二  3周三  4周四  5周五 6周六
+                                    if ((getweek == 0 && parseInt(week) == 6) || (getweek == (parseInt(week) + 1)))
+                                    {
+                                        flag = true;
+                                    }
+                                    else
+                                    {
+                                        flag = false;
+                                    }
+                                }
+                                else if(sendwhileType == 2 || sendwhileType == "2")
+                                {
+                                    var getdate = new Date();//0周日  1周一  2周二  3周三  4周四  5周五 6周六
+                                    if (getCurrentTime(getdate) == date)
+                                    {
+                                        flag = true;
+                                    }
+                                    else
+                                    {
+                                        flag = false;
+                                    }
+                                }
+                                if(flag)
+                                {
+                                    if(items != null)
+                                    {
+                                        for(var i=0;i<items.length;i++)
+                                        {
+                                            var status = items[i].status;
+                                            var item_id = items[i].id;
+                                            if(status == true)
+                                            {
+                                                $($("#item_body").find("tr[name='first_mv"+id+"']").find("div").get(1)).find(".item").each(function(e) {
+                                                    var dom_item_id = "";
+                                                    $(this).find("input").each(function (f) {
+                                                        if(f == 0)
+                                                        {
+                                                            dom_item_id = $(this).val();
+                                                            //alert(dom_item_id);
+                                                        }
+                                                        if(f == 5)
+                                                        {
+                                                            if(dom_item_id != "" && item_id == dom_item_id)
+                                                            {
+                                                                $($("#item_body").find("tr[name='first_mv"+id+"']").find("div").get(1)).find(".item").each(function(e) {
+                                                                    $(this).find("input[name='flv']").each(function (k) {
+                                                                        $(this).css("background-color","");
+                                                                    })
+                                                                })
+                                                                $(this).css("background-color","#7cd689");
+                                                            }
+                                                        }
+                                                    })
+                                                })
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        error:function(data)
+                        {
+                            var errorObj = data;
+                            var status = data.status;
+                            var statusText = data.statusText
+                            if(status == 401 || status == 400)
+                            {
+                                top.location.href = "login.html";
+                            }
+                            else if(status == 409)
+                            {
+                                window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                            }
+                        }
+                    })
+                }
+            },5000);
+        }
+
+        //小窗口
+        function show_pre1(id,alias,id1,alias1,manual,mvName,start,stop,mode)
+        {
+            //var rtmp_ip = $("#rtmp_ip").val();
+            var rtmp_ip = window.location.hostname;
+            var rtmp_port = $("#rtmp_port").val();
+
+            var flag = $("#box"+id).attr("checked");
+            if(flag)
+            {
+                var url = "rtmp://"+rtmp_ip+":"+rtmp_port+"/"+alias;
+                build_dom(url,id,alias);
+
+                setTimeout(function(){
+                    $("#box"+id).attr("checked","true")
+                },100)
+                changLive(id1,alias1,mvName,start,stop,mode,manual);
+
+
+            }
+            else
+            {
+                $("#outer"+id).remove();
+
+                setTimeout(function(){
+                    $("#box"+id).removeAttr("checked")
+                },100)
+            }
+        }
+
+        //操作
+        function m_add(obj)
+        {
+            var maxId = 0;
+
+            $(obj).parent("div").parent("div").find(".item").each(function(a){
+                var this_id = parseInt($($(this).find("input").get(0)).val());
+                if(this_id>maxId)
+                {
+                    maxId = this_id;
+                }
+            })
+            maxId += 1;
+
+            var content = $(obj).parent("div").parent("div").find(".item").first().clone();
+            $(content).find("input[type='text']").val("");
+            $(content).find("input[type='text'][name='item_type']").val("file");
+            $(content).find("input[type='button']").show();
+            $(content).find("input[id='itemid']").val(maxId);
+            $(content).find("input[id='flv']").attr("style","");
+            $(content).find("input[id='flv']").css("background-color","");
+            $(obj).parent("div").after(content);
+        }
+        function m_add_simple(obj)
+        {
+            var maxId = 0;
+
+            $(obj).parent("div").parent("div").find(".item").each(function(a){
+                var this_id = parseInt($($(this).find("input").get(0)).val());
+                if(this_id>maxId)
+                {
+                    maxId = this_id;
+                }
+            })
+            maxId += 1;
+
+            var content = $(obj).parent("div").parent("div").find(".item").first().clone();
+            $(content).find("input[type='text']").val("");
+            $(content).find("input[type='text'][name='item_type']").val("file");
+            $(content).find("input[type='button']").show();
+            $(content).find("input[id='itemid']").val(maxId);
+            $(content).find("input[id='flv']").attr("style","");
+            $(content).find("input[id='flv']").css("background-color","");
+            $(obj).parent("div").after(content);
+        }
+        function m_remove(obj)
+        {
+            var id =  $(obj).parent("div").parent("div").attr("id");
+            //if(id != "templ")
+            {
+                $(obj).parent("div").remove();
+            }
+        }
+        function m_remove_simple(obj)
+        {
+            var id =  $(obj).parent("div").parent("div").attr("id");
+            //if(id != "templ")
+            {
+                $(obj).parent("div").remove();
+            }
+        }
+        //提交轮播数据
+        function submitItem(sendId,sendWeek,sendDate,sendWhileMode,sendWhileType,sendListId)
+        {
+            sendWeek = parseInt(sendWeek);
+            //alert("提交"+sendId+"====="+sendWeek+"====="+sendDate+"====="+sendWhileMode+"====="+sendWhileType);
+            if (sendWhileMode == 0 || sendWhileMode == "0")//多列表
+            {
+                var live;
+                $.ajax({
+                    type:"GET",
+                    url:locationHref+"/rest/admin/lives/"+sendId,//获取一个直播频道
+                    success:function(data)
+                    {
+                        live = data;
+                        var flag = true;
+                        //频道
+                        var alias = live.alias;
+                        var appName = live.appName;
+                        var autoClosePull = live.autoClosePull;
+                        var dataPath = live.dataPath;
+                        var delaySeconds = live.delaySeconds;
+                        var enableHLS = live.enableHLS;
+                        var enableRTP = live.enableRTP;
+                        var enableTS = live.enableTS;
+                        var flvKeyframe = live.flvKeyframe;
+                        var format = live.format;
+                        var forwardUrls = live.forwardUrls;
+                        var hlsStatus = live.hlsStatus;
+                        var liveId = live.id;
+                        var intervalTime = live.intervalTime;
+                        var ip = live.ip;
+                        var keepPlaybackDays = live.keepPlaybackDays;
+                        var lazyPull = live.lazyPull;
+                        var liveProperty = live.liveProperty;
+                        var liveStatus = live.liveStatus;
+                        var name = live.name;
+                        var outputMode = live.outputMode;
+                        var outputs = live.outputs;
+                        var playback = live.playback;
+                        var publishStatus = live.publishStatus;
+                        var push = live.push;
+                        var recordAppend = live.recordAppend;
+                        var recordEnabled = live.recordEnabled;
+                        var recordStatus = live.recordStatus;
+                        var recordType = live.recordType;
+                        var replaces = live.replaces;
+                        var right = live.right;
+                        var splitFileSize = live.splitFileSize;
+                        var timeToApend = live.timeToApend;
+                        var tsAddress = live.tsAddress;
+                        var tsStatus = live.tsStatus;
+                        var type1 = live.type;
+                        var pullStream = live.pullStream;
+                        var transferInfo = live.transferInfo;
+                        var objPlayItem = live.listItem;
+                        var transfId = objPlayItem.transfId;
+                        var whileType = objPlayItem.type;
+                        var whileMode = objPlayItem.mode;
+                        var mvlist = objPlayItem.mvlist;
+                        var newMvlist = new Array();
+                        if(mvlist != null)
+                        {
+                            for(var i=0;i<mvlist.length;i++)
+                            {
+                                if(i == 0)
+                                {
+                                    var mvID = mvlist[i].listId;
+                                    var mvName = mvlist[i].name;
+                                    var startTime = mvlist[i].startTime;
+                                    var stopTime = mvlist[i].stopTime;
+                                    var items = mvlist[i].items;
+                                    var itemId,itemname,type,value,media_time;
+                                    var arr = new Array();
+                                    $($("#item_body").find("tr[name='first_mv"+sendId+"']").find("div").get(1)).find(".item").each(function(e) {
+                                        $(this).find("input").each(function (f) {
+                                            if (f == 0) {
+                                                itemId = $(this).val();
+                                            }
+                                            else if (f == 1) {
+                                                itemname = $(this).val();
+                                            }
+                                            else if (f == 2) {
+                                                type = $(this).val();
+                                            }
+                                            else if (f == 3) {
+                                                value = $(this).val();
+                                                if(value == "")
+                                                {
+                                                    flag = false;
+                                                }
+                                            }
+                                            else if(f == 4)
+                                            {
+                                                media_time = $(this).val();
+                                            }
+                                        })
+                                        var item = new ItemsWhilePlay(itemId,itemname,type,value,media_time);
+                                        arr[e] = item;
+                                    })
+                                    newMvlist[i] = new MvList(mvID,mvName,startTime,stopTime,arr);
+                                }
+                                else
+                                {
+                                    var mvID = mvlist[i].listId;
+                                    var mvName = mvlist[i].name;
+                                    var startTime = mvlist[i].startTime;
+                                    var stopTime = mvlist[i].stopTime;
+                                    var items = mvlist[i].items;
+                                    var mvListInfo = new MvList(mvID,mvName,startTime,stopTime,items);
+                                    newMvlist[i] = mvListInfo;
+                                }
+                            }
+                        }
+                        var listItem = new PlayWhileItem(newMvlist,transfId,whileType,whileMode);
+                        var liveInfo = new LiveChannelInfoWhileDel(alias,appName,autoClosePull,dataPath,delaySeconds,enableHLS,enableRTP,enableTS,flvKeyframe,format,forwardUrls,hlsStatus,liveId,intervalTime,ip,keepPlaybackDays,lazyPull,liveProperty,liveStatus,
+                                name,outputMode,outputs,playback,publishStatus,push,recordAppend,recordEnabled,recordStatus,recordType,replaces,right,splitFileSize,timeToApend,tsAddress,tsStatus,type1,listItem,pullStream,transferInfo);
+                        //alert(stringify(liveInfo));
+                        if(flag == true && arr.length != 0)
+                        {
+                            $.ajax({
+                                type:"PUT",
+                                url:locationHref+"/rest/admin/lives/"+liveId,//编辑一个直播频道
+                                async: false,
+                                data: stringify(liveInfo),
+                                dataType:"json",
+                                success:function(data)
+                                {
+                                    window.location.href="/live_while_list.html";
+                                },
+                                error:function(data)
+                                {
+                                    var errorObj = data;
+                                    var status = data.status;
+                                    var statusText = data.statusText
+                                    if(status == 401 || status == 400)
+                                    {
+                                        top.location.href = "login.html";
+                                    }
+                                    else if(status == 409)
+                                    {
+                                        window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                                    }
+                                }
+                            })
+                        }
+                        else
+                        {
+                            window.top.art.dialog({id:"tishi",content:DataNotEmpty+"!",time:1});
+                            window.location.reload();
+                        }
+                    },
+                    error:function(data)
+                    {
+                        var errorObj = data;
+                        var status = data.status;
+                        var statusText = data.statusText
+                        if(status == 401 || status == 400)
+                        {
+                            top.location.href = "login.html";
+                        }
+                        else if(status == 409)
+                        {
+                            window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                        }
+                    }
+                })
+            }
+            else //单列表
+            {
+                $.ajax({
+                    type:"GET",
+                    url:locationHref+"/rest/admin/lives/"+sendId+"/lunbo/oneList",//获取一个直播频道
+                    success: function (data) {
+                        var flag = true;
+                        var listItem = data;
+                        var transfId = listItem.transfId;
+                        var whileType = listItem.type;
+                        var whileMode = listItem.mode;
+                        var mvlist = listItem.mvlist;
+
+                        var itemId,itemname,itemStartTime,itemStopTime,type,value,media_time;
+                        var arr = new Array();
+                        $($("#item_body").find("tr[name='first_mv"+sendId+"']").find("div").get(1)).find(".item").each(function(e) {
+                            $(this).find("input").each(function (f) {
+                                if (f == 0) {
+                                    itemId = $(this).val();
+                                }
+                                else if (f == 1) {
+                                    itemname = $(this).val();
+                                }
+                                else if (f == 2) {
+                                    itemStartTime = $(this).val();
+                                }
+                                else if (f == 3) {
+                                    itemStopTime = $(this).val();
+                                }
+                                else if (f == 4) {
+                                    type = $(this).val();
+                                }
+                                else if (f == 6) {
+                                    value = $(this).val();
+                                    if(value == "")
+                                    {
+                                        flag = false;
+                                    }
+                                }
+                                else if(f == 7)
+                                {
+                                    media_time = $(this).val();
+                                }
+                            })
+                            //var item = new ItemsWhilePlay(itemId,itemname,type,value,media_time);
+                            var items = new ItemsWhilePlayInfo(itemId,itemname,type,value,media_time,itemStartTime,itemStopTime);
+                            arr[e] = items;
+                        })
+
+                        var mvlistInfo;
+                        if(arr != "")
+                        {
+                            mvlist = new Array();
+                            if(sendWhileType == 0 || sendWhileType == "0")//天
+                            {
+                                if(sendListId != undefined && sendListId != "")
+                                {
+                                    mvlistInfo = new MvListTime(-1, '', false, arr,sendListId);
+                                }
+                                else
+                                {
+                                    mvlistInfo = new MvListTime_noId(-1, '', false, arr);
+                                }
+
+                            }
+                            else if(sendWhileType == 1 || sendWhileType == "1")//周
+                            {
+                                if(sendListId != undefined && sendListId != "")
+                                {
+                                    mvlistInfo = new MvListTime(sendWeek, '', false, arr,sendListId);
+                                }
+                                else
+                                {
+                                    mvlistInfo = new MvListTime_noId(sendWeek, '', false, arr);
+                                }
+                            }
+                            else
+                            {
+                                if(sendListId != undefined && sendListId != "")
+                                {
+                                    mvlistInfo = new MvListTime(-1, sendDate, false, arr, sendListId);
+                                }
+                                else
+                                {
+                                    mvlistInfo = new MvListTime_noId(-1,sendDate,false,arr);
+                                }
+                            }
+                            mvlist[0] = mvlistInfo;
+                        }
+                        else
+                        {
+                            mvlist = new Array();
+                            if(sendWhileType == 0 || sendWhileType == "0")//天
+                            {
+                                mvlistInfo = new MvListTime(-1, '', false, arr,sendListId);
+                            }
+                            else if(sendWhileType == 1 || sendWhileType == "1")//周
+                            {
+                                mvlistInfo = new MvListTime(sendWeek, '', false, arr,sendListId);
+                            }
+                            else
+                            {
+                                mvlistInfo = new MvListTime(-1, sendDate, false, arr, sendListId);
+                            }
+                            mvlist[0] = mvlistInfo;
+                        }
+                        var listItemSub = new PlayWhileItem(mvlist,transfId,whileType,whileMode);
+                        //alert(stringify(listItemSub))
+
+                        if(arr == "")
+                        {
+                            $.ajax({
+                                type:"PUT",
+                                url:locationHref+"/rest/admin/lives/"+sendId+'/lunbo/oneList',//编辑一个直播频道
+                                async: false,
+                                data: stringify(listItemSub),
+                                dataType:"json",
+                                success:function(data)
+                                {
+                                    window.location.reload();
+                                },
+                                error:function(data)
+                                {
+                                    var errorObj = data;
+                                    var status = data.status;
+                                    var statusText = data.statusText
+                                    if(status == 401 || status == 400)
+                                    {
+                                        top.location.href = "login.html";
+                                    }
+                                    else if(status == 409)
+                                    {
+                                        window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                                    }
+                                }
+
+                            });
+                        }
+                        else
+                        {
+                            if(flag == true && arr.length != 0)
+                            {
+                                $.ajax({
+                                    type:"PUT",
+                                    url:locationHref+"/rest/admin/lives/"+sendId+'/lunbo/oneList',//编辑一个直播频道
+                                    async: false,
+                                    data: stringify(listItemSub),
+                                    dataType:"json",
+                                    success:function(data)
+                                    {
+                                        window.location.reload();
+                                    },
+                                    error:function(data)
+                                    {
+                                        var errorObj = data;
+                                        var status = data.status;
+                                        var statusText = data.statusText
+                                        if(status == 401 || status == 400)
+                                        {
+                                            top.location.href = "login.html";
+                                        }
+                                        else if(status == 409)
+                                        {
+                                            window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                                        }
+                                    }
+
+                                });
+                            }
+                            else
+                            {
+                                window.top.art.dialog({id:"tishi",content:DataNotEmpty+"!",time:1});
+                            }
+                        }
+                    },
+                    error:function(data)
+                    {
+                        var errorObj = data;
+                        var status = data.status;
+                        var statusText = data.statusText
+                        if(status == 401 || status == 400)
+                        {
+                            top.location.href = "login.html";
+                        }
+                        else if(status == 409)
+                        {
+                            window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                        }
+                    }
+                })
+            }
+        }
+
+        //删除频道
+        function delDialog(id)
+        {
+            window.top.art.dialog
+            (
+                    {
+                        id:'del',content:DeleteMethod, title:DeleteLiveChannel,lock:true
+                    },
+                    function(){
+                        delLive(id);
+                        window.top.art.dialog({id:'del'}).close()
+                        window.location.href = '/live_while_list.html';
+                        return true;
+                    },
+                    function()
+                    {
+                        window.top.art.dialog({id:'del'}).close()
+                    }
+            )
+        }
+        function delLive(id)
+        {
+            $.ajax({
+                type:"DELETE",
+                url:locationHref+"/rest/admin/lives/"+id,//删除一个直播频道
+                async: false,
+                success:function(data) {
+
+                },
+                error:function(data)
+                {
+                    var errorObj = data;
+                    var status = data.status;
+                    var statusText = data.statusText
+                    if(status == 401 || status == 400)
+                    {
+                        top.location.href = "login.html";
+                    }
+                    else if(status == 409)
+                    {
+                        window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                    }
+                }
+
+            })
+        }
+
+        //删除频道子流
+        function delSubStream(id,name)
+        {
+            window.top.art.dialog
+            (
+                    {
+                        id:'del',content:DeleteMethod, title:DeleteLiveStream,lock:true
+                    },
+                    function(){
+                        window.top.art.dialog({id:"delLive",content:BeingDeleted+"...<img width=20 src='images/loading.gif'>"});
+                        delSub(id,name);
+                        window.top.art.dialog({id:'del'}).close()
+                        return true;
+                    },
+                    function()
+                    {
+                        window.top.art.dialog({id:'del'}).close()
+                    }
+            )
+        }
+        function delSub(id,dname)
+        {
+            var liveId = id;
+            $.ajax({
+                type:"GET",
+                url:locationHref+"/rest/admin/lives/"+liveId,//获取一个直播频道
+                async: false,
+                success: function (data) {
+                    var live = data;
+                    var arr = new Array();
+                    var outputs = live.outputs;
+                    var c_count = 0;
+                    if(outputs.length >0 && outputs != "null")
+                    {
+                        for(var i=0;i<outputs.length;i++)
+                        {
+                            if(outputs[i].name != dname)
+                            {
+                                arr[c_count]=outputs[i];
+                                c_count++;
+                            }
+                        }
+                    }
+
+                    $.ajax({
+                        type:"PUT",
+                        url:locationHref+"/rest/admin/lives/"+liveId+"/subStream",//删除一个直播频道子流
+                        async: false,
+                        data: stringify(arr),
+                        dataType:"json",
+                        success:function(data)
+                        {
+                            window.top.art.dialog({id:'delLive'}).close();
+                            window.location.href = '/live_while_list.html';
+                        },
+                        error:function()
+                        {
+                            window.top.art.dialog({id:'delLive'}).close();
+                        }
+
+                    });
+                },
+                error:function(data)
+                {
+                    var errorObj = data;
+                    var status = data.status;
+                    var statusText = data.statusText
+                    if(status == 401 || status == 400)
+                    {
+                        top.location.href = "login.html";
+                    }
+                    else if(status == 409)
+                    {
+                        window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                    }
+                }
+            })
+        }
+
+        function init_license()
+        {
+            $.ajax({
+                type: "GET",
+                url: locationHref+"/rest/admin/system/getLicenseInfo",//获取授权
+                success:function(data)
+                {
+                    var obj = null;
+                    try
+                    {
+                        obj = data;
+                    }
+                    catch(e)
+                    {
+                        return ;
+                    }
+
+                    var ts_enable = obj.supportTS;
+                    var hls_enable = obj.supportHLS;
+                    var fw_enable = obj.supportRtmpFW;
+
+                    ts_hls_oper(ts_enable,hls_enable,fw_enable);
+
+                },
+                error:function(data)
+                {
+                    var errorObj = data;
+                    var status = data.status;
+                    var statusText = data.statusText
+                    if(status == 401 || status == 400)
+                    {
+                        top.location.href = "login.html";
+                    }
+                    else if(status == 409)
+                    {
+                        window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+                    }
+                }
+            })
+
+            window.top.art.dialog({id:"wait"}).close();
+
+        }
+
+        function ts_hls_oper(ts_enable,hls_enable,fw_enable)
+        {
+            if(ts_enable == true)
+            {
+                $("div[name='ts_oper']").css("display","inline");
+            }
+            if(hls_enable == true)
+            {
+                $("div[name='hls_oper']").css("display","inline");
+            }
+            if(fw_enable == true)
+            {
+                $("div[name='fw_oper']").css("display","inline");
+            }
+        }
+
+    </script>
+
+    <title></title>
+</head>
+<body id="live_body_id" scroll="yes" style="overflow-y: scroll;">
+<div class="pad-10">
+    <div class="content-menu ib-a  line-x" >
+        <a href="javascript:;" onclick="addDialog(4)" class="ext_btn ext_btn_success" id="addLiveChannel">添加轮播频道</a>
+        <div style="float: right;">
+            <input type="text" class="input-text" name="key" id="key" value="">
+            <input type="button" value="搜索" class="button" onclick="search_while_media(4,total_count)" id="search">
+        </div>
+    </div>
+    <form name="myform" id="myform" action="" method="post" class="">
+        <div class="table-list">
+            <table width="100%" class="list_table" id="mytable">
+                <thead>
+                <tr>
+                    <th align="center" width="5%"><input type="checkbox" id="selector" onclick="create_all_show()"/></th>
+                    <th align="left" width="24%" id="ListHeader_1">频道信息</th>
+                    <th align="left" width="13%" id="ListHeader_2">频道信息</th>
+                    <th align="left" width="19%" id="ListHeader_3">状态栏</th>
+                    <th align="left" width="18%" id="ListHeader_4">频道属性</th>
+                    <th align="left" width="9%" id="ListHeader_5">观看方式</th>
+                    <th align="left" width="12%" id="ListHeader_6">操 作</th>
+                </tr>
+                </thead>
+                <tbody id="main_body">
+
+                </tbody>
+            </table>
+
+
+        </div><!-- end table-list -->
+        <div>
+            <div style="float: right;" id="pager_outer">
+
+            </div>
+        </div>
+        <div class="table-list" >
+            <table width="100%" class="list_table">
+                <thead>
+                    <tr>
+                        <th align="left" width="500px" style="min-width: 420px;" id="playTime">当前频道:<span style="color: red;" id="liveAlias" ></span></th>
+                    </tr>
+                </thead>
+                <tbody id="item_body" style="background-color: #D4E7F0;">
+
+                </tbody>
+            </table>
+        </div>
+    </form>
+</div><!-- end pad-10 -->
+<div id="preshow" style="padding:10px;">
+</div>
+<br><br><br>
+
+</body>
+</html>
+

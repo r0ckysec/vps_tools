@@ -1,0 +1,546 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<link href="css/index.css" rel="stylesheet" type="text/css" />
+	<link href="css/dialog.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/main.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/jquery.qrcode.min.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<!--<script type="text/javascript" src="js/live.js"></script>-->
+	<script type="text/javascript" src="js/player.js" charset="utf-8"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<style type="text/css">
+		.AddPlayIco
+		{
+			height:100px;
+			width:200px;
+			float:left;
+			margin-left: 30px;
+			cursor: pointer
+		}
+		.playImage
+		{
+			width: 30px;
+			height: 30px;
+			position: relative;
+			left: 90px;
+			bottom: 85px;
+			cursor: pointer;
+		}
+
+		.title button/*a*/
+		{
+			color:white;
+			font-size:20px;
+			font-weight: bold;
+			margin-right:10px;
+			display:inline
+		}
+
+		.title button:hover /*a:hover*/
+		{
+			background-color: #BDBDBD;
+		}
+	</style>
+	<script type="text/javascript">
+		var host = window.location.hostname;
+		var port = window.location.port;
+		var http_port = window.location.port;
+		var errorImg = "/images/video.jpg";
+		var Media ;
+		var InTotal ;
+		var Page ;
+		var NumberOfData ;
+		var HomePage ;
+		var PreviousPage ;
+		var NextPage ;
+		var Shadowe ;
+		var VideoPlay ;
+		var ReferenceAddress ;
+		var currentPage =1;
+		var currentPageCount =20;
+		var clickAppName;
+		var clickLiveName;
+		//国际化
+		$(function(){
+			var Languages = $.cookie('internationalization');
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					//window.location.title = $.i18n.prop('LiveVideo');
+					$('#Welcome').html($.i18n.prop('WelcomeTips'));
+					$('#live').html($.i18n.prop('LiveVideo'));
+					$('#media').html($.i18n.prop('VideoOn_Demand'));
+					$('#live_admin').html($.i18n.prop('AdministratorAccess'));
+					$('#live_list_title').html($.i18n.prop('LiveChannelList'));
+					$('#LivePreview').html($.i18n.prop('LivePreview')+':<span id="status">live/live1</span>');
+					$('#Search_1').val($.i18n.prop('Search'));
+					$('#Search_2').val($.i18n.prop('Search'));
+					$('#image').attr("title",$.i18n.prop('Media'));
+					$("#video_list_title").html($.i18n.prop('VODChannelList')) ;
+					$("#OnDemandPreview").html($.i18n.prop('OnDemandPreview')+':<span id="status1">data</span>') ;
+					$("#address").html($.i18n.prop('CompanyAddress')) ;
+					$("#changeHtml5").html($.i18n.prop('changeHtml5')) ;
+					$("#help").html($.i18n.prop('StartHelp')) ;
+					Media = $.i18n.prop('Media') ;
+					InTotal = $.i18n.prop('InTotal') ;
+					Page = $.i18n.prop('Page') ;
+					NumberOfData = $.i18n.prop('NumberOfData') ;
+					HomePage = $.i18n.prop('HomePage') ;
+					PreviousPage = $.i18n.prop('PreviousPage') ;
+					NextPage = $.i18n.prop('NextPage') ;
+					Shadowe = $.i18n.prop('Shadowe') ;
+					VideoPlay = $.i18n.prop('VideoPlay') ;
+					ReferenceAddress = $.i18n.prop('ReferenceAddress') ;
+				}
+			});
+		});
+
+		//初始加载
+		$(function(){
+			init_whole();
+		})
+		var timeOutTime;
+		function init_whole()
+		{
+			init_live_list();
+			getFirst();
+			//clearTimeout(timeOutTime);
+			$("#divLive").mouseover(function(){
+				$("#androidQro").show();
+			}).mouseout(function(){
+				$("#androidQro").hide();
+			})
+		}
+
+		function getFirst()
+		{
+			timeOutTime = setTimeout(function(){
+				var id = $("#first_liveId").val();
+				var liveStatus = $("#first_liveStatus").val();
+				var hls = $("#first_hls").val();
+				var app = $("#first_app").val();
+				var live = $("#first_live").val();
+				var streamType = $("#first_streamType").val();
+				var first_playurl = $("#first_playurl").val();
+
+				embed_flash_player1(id,first_playurl,'98%','500px','',app,live,streamType);
+			},1000);
+		}
+
+		//直播流播放
+		function embed_flash_player1(id,play_url,width,height,player_type,app,live,streamType)
+		{
+			$("#center").find("object").remove();
+			$("#div2").hide();
+			$("#div1").hide();
+			$("#list").hide();
+			$("#searchKey").hide();
+
+			var dom = "";
+
+			//初使化播放器的宽度和高度
+			if(width == undefined || height == undefined ||width == "" || height == "" )
+			{
+				width = 400;
+				height = 300;
+			}
+			//初使化播放器的类型
+			if(player_type == undefined || player_type =="")
+			{
+				player_type = "ckplayer";
+			}
+			else
+			{
+				player_type = "default";
+
+			}
+
+			//初使化swfpath路径
+			var ckplayer_swfpath = "";
+			var default_swfpath = "";
+			if(port == "")
+			{
+				ckplayer_swfpath = "http://"+host+"/ckplayer/ckplayer.swf";
+				default_swfpath = "http://"+host+"/StrobeMediaPlayback.swf";
+			}
+			else
+			{
+				ckplayer_swfpath = "http://"+host+":"+port+"/ckplayer/ckplayer.swf";
+				default_swfpath = "http://"+host+":"+port+"/StrobeMediaPlayback.swf";
+			}
+			//初使化CKPLAYER播放视频类型
+			var videoType = 1;//flv is 1,mp4 is 2
+			if(play_url.indexOf(".mp4") != -1)
+			{
+				videoType = 2;
+			}
+			if(play_url.indexOf(".flv") == -1)
+			{
+				videoType = 2;
+			}
+			if(streamType == 3)
+			{
+				streamType = "vod";
+			}
+			else
+			{
+				streamType = "live";
+			}
+			if(player_type == "ckplayer" )
+			{
+				dom = get_ckplayer_dom(play_url,ckplayer_swfpath,videoType,width,height);
+			}
+			else if(player_type == "default")
+			{
+				dom = get_default_player_dom(play_url,default_swfpath,streamType,width,height);
+			}
+			$("#center").prepend(dom);
+			$("#status").html(app+"/"+live);
+		}
+
+		function replace_url(url)
+		{
+			var host = window.location.hostname;
+			var before = url.substr(0,url.indexOf("//")+2);
+			var after = "";
+
+			if(url.substring(before.length).lastIndexOf(":") != -1)
+			{
+				after = url.substr(url.lastIndexOf(":"));
+			}
+			else
+			{
+				var temp = url.substring(before.length);
+				after = temp.substring(temp.indexOf("/"));
+			}
+
+			return (before+host+after);
+		}
+
+		//直播操作
+		var firstLiveId;
+		var firstliveStatus;
+		var firsthlsStatus;
+		var firstApp;
+		var firstname;
+		var firstright;
+		var first_playurl;
+		function init_live_list(channel_type)
+		{
+			$.ajax({
+				type: "GET",
+				url: locationHref + "/rest/client/lives",//获取直播频道
+				//处理CGI返回的JSON数据
+				success: function(data)
+				{
+					//解析JSON
+					var obj = data;
+					if(obj == null )
+					{
+						return ;
+					}
+					//在页面中输出dom
+					for(var i=0;i<obj.length;i++)
+					{
+						//获取JSON对象的每个属性的值
+						var id = obj[i]['id'];
+						var alias = obj[i]['alias'];
+						var appName = obj[i]['appName'];
+						var name = obj[i]['name'];
+						var streamType = obj[i]['right']+"";
+						var liveStatus = obj[i].liveStatus;
+						var hls = obj[i].hlsStatus;
+						var rtmp_port = obj[i].rtmpPort;
+						var liveStatus1;
+						var playurl = "rtmp://"+host+":"+rtmp_port+"/"+appName+"/"+name;
+						//创建DOM
+						if(liveStatus == true)
+						{
+							liveStatus1 = "<div style='float: right; margin-right: 20px;'><img src='/images/icons/live.gif' width='20' id='image' /></div>";
+						}
+						else
+						{
+							liveStatus1 = "<div style='float: right; margin-right: 20px;'><img src='/images/icons/live.png' width='20' id='image' /></div>";
+						}
+						//创建DOM
+						/*var domContent = "<li><a href='javascript:void(0)' style='float: left' onclick=write_live('"+appName+"','"+name+"','"+streamType+"','"+id+"','"+hls+"','"+liveStatus+"')>";*/
+						var domContent = "<li><a href='javascript:void(0)' style='float: left' onclick=embed_flash_player1('"+id+"','"+playurl+"','98%','500px','','"+appName+"','"+name+"','"+streamType+"')>";
+						domContent += ""+alias+"</a>"+liveStatus1+"<div style='margin-right: 10px;float: right;'><a href='javascript:void(0)' style='color: blue;' onclick=init_right('"+appName+"','"+name+"','"+currentPage+"','"+currentPageCount+"') >"+Media+"</a></div></li>";
+						$("#live_list").append(domContent);
+					}//end for
+
+
+					firstLiveId = obj[0].id;
+					firstliveStatus = obj[0].liveStatus;
+					firsthlsStatus = obj[0].hlsStatus;
+					firstApp = obj[0].appName;
+					firstname = obj[0].name;
+					firstright = obj[0].right;
+					var play_url = "rtmp://"+host+":"+rtmp_port+"/"+firstApp+"/"+firstname;
+					first_playurl = play_url;
+
+					$("#first_liveId").val(obj[0].id);
+					$("#first_liveStatus").val(obj[0].liveStatus);
+					$("#first_hls").val(obj[0].hlsStatus);
+					$("#first_app").val(obj[0].appName);
+					$("#first_live").val(obj[0].name);
+					$("#first_streamType").val(obj[0].right);
+					$("#first_playurl").val(play_url);
+				}
+			});//ajax end
+		}
+
+
+		var imgName = "../images/video.jpg";
+		var sendName ="";
+		//初始化录制媒体
+		function init_right(appname,livename,currentPage,currentPageCount)
+		{
+			$("#clickMediaApp").val(appname);
+			$("#clickMediaLive").val(livename);
+			clickAppName = $("#clickMediaApp").val();
+			clickLiveName = $("#clickMediaLive").val();
+			var page_count = 0;
+			var page_size = 0;
+			var total_count = 1;
+			sendName = appname +"/"+ livename;
+			$("#searchKey").show();
+			$("#center").find("object").remove();
+			$("#main_body1").empty();
+			$("#div2").show();
+			var show_type = $("#div1").css("display");
+			if(show_type == "block")
+			{
+				$("#div1").show();
+				$("#div2").hide();
+			}
+			else
+			{
+				$("#div1").hide();
+				$("#div2").show();
+			}
+			//initMeida(currentPage,currentPageCount);
+
+
+			var wholeUrl;
+			var find = $("#key").val();
+			if(find != "")
+			{
+				wholeUrl = locationHref + "/rest/client/recordTypes/"+appname+"/"+livename+"/"+currentPageCount+"/"+currentPage+"/"+find+"/search";
+			}
+			else
+			{
+				wholeUrl = locationHref + "/rest/client/recordTypes/"+appname+"/"+livename+"/"+currentPageCount+"/"+currentPage+"";
+			}
+
+			$.ajax({
+				type: "GET",
+				url: wholeUrl,
+				success: function (data) {
+					var rightObj = data;
+					var items = rightObj.items;
+					var total_count = currentPage;
+					var length = rightObj.total;
+					for(var i=0;i<items.length;i++)
+					{
+						var fileName = items[i].name;
+						var status = items[i].status;
+						var httpUrl = items[i].httpUrl;
+						var rtmpUrl = items[i].rtmpUrl;
+						var duration = "未知";
+						var name = fileName.substr(fileName.lastIndexOf("/")+1,fileName.length);
+						if(status == "1" || status == "2" || status == "3" || status == "4" || status == "6" || status == "7")
+						{
+							var dom1 = '<div class="AddPlayIco">';
+							dom1+= '<div style="width:135px;height:75px;"><img src="data:image/jpeg;base64,'+imgName+'" id="image" title="'+name+'" width="200" height="85" onclick="play(\''+httpUrl+'\')" onerror=\'this.src="'+errorImg+'"\'></div>';
+							dom1+= '<div style="width:185px;height:14px;overflow: hidden;">'+name+'</div>';
+							dom1+= '<div style="color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); opacity: 0.5; position: relative;left: 145px;  bottom: 30px; width: 53px;height:15px;">'+duration+'</div>';
+							dom1+= '<div class="playImage" onclick="play(\''+httpUrl+'\')"><img src="/images/img_icon.png" bottom="80px" width="30" height="30"/></div>';
+							dom1+= '</div>';
+							$("#main_body1").prepend(dom1);
+							$("#status").html(sendName);
+							if(find != "")
+							{
+								page_size++;
+							}
+							else
+							{
+								page_size = length;
+							}
+
+						}
+						else if(status == "0")
+						{
+							$("#status").html(sendName);
+						}
+
+					}
+					var sendApp = sendName.substr(0,sendName.indexOf("/"));
+					var sendLive = sendName.substr(sendName.indexOf("/")+1,sendName.length);
+					page_count = Math.ceil(page_size/20);// page_count :多少页 page_size :多少条 total_count :当前页
+					var page_dom = '<div class="pager Library_Page" >';
+					page_dom+='<span class="Library_Page_1">'+InTotal+'<font color="red">'+page_count+'</font>&nbsp;'+Page+',<font color="red">'+page_size+'</font>'+NumberOfData+'&nbsp;&nbsp;</span>';
+					page_dom+='<a href="javascript:void(0)"  onclick="init_right(\''+sendApp+'\',\''+sendLive+'\',1,20)">'+HomePage+'</a>';
+					if(total_count-1>0)
+					{
+						page_dom+='<a href="javascript:void(0)" onclick="init_right(\''+sendApp+'\',\''+sendLive+'\','+(total_count-1)+',20)">'+PreviousPage+'</a>';
+					}
+					var page_arr = calculatePageIndex(total_count,page_count,5);
+					for(var i=page_arr[0];i<=page_arr[1];i++)
+					{
+						if(i == total_count)
+						{
+							page_dom+='<a href="javascript:void(0)" style="background-color: #3EAFE0" class="Library_Page_NoPage">'+i+'</a>';
+						}
+						else
+						{
+							page_dom+='<a href="javascript:void(0)" onclick="init_right(\''+sendApp+'\',\''+sendLive+'\','+i+',20)" class="Library_Page_NoPage">'+i+'</a>';
+						}
+					}
+					if(total_count+1<=page_count)
+					{
+						page_dom+='<a href="javascript:void(0)" onclick="init_right(\''+sendApp+'\',\''+sendLive+'\','+(total_count+1)+',20)">'+NextPage+'</a>';
+					}
+					page_dom+='<a href="javascript:void(0)" onclick="init_right(\''+sendApp+'\',\''+sendLive+'\','+page_count+',20)">'+Shadowe+'</a>';
+					page_dom+='</div>';
+					$("#pager_outer1").html(page_dom);
+				}
+			})
+		}
+
+		//播放点播
+		function play(url)
+		{
+			if(url.indexOf("rtmp://")==-1)
+			{
+				url = encodeURI(encodeURI(url));
+			}
+			var play_url = url;//not user ckplayer play rtmp
+			var dom = embed_flash_player(play_url,600,400);
+			var share_dom = init_share_player(play_url)
+
+			var whole_dom = dom+share_dom;
+			window.top.art.dialog
+			(
+					{
+						id:'playVideo',content:whole_dom, title:VideoPlay, width:'600', height:'400', lock:true
+					},
+					function(){
+						var d = window.top.art.dialog({id:'playVideo'}).data;
+						alert(d);
+						return false;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'playVideo'}).close()
+					}
+			);void(0);
+
+		}
+		//登录
+		function loginPage()
+		{
+			window.open("/login.html","_blank");
+		}
+		//flash|html5切换
+		function changeHtml5()
+		{
+			window.open("/pc_index_flv_html.html","_self");
+		}
+	</script>
+<title id="information">视频直播</title>
+</head>
+<body style="background: transparent url('images/apic17756.jpg') repeat scroll 0px 0px;">
+<!--<div id="divLive" style="position: fixed; bottom: 60%; right: 5px; cursor: pointer; width: 50px; height:50px; background: #458fce; border-bottom: 2px solid #fff; z-index: 1000 ">
+	<img src="images/phone.png" height="50px" width="50px">
+
+	<div id="androidQro" style="position: absolute; right: 40px;top: 20px; z-index: 99999; display: none;">
+		<div id="httpip" height="100px" width="100px"><div></div>手机扫码观看</div>
+	</div>
+</div>-->
+<div class="container">
+	<!--最大的DIV开始-->
+	<div class="title">
+		<img src="images/001.jpg" />&nbsp;&nbsp;&nbsp;&nbsp;<b id="Welcome">欢迎使用北极星通直播系统</b>
+		<div style="float:right; display:inline;">
+			<button id="changeHtml5" class="sp_but_cir sp_but_padding btn btn-primary" onclick="changeHtml5()">
+				html5播放
+			</button>
+			<button id="live_admin" class="sp_but_cir sp_but_padding btn btn-primary" onclick="loginPage()">+
+				管理员入口
+			</button>
+		</div>
+ 	</div>
+	<div id="media_live">
+		<div class="left">
+			<!--左侧导航开始-->
+			<h3 id="live_list_title">直播频道列表</h3>
+			<ul id="live_list" style="overflow-y: scroll;height:510px;">
+			</ul>
+		</div>
+		<!--左侧导航结束 -->
+		<!--右侧内容开始-->
+		<div class="right">
+			<h3 id="LivePreview">直播预览:<span id="status">live/live1</span>
+			</h3>
+			<!--width:720px; height:400px-->
+			<div id="center" style="margin-left:10px;">
+				<div id="searchKey" style="display: none;margin-left:10px;">
+					<input type="text" class="input-text" name="key" id="key" value="">
+					<input type="button" value="搜索" class="button" onclick="init_right(clickAppName,clickLiveName,currentPage,currentPageCount)" id="Search_1" >
+				</div>
+				<div id="div2" style="display:none;">
+					<div id="main_body1" style="height:480px;margin-top: 10px;overflow-y: scroll;">
+						<div style="height:100px;float:left">
+							<div ><img src="" id="image" title="媒体"></div>
+							<div style="width:135px;overflow: hidden"></div>
+						</div>
+					</div>
+					<div>
+						<div style="float: right;margin-right: 20px;" id="pager_outer1">
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--右侧内容结束-->
+	<input type="hidden" name="first_liveId" id="first_liveId" value="" />
+	<input type="hidden" name="first_liveStatus" id="first_liveStatus" value="" />
+	<input type="hidden" name="first_playurl" id="first_playurl" value="" />
+	<input type="hidden" name="first_hls" id="first_hls" value="" />
+	<input type="hidden" name="first_app" id="first_app" value="" />
+	<input type="hidden" name="first_live" id="first_live" value="" />
+	<input type="hidden" name="first_streamType" id="first_streamType" value="" />
+	<input type="hidden" name="first_appName" id="first_appName" value="" />
+	<input type="hidden" name="first_dataPath" id="first_dataPath" value="" />
+	<input type="hidden" name="first_alias" id="first_alias" value="" />
+	<input type="hidden" name="clickMediaApp" id="clickMediaApp" value="" />
+	<input type="hidden" name="clickMediaLive" id="clickMediaLive" value="" />
+	<div class="bottom" >
+		<div style="width: 100%;height: 110px;"><img src="images/bjsin_own.png" style="float: none;" width="200px" height="100px"/></div>
+		<span id="address">电话：010-62963637,62963642</span><a href="http://www.avpk.cn/page/4.html" id="help">| 快速开始帮助</a>
+	</div>
+</div>
+<!--最大的DIV结束-->
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN">
+<head>
+	<title>字幕</title>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="css/dialog.css" />
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="ckplayer/ckplayer.js" charset="UTF-8"></script>
+	<script type="text/javascript" src="js/player.js"></script>
+	<script type="text/javascript">
+		var InformationIsNotCorrect ;
+		var SelectUploadMedia;
+		var SelectSRTUploadMedia;
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#information').html($.i18n.prop('EssentialInformation'));
+					$('#td_1').html($.i18n.prop('VideoTitle'));
+					$('#td_2').html($.i18n.prop('SubTitle'));
+					$('#upload').val($.i18n.prop('Upload'));
+					$('#delete').val($.i18n.prop('Delete'));
+					$('#dosubmit').val($.i18n.prop('Determine'));
+
+					InformationIsNotCorrect = $.i18n.prop('InformationIsNotCorrect');
+					SelectUploadMedia = $.i18n.prop('SelectUploadMedia');
+					SelectSRTUploadMedia = $.i18n.prop('SelectSRTUploadMedia');
+				}
+			});
+			
+		});
+
+		(function($){
+			$.getUrlParam = function(name)
+			{
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			}
+		})(jQuery);
+	</script>
+</head>
+
+<body>
+
+<div class="pad-10">
+	<div class="common-form">
+		<form id="myform" method="post" action="" name="myform">
+			<input type="hidden" id="mediaId" class="input-text" name="mediaId" value="2">
+			<table width="100%" class="table_form">
+				<tbody>
+					<tr>
+						<td colspan="2"><div style="display:inline; font-size:14px; font-weight:bold"><span id="td_1">视频标题</span>：<span id="mediaName"></span></div></td>
+					</tr>
+					<tr>
+						<td width="80" id="td_2">字幕</td>
+						<td>
+							<input type="text"  class="input-text" readonly="readonly" id="srtPath" value="">
+							<div id="upcontent" class="content" style="display:inline">
+								<input type="file" name="mof" multiple="multiple" id="file"  accept=".srt"/>
+								<input type="button" value="上    传" class="ext_btn ext_btn_success" onclick="upfile();" style="float:right;padding-right:20px;" id="upload" />
+							</div>
+							<div id="del_subtitle" style="display:inline">
+								<input type="button" value="删除" id="delete" onclick="delsubtitle()" class="button" style="font-size:12px;color:#000">
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+</div>
+<div style="width:520px; height:360px; background:#000; float:left;margin-left:20px;margin-top:20px;" id="main_player">
+  	
+</div>
+
+<script type="text/javascript">
+		var beforeFileId = $.getUrlParam("fileId");
+		var file;
+		const LENGTH=1*1024*1024;
+		var ck_url,file_name,start,end
+		var existence = false ;
+		var subtitle_path;
+		$(function()
+		{
+			var name = decodeURI($.getUrlParam("name")); //名称
+			ck_url = decodeURI($.getUrlParam("url")); //rtmp路径
+			subtitle_path = decodeURI($.getUrlParam("subTitle"));//字幕路径
+
+			if(subtitle_path != "undefined")
+			{
+				subtitle_path = replace_url(subtitle_path);
+			}
+			else
+			{
+				subtitle_path = "";
+			}
+			file_name = subtitle_path;
+			$("#srtPath").val(subtitle_path);
+			//alert(subtitle_path)
+
+			$("#mediaName").text(name);
+			var flashvars = get_flash_var(ck_url, "", "", subtitle_path, "", "","", "", "", "", "","",3)
+			CKobject.embed('ckplayer/ckplayer.swf','main_player','main_player_object','100%','100%',false,flashvars,null,null);
+			//var player = embed_live_player(ck_url,"",subtitle_path,"",null,"","","","","","",false,true);
+		})
+
+	/*	function loadedHandler()
+		{
+
+		}*/
+
+		function loadedHandler()
+		{
+			if(CKobject.getObjectById('main_player_object').getType())
+			{
+
+			}
+			else
+			{
+
+			}
+		}
+
+		function delsubtitle()
+		{
+			$.ajax({
+				type:"DELETE",
+				url: locationHref+"/rest/admin/upDownload/"+beforeFileId+"/uploadTitle",//删除字幕文件
+				success: function (data)
+				{
+					$("#srtPath").val("");
+					$("#main_player").empty();
+					var flashvars = get_flash_var(ck_url, "", "","", "", "","", "", "", "", "","",3)
+					CKobject.embed('ckplayer/ckplayer.swf','main_player','main_player_object','100%','100%',false,flashvars,null,null);
+					//var falshvars = embed_live_player(ck_url,"","","",null,"","","","","","",false,true);
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+					else if(status == 409)
+					{
+						window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					}
+				}
+			});
+		}
+		
+        function upfile(){
+            file=document.getElementsByName('mof')[0].files[0];
+            if(!file){
+                alert(SelectUploadMedia);
+                return;
+            }
+			
+			if(file.name.lastIndexOf(".") == -1)
+			{
+				alert(SelectSRTUploadMedia+"!");
+                return;
+			}
+			else 
+			{
+			    var file_suffix = file.name.substring(file.name.lastIndexOf(".")+1,file.name.length);
+				if(file_suffix != "srt")
+				{
+					alert(SelectSRTUploadMedia+"!");
+					return;
+				}
+			}
+			$.ajax({
+				type:"POST",
+				url: locationHref+"/rest/admin/upDownload/"+beforeFileId+"/uploadTitle",//上传字幕文件
+				beforeSend : function(req){
+					//req.setRequestHeader('Content-Type', "application/x-subrip");
+					//req.setRequestHeader('Content-Length',"");
+					req.setRequestHeader('FILE_SIZE',file.size);
+					req.send(file);
+				},
+				success: function (data)
+				{
+					var obj = data;
+					if(obj != '')
+					{
+						if(ck_url.substr(ck_url.lastIndexOf(".")+1,ck_url.length) == 'm3u8')
+						{
+							var Apath = replace_url(obj.path);
+							var flashvars={
+								f : '/ckplayer/m3u8.swf',//插件地址
+								a : ck_url, //文件地址
+								s : 4,
+								p : 1,
+								subtitle_cn : Apath,
+								loaded : 'loadedHandler',//当播放器加载完成后发送该js函数loaded
+								wh:'16:9'
+							};
+							var params= {bgcolor:'#FFF',allowFullScreen:true,allowScriptAccess:'always',wmode:'transparent'};
+							var video=[ck_url];
+							CKobject.embed('/ckplayer/ckplayer.swf','main_player' ,'main_player_object','100%','100%',false, flashvars ,video, params);
+						}
+						else
+						{
+							var Apath = replace_url(obj.path);
+							var flashvars = get_flash_var(ck_url, "", "", Apath, "", "","", "", "", "", "","",3)
+							CKobject.embed('ckplayer/ckplayer.swf','main_player','main_player_object','100%','100%',false,flashvars,null,null);
+							//var falshvars = embed_live_player(ck_url,"",Apath,"",null,"","","","","","",false,true);
+						}
+					}
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+					else if(status == 409)
+					{
+						window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					}
+				}
+			});
+        }
+
+
+		function replace_url(url)
+		{
+			var host = window.location.hostname;
+			var before = url.substr(0,url.indexOf("//")+2);
+			var after = "";
+
+			if(url.substring(before.length).lastIndexOf(":") != -1)
+			{
+				after = url.substr(url.lastIndexOf(":"));
+			}
+			else
+			{
+				var temp = url.substring(before.length);
+				after = temp.substring(temp.indexOf("/"));
+			}
+
+			return (before+host+after);
+		}
+ 	 </script>
+</body>
+</html>

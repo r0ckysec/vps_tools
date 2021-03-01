@@ -1,0 +1,449 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>标注</title>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="css/dialog.css" />
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="ckplayer/ckplayer.js" charset="UTF-8"></script>
+	<script type="text/javascript" src="js/player.js"></script>
+	<script type="text/javascript">
+		var InformationIsNotCorrect ;
+		var TaggingInfor;
+		var Delete;
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#information').html($.i18n.prop('EssentialInformation'));
+					$('#td_1').html($.i18n.prop('VideoTitle'));
+					$('#time').html($.i18n.prop('Time'));
+					$('#tip').html($.i18n.prop('Tip'));
+					$('#dosubmit').val($.i18n.prop('Determine'));
+
+					InformationIsNotCorrect = $.i18n.prop('InformationIsNotCorrect');
+					TaggingInfor = $.i18n.prop('TaggingInfor');
+					Delete = $.i18n.prop('Delete');
+				}
+			});
+
+		});
+
+		(function($){
+			$.getUrlParam = function(name)
+			{
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			}
+		})(jQuery);
+
+
+		function auto_set_time(obj)
+		{
+			var time = $("#curtime").text();
+			$(obj).val(Math.floor(parseInt(time)));
+		}
+
+		function parseSecond(seconds)
+		{
+			var sec_num = parseInt(seconds);
+			var hours   = Math.floor(sec_num / 3600);
+			var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+			var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+			if (hours   < 10) {hours   = "0"+hours;}
+			if (minutes < 10) {minutes = "0"+minutes;}
+			if (seconds < 10) {seconds = "0"+seconds;}
+			if(hours === "00")
+			{
+				var time = "00:"+minutes+':'+seconds;
+			}
+			else
+			{
+				var time = hours+':'+minutes+':'+seconds;
+			}
+			return time;
+		}
+
+	</script>
+</head>
+
+<body>
+
+<div class="pad-10">
+
+	<div class="video-outer">
+		<div id="main_player" style="width: 400px;height: 300px;float: left"></div>
+		<script type="text/javascript" src="ckplayer/ckplayer.js" charset="utf-8"></script>
+		<script type="text/javascript">
+			String.prototype.replaceAll  = function(s1,s2){
+				return this.replace(new RegExp(s1,"gm"),s2);
+			}
+
+			var beforeName = decodeURI($.getUrlParam("name"));
+			var url = decodeURI($.getUrlParam("url"));
+			var beforeFileId = decodeURI($.getUrlParam("itemNum"));
+			var player;
+			$(function(){
+				$("#mediaName").text(beforeName);
+				var tiptime = ""
+				var tipcontent = ""
+				var dom = "";
+				$.ajax({
+					type: "GET",
+					url: locationHref+"/rest/admin/vodTypes/"+beforeFileId+"/0/0/marker",//获取标注
+					async: false,
+					success: function (data)
+					{
+						var obj = data;
+						var items = obj.items;
+						var items_arr = new Array();
+						if(items != '')
+						{
+							$("#templ").empty();
+							for(var i=0;i<items.length;i++)
+							{
+								var tiptime_arr = items[i].markerTime;
+								var tipcontent_arr = items[i].marker+"";
+								var itemsNew = new itemsArray(tipcontent_arr,tiptime_arr);
+								items_arr[i] = itemsNew;
+								if(i==0)
+								{
+									tiptime += items[i].markerTime+"";
+									tipcontent += items[i].marker+"";
+								}
+								else
+								{
+									tiptime += "|"+items[i].markerTime;
+									tipcontent += "|"+items[i].marker;
+								}
+								dom+='<div class="item">';
+								dom+='<div class="f"><input type="hidden"  value="'+items[i].id+'"  name="tipId" >';
+								dom+='<input type="text" class="input-text" value="'+items[i].markerTime+'"  name="tipTime" size="8"  onfocus="auto_set_time(this)" readonly  >';
+								dom+='	</div>';
+								dom+='<div class="f c">';
+								dom+='<input type="text" class="input-text" value="'+items[i].marker+'"  name="tipContent" size="30" >';
+								dom+='</div>';
+								dom+='<input type="button" class="button" value="'+Delete+'" onclick="delTipInfo(\''+items[i].id+'\')">'
+								dom+='<a href="javascript:;" onclick="m_add_del(this)" >+</a>';
+								dom+='<a href="javascript:;" name="remove_del" style="display: none;" onclick="m_remove(this)">-</a>';
+								dom+='</div>';
+							}
+						}
+						else
+						{
+							dom+='<div class="item">';
+							dom+='<div class="f"><input type="hidden"  value=""  name="tipId" >';
+							dom+='<input type="text" class="input-text" value=""  name="tipTime" size="8" onfocus="auto_set_time(this)" readonly >';
+							dom+='	</div>';
+							dom+='<div class="f c">';
+							dom+='<input type="text" class="input-text" value=""  name="tipContent" size="40" >';
+							dom+='</div>';
+							dom+='<a href="javascript:;" onclick="m_add(this)" >+</a>';
+							dom+='<a href="javascript:;" onclick="m_remove(this)">-</a>';
+							dom+='</div>';
+						}
+
+						if(url.substr(url.lastIndexOf(".")+1,url.length) == 'm3u8')
+						{
+							var flashvars={
+								f : '/ckplayer/m3u8.swf',//插件地址
+								a : url, //文件地址
+								s : 4,
+								p : 1,
+								k : tiptime,
+								n : tipcontent,
+								loaded : 'loadedHandler',//当播放器加载完成后发送该js函数loaded
+								wh:'16:9'
+							};
+							var params= {bgcolor:'#FFF',allowFullScreen:true,allowScriptAccess:'always',wmode:'transparent'};
+							var video=[url];
+							CKobject.embed('/ckplayer/ckplayer.swf','main_player' ,'main_player_object','100%','100%',false, flashvars ,video, params);
+						}
+						else
+						{
+							var flashvars = get_flash_var(url, tiptime, tipcontent, "", "", "","", "", "", "", "","",3)
+							CKobject.embed('ckplayer/ckplayer.swf','main_player','main_player_object','100%','100%',false,flashvars,null,null);
+							//player = embed_live_player(url,items_arr,"","",null,"","","","","","",false,true);
+						}
+
+
+
+					},
+					error:function()
+					{
+						top.location.href = "login.html";
+					}
+				})
+				$("#templ").html(dom);
+			})
+
+			function itemsArray(words,time)
+			{
+				this.words = words;
+				this.time = time;
+			}
+
+			/*function loadedHandler() {
+				player.addListener('time', timeHandler); //监听播放时间
+			}*/
+			/*function timeHandler(t)
+			{
+				$("#curtime").text(t);
+			}*/
+
+			function loadedHandler()
+			{
+				if(CKobject.getObjectById('main_player_object').getType())
+				{
+					CKobject.getObjectById('main_player_object').addListener('time',timeHandler);
+				}
+				else
+				{
+					CKobject.getObjectById('main_player_object').addListener('time','timeHandler');
+				}
+			}
+			function timeHandler(t)
+			{
+				$("#curtime").text(t)
+			}
+
+			function tip(id,marker,markerTime)
+			{
+				this.id = id;
+				this.marker = marker;
+				this.markerTime = markerTime;
+			}
+
+			function tip1(marker,markerTime)
+			{
+				this.marker = marker;
+				this.markerTime = markerTime;
+			}
+
+			function delTipInfo(id)
+			{
+				$.ajax({
+					type: "DELETE",
+					url: locationHref+"/rest/admin/vodTypes/"+beforeFileId+"/"+id+"/marker",//删除标注
+					async: false,
+					success: function (data) {
+						window.location.reload();
+					},
+					error:function(data)
+					{
+						var errorObj = data;
+						var status = data.status;
+						var statusText = data.statusText
+						if(status == 401 || status == 400)
+						{
+							top.location.href = "login.html";
+						}
+						else if(status == 409)
+						{
+							window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+						}
+					}
+				})
+			}
+
+			function add_tips()
+			{
+				var flag = true;
+				$("input[name='tipTime']").each(function (i) {
+					var markerTime = parseInt(this.value);
+					var marker = $("input[name='tipContent']").get(i).value;
+					if(markerTime == "" || marker == "" || markerTime == "NaN")
+					{
+						window.top.art.dialog({id:"mesg",content:TaggingInfor+"!",time:1});
+						flag = false;
+					}
+				})
+
+
+				if(flag)
+				{
+					var array = new Array();
+					$("[name='tipTime']").each(function(i){
+						var markerTime = parseInt(this.value);
+						var id = $("input[name='tipId']").get(i).value;
+						var marker = $("input[name='tipContent']").get(i).value;
+
+						var obj_tip;
+						if(id == "")
+						{
+							obj_tip = new tip1(marker,markerTime);
+						}
+						else
+						{
+							obj_tip = new tip(id,marker,markerTime);
+						}
+						array[i] = obj_tip;
+					})
+
+					//alert(stringify(array))
+
+					$.ajax({
+						type: "PUT",
+						url: locationHref+"/rest/admin/vodTypes/"+beforeFileId+"/marker",//设置标注
+						async: false,
+						data: stringify(array),
+						success: function (data) {
+							window.location.reload();
+						},
+						error:function(data)
+						{
+							var errorObj = data;
+							var status = data.status;
+							var statusText = data.statusText
+							if(status == 401 || status == 400)
+							{
+								top.location.href = "login.html";
+							}
+							else if(status == 409)
+							{
+								window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+								window.location.reload();
+							}
+						}
+					})
+				}
+
+			}
+		</script>
+		<div style="display:none" id="curtime" style="float:left" ></div>
+	</div>
+
+
+	<div class="common-form" style="float: left;">
+
+		<form id="myform" method="post" action="" name="myform">
+			<table width="100%" class="table_form">
+				<tbody>
+				<tr>
+					<td colspan="2"><div style="display:inline; font-size:14px; font-weight:bold"><span id="td_1">视频标题</span>：<span id="mediaName"></span></div></td>
+				</tr>
+
+				<tr>
+					<td colspan="2">
+						<style type="text/css">
+							.title{height:20px}
+							.title .t{width: 70px;text-align: center;}
+							.title .i{width:233px;text-align:center}
+							.item{height:30px;}
+							.item a{display:block;float:left;margin-right:5px; width:23px;height:23px;background:#ededed;border:1px solid #e0e0e0;cursor:pointer;text-align:center;line-height: 23px;font-size:18px;font-weight: bold;}
+							.item a:hover{text-decoration:none;}
+							.f{float: left;}
+							.c{text-align: center}
+						</style>
+						<script type="text/javascript">
+							function m_add(obj)
+							{
+								var content = $("#templ").find(".item").first().clone(true);
+								var begin = $(obj).parent("div").parent("div").attr("id");
+
+								if(begin=="templ")
+								{
+									$("#templ").after(content);
+								}
+								else
+								{
+									$(obj).parent("div").after(content);
+								}
+								$(content).find("input[type='hidden']").val("");
+								$(content).find("input[type='text']").val("");
+
+
+								var index = $("#index").val();
+								$("#index").val((parseInt(index)+1));
+
+							}
+							function m_remove(obj)
+							{
+								var id =  $(obj).parent("div").parent("div").attr("id");
+								var index = $("#index").val();
+								$("#index").val((parseInt(index)-1));
+								if(index > 1)
+								{
+									$(obj).parent("div").remove();
+								}
+
+							}
+							function m_add_del(obj)
+							{
+								var content = $("#templ").find(".item").first().clone(true);
+								var begin = $(obj).parent("div").parent("div").attr("id");
+
+								if(begin=="templ")
+								{
+									$("#templ").after(content);
+								}
+								else
+								{
+									$(obj).parent("div").after(content);
+								}
+								$(content).find("input[type='text']").val("");
+								$(content).find("input[type='hidden']").val("");
+								$(content).find("input[type='button']").hide();
+								$(content).find("a[name='remove_del']").show();
+
+								var index = $("#index").val();
+								$("#index").val((parseInt(index)+1));
+							}
+						</script>
+						<div class="title">
+							<div id="time" class="f t">时间</div>
+							<div id="tip" class="f i">提示信息</div>
+						</div>
+						<div id="items">
+							<div id="templ">
+								<div class="item">
+									<div class="f"><input type="hidden"  value=""  name="tipId" >
+										<input type="text" class="input-text" value=""  name="tipTime" size="8" onfocus="auto_set_time(this)" readonly >
+									</div>
+									<div class="f c">
+										<input type="text" class="input-text" value=""  name="tipContent" size="40" >
+									</div>
+									<a href="javascript:;" onclick="m_add(this)" >+</a>
+									<a href="javascript:;" onclick="m_remove(this)">-</a>
+								</div>
+
+							</div><!-- end templ -->
+
+							<input type="hidden" name="index" id="index" value="1" />
+						</div> <!-- end items -->
+					</td>
+				</tr>
+				</tbody></table>
+		</form>
+	</div>
+</div>
+</body>
+</html>

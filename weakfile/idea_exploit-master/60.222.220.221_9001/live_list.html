@@ -1,0 +1,470 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link href="css/sp.css" rel="stylesheet" type="text/css" />
+    <link href="css/reset.css" rel="stylesheet" type="text/css" />
+    <link href="css/system.css" rel="stylesheet" type="text/css" />
+    <link href="css/table_form.css" rel="stylesheet" type="text/css" />
+    <link href="css/dialog.css" rel="stylesheet" type="text/css" />
+    <link href="css/live.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+    <script type="text/javascript" src="js/jquery.corner.js"></script>
+    <script type="text/javascript" src="js/admin_common.js"></script>
+    <script type="text/javascript" src="js/dialog.js"></script>
+    <script type="text/javascript" src="js/live.js"></script>
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <script type="text/javascript" src="js/jbase64.js"></script>
+    <script type="text/javascript" src="js/search.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+    <script type="text/javascript" src="js/add_edit_live.js"></script>
+    <script type="text/javascript" src="js/bean.js"></script>
+    <script type="text/javascript">
+        var  DirectCurrentSource ;// 流源
+        var Encoder ;// 编码器
+        var  PullFlow ;// 拉流
+        var TranscodingSubStream ; //转码子流
+        var InsertFlow ; // 插播流
+        var GeneralLive ; // 普通直播
+        var ReturnBroadcastMode ; // 回播模式
+        var CarouselMode ; // 轮播模式
+        var GuidedMode ;//  导播模式
+        var Manual ; // 手动
+        var Timing ; //  定时
+        var StreamingVideo ; // 有流则录像
+        var NotLiveState ; // 未直播状态
+        var BeingBroadcastLive ;//  正在直播
+        var　Computer ; // 电脑
+        var ComputerWatch ; // 电脑观看
+        var MobilePhone ;// 手机
+        var MobileViewing ;// 移动观看
+        var Delete ;// 删除
+        var Alias ;// 别名
+        var ChannelType ;// 频道类型
+
+        var NoForwardingStream ;// 未转发流
+        var IsForwardingFlow ;// 正在转发流
+        var TS_NoFlow  ;// TS未发流
+        var TS_IsForwardingFlow ;// TS正在发流
+        var HLS_NoFlow ;// HLS未发流
+        var HLS_IsForwardingFlow ;// HLS正在发流
+        var NoVideo ;//  未录像
+        var BeingVideo ;// 正在录像
+        var TimingVideo ;// 定录
+        var TimingVideos ;// 定时录像
+        var Carousel ;// 轮播
+        var　VirtualLive ;// (轮播)虚拟直播
+        var Director ;// 导播
+        var StartRecording ;// 开录
+        var StopVideo ;// 停录
+        // var StopFlow ;// 断流
+        // var SendFlow ;// 发流
+        var Type ;// 类型
+        var PushMode ;// 推方式
+        var PullMode ;// 拉方式
+        var VideoMode ;// 录像方式
+        var StreamSize ;// 码流大小
+        var Bypass ;// 转流
+        var ForwardingStream ;// 转发流
+        var Subflow ;// 子流
+        var AddSubStream ;// 添加子码流
+        var Spots ;// 插播
+        var LiveSpots ;// 直播插播
+        var Edit ;// 编辑
+        var HomePage ;// 首页
+        var PreviousPage ;// 上一页
+        var NextPage ;// 下一页
+        var　Shadowe ;// 尾页
+        var InTotal ;// 共
+        var Page ;// 页
+        var NumberOfData ;// 条数据
+        var BuildingPage ; // 正在构建页面
+        var FailedToGetData ; // 获取数据失败
+        var DeleteMethod ;// 确定要删除吗
+        var DeleteLiveChannel ;// 删除直播频道
+        var DeleteLiveStream ;// 删除子直播流
+        var BeingDeleted ;// 正在删除
+        var AddLiveList ; // 添加直播列表
+        var AddLiveChildStream ; // 添加直播子码流
+        var CarouselList ; // 轮播列表
+        var AddLiveSpots ; // 添加直播插播
+        var NoChoice ; // 您未选择任何直播频道
+        var SelectTheProtocolToGenerate_URL ; // 选择要生成URL的协议
+        var MobilePlay ; // 移动播放
+        var EditLive ; // 编辑直播
+        var ForwardingFlowConfiguration ; // 转发流配置
+        var LiveIntroduction ; // 直播简介
+        var BeingLoaded ; // 正在加载
+        var Grouping;
+        var ReplaceList;
+        var ReplaceFile;
+        var ReplaceNo;
+        var Trailer;
+
+        $(function(){
+            Init_license(authorization);
+            var Languages = $.cookie('internationalization');
+             if ( Languages == null || Languages == "" )
+            {
+                Languages = 'zh' ;
+            }
+                jQuery.i18n.properties({
+                    name : 'strings', //资源文件名称
+                    path : '/i18n/', //资源文件路径
+                    mode : 'map', //用Map的方式使用资源文件中的值
+                    language : Languages,
+                    encoding : 'UTF-8', // 必须写 否则中文乱码
+                    callback : function() {//加载成功后设置显示内容
+                        $('#addLiveChannel').html($.i18n.prop('AddLiveChannel'));
+                        $('#display').html($.i18n.prop('ShowAll'));
+                        $('#channel_1').html($.i18n.prop('CommonChannel'));
+                        $('#channel_2').html($.i18n.prop('CallbackChannel'));
+                        $('#channel_3').html($.i18n.prop('CarouselChannel'));
+                        $('#channel_4').html($.i18n.prop('TVChannel'));
+                        $('#search').val($.i18n.prop('Search'));
+                        $('#ListHeader_1').html($.i18n.prop('ChannelInformation'));
+                        $('#ListHeader_2').html($.i18n.prop('ChannelInformation'));
+                        $('#ListHeader_3').html($.i18n.prop('StatusBar'));
+                        $('#ListHeader_4').html($.i18n.prop('ChannelProperties'));
+                        $('#ListHeader_5').html($.i18n.prop('ViewingMode'));
+                        $('#ListHeader_6').html($.i18n.prop('Operation'));
+                        Encoder = $.i18n.prop('Encoder') ;
+                        PullFlow = $.i18n.prop('PullFlow') ;
+                        TranscodingSubStream = $.i18n.prop('TranscodingSubStream') ;
+                        InsertFlow = $.i18n.prop('InsertFlow') ;
+                        GeneralLive = $.i18n.prop('GeneralLive') ;
+                        ReturnBroadcastMode = $.i18n.prop('ReturnBroadcastMode') ;
+                        CarouselMode = $.i18n.prop('CarouselMode') ;
+                        GuidedMode = $.i18n.prop('GuidedMode') ;
+                        Manual = $.i18n.prop('Manual') ;
+                        Timing = $.i18n.prop('Timing') ;
+                        StreamingVideo = $.i18n.prop('StreamingVideo') ;
+                        NotLiveState = $.i18n.prop('NotLiveState') ;
+                        BeingBroadcastLive = $.i18n.prop('BeingBroadcastLive') ;
+                        Computer = $.i18n.prop('Computer') ;
+                        ComputerWatch = $.i18n.prop('ComputerWatch') ;
+                        MobilePhone = $.i18n.prop('MobilePhone') ;
+                        MobileViewing = $.i18n.prop('MobileViewing') ;
+                        Delete = $.i18n.prop('Delete') ;
+                        Alias = $.i18n.prop('Alias') ;
+                        ChannelType = $.i18n.prop('ChannelType') ;
+
+                        NoForwardingStream = $.i18n.prop('NoForwardingStream') ;
+                        IsForwardingFlow = $.i18n.prop('IsForwardingFlow') ;
+                        TS_NoFlow = $.i18n.prop('TS_NoFlow') ;
+                        TS_IsForwardingFlow = $.i18n.prop('TS_IsForwardingFlow') ;
+                        HLS_NoFlow = $.i18n.prop('HLS_NoFlow') ;
+                        HLS_IsForwardingFlow = $.i18n.prop('HLS_IsForwardingFlow') ;
+                        NoVideo = $.i18n.prop('NoVideo') ;
+                        BeingVideo = $.i18n.prop('BeingVideo') ;
+                        TimingVideo = $.i18n.prop('TimingVideo') ;
+                        TimingVideos = $.i18n.prop('TimingVideos') ;
+                        Carousel = $.i18n.prop('Carousel') ;
+                        VirtualLive = $.i18n.prop('VirtualLive') ;
+                        Director = $.i18n.prop('Director') ;
+                        StartRecording = $.i18n.prop('StartRecording') ;
+                        StopVideo = $.i18n.prop('StopVideo') ;
+                       //StopFlow = $.i18n.prop('StopFlow') ;
+                       // SendFlow = $.i18n.prop('SendFlow') ;
+                        Type = $.i18n.prop('Type') ;
+                        PushMode = $.i18n.prop('PushMode') ;
+                        DirectCurrentSource = $.i18n.prop('CurrentSource') ;
+                        Encoder = $.i18n.prop('Encoder') ;
+                        PullFlow = $.i18n.prop('PullFlow') ;
+                        PullMode = $.i18n.prop('PullMode') ;
+                        VideoMode = $.i18n.prop('VideoMode') ;
+                        StreamSize = $.i18n.prop('StreamSize') ;
+                        Bypass = $.i18n.prop('Bypass') ;
+                        ForwardingStream = $.i18n.prop('ForwardingStream') ;
+                        Subflow = $.i18n.prop('Subflow') ;
+                        AddSubStream = $.i18n.prop('AddSubStream') ;
+                        Spots = $.i18n.prop('Spots') ;
+                        LiveSpots = $.i18n.prop('LiveSpots') ;
+                        Edit = $.i18n.prop('Edit') ;
+                        HomePage = $.i18n.prop('HomePage') ;
+                        PreviousPage = $.i18n.prop('PreviousPage') ;
+                        NextPage = $.i18n.prop('NextPage') ;
+                        Shadowe = $.i18n.prop('Shadowe') ;
+                        InTotal = $.i18n.prop('InTotal') ;
+                        Page = $.i18n.prop('Page') ;
+                        NumberOfData = $.i18n.prop('NumberOfData') ;
+                        BuildingPage = $.i18n.prop('BuildingPage') ;
+                        FailedToGetData = $.i18n.prop('FailedToGetData') ;
+                        DeleteMethod = $.i18n.prop('DeleteMethod') ;
+                        DeleteLiveChannel = $.i18n.prop('DeleteLiveChannel') ;
+                        DeleteLiveStream = $.i18n.prop('DeleteLiveStream') ;
+                        BeingDeleted = $.i18n.prop('BeingDeleted') ;
+
+                        AddLiveList = $.i18n.prop('AddLiveList') ;
+                        AddLiveChildStream = $.i18n.prop('AddLiveChildStream') ;
+                        CarouselList = $.i18n.prop('CarouselList') ;
+                        AddLiveSpots = $.i18n.prop('AddLiveSpots') ;
+                        NoChoice = $.i18n.prop('NoChoice') ;
+                        SelectTheProtocolToGenerate_URL = $.i18n.prop('SelectTheProtocolToGenerate_URL') ;
+                        MobilePlay = $.i18n.prop('MobilePlay') ;
+                        EditLive = $.i18n.prop('EditLive') ;
+                        ForwardingFlowConfiguration = $.i18n.prop('ForwardingFlowConfiguration') ;
+                        LiveIntroduction = $.i18n.prop('LiveIntroduction') ;
+                        BeingLoaded = $.i18n.prop('BeingLoaded') ;
+                        Grouping = $.i18n.prop('Grouping') ;
+                        Trailer = $.i18n.prop('Trailer') ;
+
+                        ReplaceList = $.i18n.prop('ReplaceList') ;
+                        ReplaceFile = $.i18n.prop('ReplaceFile') ;
+                        ReplaceNo = $.i18n.prop('ReplaceNo') ;
+                    }
+                });
+        });
+
+        (function($){
+            $.getUrlParam = function(name)
+            {
+                var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if (r!=null) return unescape(r[2]); return null;
+            }
+        })(jQuery);
+
+        String.prototype.replaceAll  = function(s1,s2){
+            return this.replace(new RegExp(s1,"gm"),s2);
+        }
+
+        $(function(){
+            $.ajaxSetup({ cache: false });
+            $(".btn").corner("3px");
+            build_whole_page(1,1);
+            refreshStream();
+        })
+
+        function delDialog(id)
+        {
+            window.top.art.dialog
+            (
+                {
+                    id:'del',content:DeleteMethod, title:DeleteLiveChannel,lock:true
+                },
+                function(){
+                    delLive(id);
+                    window.top.art.dialog({id:'del'}).close()
+                    window.location.href = '/live_list.html';
+                    return true;
+                },
+                function()
+                {
+                    window.top.art.dialog({id:'del'}).close()
+                }
+            )
+        }
+
+        function delLive(id)
+        {
+            $.ajax({
+                type:"DELETE",
+                url:locationHref+"/rest/admin/lives/"+id,//删除一个直播频道
+                async: false,
+                success:function(data) {
+                },
+                error:function(data)
+                {
+                    var errorObj = data;
+                    var status = data.status;
+                    var statusText = data.statusText
+                    if(status == 401 || status == 400)
+                    {
+                        top.location.href = "login.html";
+                    }
+                }
+
+            })
+        }
+
+        function delSubStream(id,name)
+        {
+            window.top.art.dialog
+            (
+                    {
+                        id:'del',content:DeleteMethod, title:DeleteLiveStream,lock:true
+                    },
+                    function(){
+                        window.top.art.dialog({id:"delLive",content:BeingDeleted+"...<img width=20 src='images/loading.gif'>"});
+                        delSub(id,name);
+                        window.top.art.dialog({id:'del'}).close()
+                        return true;
+                    },
+                    function()
+                    {
+                        window.top.art.dialog({id:'del'}).close()
+                    }
+            )
+        }
+
+        function delSub(id,dname)
+        {
+            var liveId = id;
+            $.ajax({
+                type:"GET",
+                url:locationHref+"/rest/admin/lives/"+liveId,//获取一个直播频道
+                async: false,
+                success: function (data) {
+                    var live = data;
+                    var auth = getcookie("AMS_SESSION_ID");
+                    var arr = new Array();
+                    var outputs = live.outputs;
+                    var c_count = 0;
+                    if(outputs.length >0 && outputs != "null")
+                    {
+                        for(var i=0;i<outputs.length;i++)
+                        {
+                            if(outputs[i].name != dname)
+                            {
+                                arr[c_count]=outputs[i];
+                                c_count++;
+                            }
+                        }
+                    }
+
+                    $.ajax({
+                        type:"PUT",
+                        url:locationHref+"/rest/admin/lives/"+liveId+"/subStream",//删除一个直播频道子流
+                        async: false,
+                        data: stringify(arr),
+                        dataType:"json",
+                        success:function(data)
+                        {
+                            window.top.art.dialog({id:'delLive'}).close();
+                            window.location.href = '/live_list.html';
+                        },
+                        error:function(data)
+                        {
+                            var errorObj = data;
+                            var status = data.status;
+                            var statusText = data.statusText
+                            if(status == 401 || status == 400)
+                            {
+                                top.location.href = "login.html";
+                            }
+                        }
+
+                    });
+                },
+                error:function(data)
+                {
+                    var errorObj = data;
+                    var status = data.status;
+                    var statusText = data.statusText
+                    if(status == 401 || status == 400)
+                    {
+                        top.location.href = "login.html";
+                    }
+                }
+
+            })
+        }
+
+        function init_license()
+        {
+            $.ajax({
+                type: "GET",
+                url: locationHref+"/rest/admin/system/getLicenseInfo",//获取授权
+                success:function(data)
+                {
+                    var obj = null;
+                    try
+                    {
+                        obj = data;
+                    }
+                    catch(e)
+                    {
+                        return ;
+                    }
+
+                    var ts_enable = obj.supportTS;
+                    var hls_enable = obj.supportHLS;
+                    var fw_enable = obj.supportRtmpFW;
+
+                    ts_hls_oper(ts_enable,hls_enable,fw_enable);
+                },
+                error:function(data)
+                {
+                    var errorObj = data;
+                    var status = data.status;
+                    var statusText = data.statusText
+                    if(status == 401 || status == 400)
+                    {
+                        top.location.href = "login.html";
+                    }
+                }
+
+            })
+            window.top.art.dialog({id:"wait"}).close();
+        }
+
+        function ts_hls_oper(ts_enable,hls_enable,fw_enable)
+        {
+            if(ts_enable == true)
+            {
+                $("div[name='ts_oper']").css("display","inline");
+            }
+            if(hls_enable == true)
+            {
+                $("div[name='hls_oper']").css("display","inline");
+            }
+            if(fw_enable == true)
+            {
+                $("div[name='fw_oper']").css("display","inline");
+            }
+        }
+    </script>
+    <title></title>
+</head>
+<body id="live_body_id" scroll="yes" style="overflow-y: scroll;">
+<div class="pad-10">
+    <div class="content-menu ib-a  line-x" >
+        <a href="javascript:;" onclick="addDialog(1)" class="ext_btn ext_btn_success" id="addLiveChannel">添加直播频道</a>
+        <div style="float: right;">
+            <input type="text" class="input-text" name="key" id="key" value="">
+            <input type="button" value="搜索" class="button" onclick="search_medias(1,1)" id="search">
+        </div>
+    </div>
+
+    <form name="myform" id="myform" action="" method="post" class="">
+        <div class="table-list">
+            <table width="100%" class="list_table">
+                <thead>
+                <tr>
+                    <th align="center" width="3%"><input type="checkbox" id="selector" onclick="create_all_show()"/></th>
+                    <th align="left" width="25%" id="ListHeader_1">频道信息</th>
+                    <th align="left" width="12%" id="ListHeader_2">频道信息</th>
+                    <th align="left" width="19%" id="ListHeader_3">状态栏</th>
+                    <th align="left" width="21%" id="ListHeader_4">频道属性</th>
+                    <th align="left" width="11%" id="ListHeader_5">观看方式</th>
+                    <th align="left" width="8%" id="ListHeader_6">操 作</th>
+                </tr>
+                </thead>
+                <tbody id="main_body">
+
+                </tbody>
+            </table>
+        </div><!-- end table-list -->
+        <div>
+            <div style="float: right;" id="pager_outer">
+
+            </div>
+        </div>
+    </form>
+</div><!-- end pad-10 -->
+<div id="preshow" style="padding:10px;">
+</div>
+<br><br><br>
+
+</body>
+</html>
+

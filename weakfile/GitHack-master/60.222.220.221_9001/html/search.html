@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1">
+    <title>搜索</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+    <script type="text/javascript" src="js/jbase64.js"></script>
+    <script type="text/javascript" src="js/cookie.js"></script>
+    <script type="text/javascript" src="js/dialog.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/dialog.css">
+    <link rel="stylesheet" type="text/css" href="css/search.css">
+
+    <script type="text/javascript">
+        $.getUrlParam = function(name)
+        {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r!=null) return unescape(r[2]); return null;
+        }
+        var beforeKey = decodeURI($.getUrlParam("key"));
+        var page_size = 12;
+        var currentPage = 1;
+
+        var host = window.location.hostname;
+        var port = window.location.port;
+        var imageurl = "../images/video.jpg";
+
+        function Path(name)
+        {
+            this.name = name;
+        }
+
+        $(function() {
+            $("#headHtml").load("header.html");
+            $("#bottomHtml").load("bottom.html");
+            init_page(currentPage,page_size);
+        })
+
+
+        function init_page(currentPage,page_size)
+        {
+            $("#searchList").empty();
+            $.ajax({
+                type: "GET",
+                url: locationHref+"/rest/client/vodTypes/"+page_size+"/"+currentPage+"/"+beforeKey+"/searchType",//从所有点播已分类中搜索媒体信息，不包括未分类
+                success:function(data, textStatus, request)
+                {
+                    var obj = data;
+                    if(obj == null)
+                    {
+                        window.top.art.dialog({id:"vod",content:"无点播视频"+"!",time:1});
+                    }
+                    var total = obj.total;
+                    var length = total;
+                    var items = obj.items;
+                    var count = 0;
+                    //var items = obj.files;
+                    //==================================================
+                    var visible = obj.visible;
+                    if(items != null)
+                    {
+                        for(var i=0;i<items.length;i++)
+                        {
+                            count++;
+                            var fileId = items[i].fileId;
+                            var allName = items[i].name;
+                            var name = allName.substr(allName.lastIndexOf("/")+1,allName.length);
+                            var name_sub = name.substr(0,name.lastIndexOf("."));
+                            var http_play_url = replace_url(items[i].httpUrl);
+                            var rtmp_play_url_ckplayer = replace_url(items[i].rtmpUrl);
+                            var createTime = items[i].createTime;
+                            var browHistory = items[i].browHistory;
+                            var step = items[i].step;
+                            if(step != null)
+                            {
+                                var stepStartPlay = step.stepStartPlay;
+                                var stepStopPlay = step.stepStopPlay;
+                            }
+                            var advertising = items[i].advertising;
+                            if(advertising != null)
+                            {
+                                var ad1Path = advertising.ad1Path;
+                                var ad1Duration = advertising.ad1Duration;
+                                var ad2Path = advertising.ad2Path;
+                            }
+                            var logo = items[i].logo;
+                            if(logo != null)
+                            {
+                                var osdvisible = logo.visible;
+                                var level = logo.level;
+                                var vertical = logo.vertical;
+                                var levelShift = logo.levelShift;
+                                var verticalShift = logo.verticalShift;
+                            }
+
+
+                            var imgName = "";
+                            var imgResolution = "";
+                            var img_url = "";
+                            var cfg = items[i].cfg;
+                            var bitrate;
+                            var frameRate;
+                            var duration = "";
+                            var format = "";
+                            var resolution = "";
+                            if(cfg != null && cfg != undefined)
+                            {
+                                frameRate = cfg.frameRate;
+                                bitrate = cfg.bitrate;
+                                var img = cfg.img;
+                                duration = cfg.duration;
+                                format = cfg.format;
+                                resolution = cfg.resolution;
+                                if(duration == undefined || format == undefined || resolution == undefined)
+                                {
+                                    duration = "";
+                                    format = "";
+                                    resolution = "";
+                                }
+                                if(img != null)
+                                {
+                                    for(var k=0;k<img.length;k++)
+                                    {
+                                        imgName = img[0].fileName;
+                                        if(imgName != undefined)
+                                        {
+                                            imgName = replace_url(imgName);
+                                        }
+                                        imgResolution = img[0].resolution;
+                                    }
+                                }
+                            }
+
+                            var description = "";
+                            var mainTitle = "";
+                            var subTitle = "";
+                            var info = items[i].info;
+                            if(info != null)
+                            {
+                                description = info.description;
+                                subTitle = info.subTitle;
+                                mainTitle = info.mainTitle;
+                                if(mainTitle != "" )
+                                {
+                                    name_sub = mainTitle;
+                                }
+                                else if(subTitle != "")
+                                {
+                                    name_sub = subTitle;
+                                }
+                            }
+
+                            var time = 1;
+                            var dom ='<ul class="text-float-left TitleBox">' ;
+                            dom += '<li class="VideoImageSearch" style="overflow: hidden;"><a title="' ;
+                            dom += '播放：' + browHistory + "&#10;"  ;
+                            dom += '播放时间：'+ duration + "&#10;" ;
+                            dom += '上传时间：'+createTime+'" href="/html/vodInfo.html?allName='+fileId+'&page='+currentPage+'&flag=search&key='+encodeURI(encodeURI(beforeKey))+'" target="_blank"><img  onerror="javascript:this.src=\''+imageurl+'\'" src="'+imgName+'" border="0" height="100%" width="100%">';
+                            dom += ''+name_sub+'';
+                            dom += '<div class="duration_css" style="color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); opacity: 0.5; position: relative;left: 78px;  bottom: 20px; width: 53px;height:15px;">'+duration+'</div></a>' ;//name='+rtmp_play_url_ckplayer+'&
+                            dom += '<div style="position: relative; left: 0px; bottom: 108px;"><img src="'+imgName+'"  width="100" height="100" li="Quality" style="float: left; position: relative;display:none;" t="0" alt="精华"></div>' ;
+                            dom += '<div style="position: relative; right: 5px; bottom: 20px; text-align: right"></div>' ;
+                            dom += '<div style="position: absolute; display: ; z-index: 1000;"><img src="'+imgName+'"  width="100" height="100" li="VideoDemand" alt="添加至稍后看" style="cursor: pointer; display: none;" onclick="javascript:SetDemandCookie(\'5221\', this);" v="5221"></div>' ;
+                            dom += '</li><li class="text-float-left TitleIcon" style="display: "></li>' ;
+                            dom += '<li class="Title text-wrap1" style="width: 138px;overflow: hidden;"><a title="' ;
+                            dom += '播放：' + browHistory + "&#10;" ;
+                            dom += '播放时间：'+ duration  + "&#10;" ;
+                            dom += '上传时间：'+createTime+'" href="/" target="_blank">';
+                            dom += ''+name_sub+'';
+                            dom += '</a></li>' ;
+                            //dom += '<li class="User text-wrap1" style="width: 138px;"><span style="display:  "><span class="tip">媒体来源:</span><span class="data">媒体来源</span></span>&nbsp;</li>' ;
+                            dom += '<li class="Play text-wrap1" style="width: 138px;display:"><span><span class="tip">播放:</span><span class="data">'+browHistory+'</span></span>&nbsp; <span><span class="tip">评论:</span><span class="data">评论次数</span></span></li>' ;
+                            dom += '</ul>' ;
+                            $("#searchList").append(dom);
+                        }
+                    }
+
+
+
+                    //------------------------------------------------------------------------------------------------------------
+
+                    var pages = Math.ceil(total/page_size);
+                    var page_dom = '<div class="pager Library_Page" >';
+                    page_dom+='<a href="javascript:void(0)"  onclick="init_page(1,'+page_size+')">首页</a>';//首页
+                    if(currentPage-1>0)
+                    {
+                        page_dom+='<a href="javascript:void(0)" onclick="init_page('+(currentPage-1)+','+page_size+')">上一页</a>';//上一页
+                    }
+                    var page_arr = calculatePageIndex(currentPage,pages,5);
+                    for(var z=page_arr[0];z<=page_arr[1];z++)
+                    {
+                        if(z == currentPage)
+                        {
+                            page_dom+='<a href="javascript:void(0)" style="background-color: #3EAFE0" class="Library_Page_NoPage">'+z+'</a>';
+                        }
+                        else
+                        {
+                            page_dom+='<a href="javascript:void(0)" onclick="init_page('+z+','+page_size+')" class="Library_Page_NoPage">'+z+'</a>';
+                        }
+                    }
+                    if(currentPage+1<=pages)
+                    {
+                        page_dom+='<a href="javascript:void(0)" onclick="init_page('+(currentPage+1)+','+page_size+')">下一页</a>';//下一页
+                    }
+                    page_dom+='<a href="javascript:void(0)" onclick="init_page('+pages+','+page_size+')">尾页</a>';//尾页
+                    page_dom+='</div>';
+                    $("#page").html(page_dom)
+                },
+                error: function()
+                {
+                    //top.location.href = "/login.html";
+                }
+            })
+        }
+
+        function calculatePageIndex(currentPage,totalPage,viewPageCount)
+        {
+            var startPage = 0 ;
+            var endPage = 0;
+            var arr = new Array();
+            // 如果总页面小于 页面 分页显示页数
+            if (totalPage <= viewPageCount) {
+                startPage = 1;
+                endPage = totalPage;
+                arr[0] = startPage;
+                arr[1] = endPage;
+
+                return arr;
+            }
+
+            //计算出中间值
+            var n = Math.ceil(viewPageCount/2)-1;
+            startPage = currentPage - n;
+
+            //如果当前页己经小于起始页
+            if (startPage <= 1) {
+                startPage = 1;
+                // 因为两个边界的页码数也要显示
+                endPage = startPage + (viewPageCount - 1);
+                arr[0] = startPage;
+                arr[1] = endPage;
+
+                return arr;
+            }
+
+            endPage = currentPage + n;
+
+            //前页页面显示的值是积数 还是偶数
+            if (viewPageCount % 2 == 0) {
+                startPage += 1;
+            }
+            if (endPage > totalPage) {
+                endPage = totalPage;
+                // 因为两个边界的页码数也要显示
+                startPage = totalPage - (viewPageCount - 1);
+            }
+            arr[0] = startPage;
+            arr[1] = endPage;
+
+            return arr;
+        }
+
+        function replace_url(url)
+        {
+            var host = window.location.hostname;
+            var before = url.substr(0,url.indexOf("//")+2);
+            var after = "";
+
+            if(url.substring(before.length).lastIndexOf(":") != -1)
+            {
+                after = url.substr(url.lastIndexOf(":"));
+            }
+            else
+            {
+                var temp = url.substring(before.length);
+                after = temp.substring(temp.indexOf("/"));
+            }
+
+            return (before+host+after);
+        }
+    </script>
+
+</head>
+<body>
+    <div id="headHtml"></div>
+
+    <div style="margin:0px auto;width:100%;display:inline-block;-ms-overflow-x:hidden;">
+        <div style="margin:0px auto;width:980px;-ms-overflow-x:hidden;">
+            <div style="overflow:hidden;width: 980px; height:auto;">
+                <div class="OutBorder clearfix" id="search_body" style="overflow:hidden;align:center;">
+                    <div class="lm_cl"></div>
+                    <div class="lm_cr"></div>
+                    <div class="clearfix Box">
+                        <div id="searchList" class="VideoListBox clearfix" style="clear: both;">
+
+                        </div>
+                        <div align="right" id="page" class="PageNav" width="100%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="bottomHtml"></div>
+
+</body>
+</html>

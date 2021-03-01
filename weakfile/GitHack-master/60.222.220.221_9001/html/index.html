@@ -1,0 +1,786 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" class="off">
+<head>
+<title>直播点播系统</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=8">
+
+<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+<script type="text/javascript" src="js/dialog.js"></script>
+<script type="text/javascript" src="js/aokuIndex.js"></script>
+<script type="text/javascript" src="js/jbase64.js"></script>
+<script type="text/javascript" src="js/cookie.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+
+<link rel="stylesheet" type="text/css" href="css/focus.css"/>
+<link rel="stylesheet" type="text/css" href="css/dialog.css">
+
+<script type="text/javascript">
+    function Path(name)
+    {
+        this.name = name;
+    }
+
+    var host = window.location.hostname;
+    var port = window.location.port;
+    var beforeId = "";
+    var imageurl = "../images/video.jpg";
+    var currentPage = 1;
+    var currentPageCount = 10;
+
+    $(function() {
+        $("#loadHtml_head").load("header.html");
+        $("#loadHtml_bottom").load("bottom.html");
+
+        load_whole_page();
+
+        /*
+         *公告
+         */
+        $.ajax({
+            type: "GET",
+            async: false,
+            url: locationHref+"/rest/client/news/5/"+currentPage,//获取所有新闻
+            success:function(data, textStatus, request)
+            {
+                var obj = data;
+                if(obj != null)
+                {
+                    var items = obj.items;
+                    var length = obj.total;
+                    if(items != null)
+                    {
+                        for(var i=0;i<items.length;i++)
+                        {
+                            var id = items[i].id;
+                            var title = items[i].title;
+                            var txt = items[i].txt;
+                            var createTime = items[i].time;
+                            var dom ='<div class="text-overflow"><a href="/html/noticeInfo.html?id='+id+'&title='+encodeURIComponent(encodeURIComponent(title))+'">'+title+'</a></div>';
+                            if(i <= 4)
+                            {
+                                $("#notice_news").append(dom);
+                            }
+                        }
+                    }
+                }
+            },
+            error:function()
+            {
+                //parent.location.href = "/login.html";
+            }
+        })
+
+
+        /*
+         * 直播
+         */
+        $.ajax({
+            type: "GET",
+            async: false,
+            url: locationHref + "/rest/client/lives",//获取直播频道
+            success:function(data, textStatus, request)
+            {
+                var obj = data;
+                if (obj != null)
+                {
+                    for (var i = 0; i < obj.length; i++) {
+                        var appName = obj[i].appName;
+                        var liveName = obj[i].name;
+                        var name = appName + "/" + liveName;
+                        var right = obj[i].right;
+                        var liveStatus = obj[i].liveStatus;
+                        var rtmpPort = obj[i].rtmpPort;
+                        var right_str = "";
+                        if (right == 1) {
+                            right_str = "普通直播";
+                        }
+                        else if (right == 3) {
+                            right_str = "回播模式";
+                        }
+                        else if (right == 4) {
+                            right_str = "轮播模式";
+                        }
+                        else if (right == 5) {
+                            right_str = "导播模式";
+                        }
+                        //--------------------直播频道---------------------
+                        var dom = '<div class="live-head">';
+                        dom += '<div class="item head-left">';
+                        dom += '<a href="/html/live.html?appName=' + appName + '&liveName=' + liveName + '&rtmpPort=' + rtmpPort + '&liveStatus=' + liveStatus + '&rightLive='+right+'">' + name + '</a>';
+                        dom += '</div>';
+                        dom += '<div class="head-right live-type">' + right_str + '</div>';
+                        dom += '</div>';
+                        if (i < 4) {
+                            $("#live_content").append(dom);
+                        }
+                    }
+                }
+            },
+            error:function()
+            {
+                //top.location.href = "/login.html";
+            }
+        })
+    })
+
+    function load_whole_page()
+    {
+        //焦点视频
+        $.ajax({
+            type:"GET",
+            url: locationHref+"/rest/client/vodTypes/"+5+"/"+currentPage+"/get/focus",//获取视频焦点
+            async: false,
+            success:function(data, textStatus, request)
+            {
+                var obj = data;
+                var length =obj.total;
+                var item = obj.items;
+                if(item != null)
+                {
+                    for(var i=0;i<item.length;i++)
+                    {
+                        var fileId = item[i].fileId;
+                        var allName = item[i].name;
+                        var name = allName.substr(allName.lastIndexOf("/")+1,allName.length);
+                        var name_sub = name.substr(0,name.lastIndexOf("."));
+                        var description = item[i].description;
+                        var vodTypeId = item[i].vodTypeId;
+                        var mediaTypeId = item[i].mediaTypeId;
+                        var createTime = item[i].createTime;
+                        var browHistory = item[i].browHistory;
+                        var hotFlags = item[i].hotFlags;
+                        var step = item[i].step;
+                        if(step != null)
+                        {
+                            var stepStartPlay = step.stepStartPlay;
+                            var stepStopPlay = step.stepStopPlay;
+                        }
+                        var advertising = item[i].advertising;
+                        if(advertising != null)
+                        {
+                            var ad1Path = advertising.ad1Path;
+                            var ad1Duration = advertising.ad1Duration;
+                            var ad2Path = advertising.ad2Path;
+                        }
+                        var logo = item[i].logo;
+                        if(logo != null)
+                        {
+                            var osdvisible = logo.visible;
+                            var level = logo.level;
+                            var vertical = logo.vertical;
+                            var levelShift = logo.levelShift;
+                            var verticalShift = logo.verticalShift;
+                        }
+
+                        var imgName = "";
+                        var imgResolution ="";
+                        var img_url = "";
+                        var http_play_url = replace_url(item[i].httpUrl);
+                        var rtmp_play_url_ckplayer = replace_url(item[i].rtmpUrl);
+                        var cfg = item[i].cfg;
+                        var bitrate;
+                        var frameRate;
+                        var duration = "";
+                        var format = "";
+                        var resolution = "";
+                        if(cfg != null && cfg != undefined)
+                        {
+                            frameRate = cfg.frameRate;
+                            bitrate = cfg.bitrate;
+                            var img = cfg.img;
+                            duration = cfg.duration;
+                            format = cfg.format;
+                            resolution = cfg.resolution;
+                            if(duration == undefined || format == undefined || resolution == undefined)
+                            {
+                                duration = "";
+                                format = "";
+                                resolution = "";
+                            }
+                            if(img != null)
+                            {
+                                for(var k=0;k<img.length;k++)
+                                {
+                                    imgName = img[0].fileName;
+                                    if(imgName != undefined)
+                                    {
+                                        imgName = replace_url(imgName);
+                                    }
+                                    imgResolution = img[0].resolution;
+                                }
+                            }
+
+                        }
+
+                        //--------------轮播-----------------------
+                        var dom  = "";
+                        var dom1 = "";
+                        var dom2 = "";
+                        dom += '<li><a href="/html/vodInfo.html?cateId='+beforeId+'&allName='+fileId+'&flag=focus&page='+currentPage+'" target="_blank"><img src="'+imgName+'" onerror="javascript:this.src=\''+imageurl+'\'"></a></li>';//name='+encodeURIComponent(encodeURIComponent(rtmp_play_url_ckplayer))+'&
+                        dom1 += '<li><h3><a href="/html/vodInfo.html?cateId='+beforeId+'&allName='+fileId+'&flag=focus&page='+currentPage+'" target="_blank">'+name_sub+'</a></h3></li>';//name='+encodeURIComponent(encodeURIComponent(rtmp_play_url_ckplayer))+'&
+                        dom2 += '<li><a href="/html/vodInfo.html?cateId='+beforeId+'&allName='+fileId+'&flag=focus&page='+currentPage+'" target="_blank"><div style="position: relative;width: 100%;height: 100%;"><img src="'+imgName+'" onerror="javascript:this.src=\''+imageurl+'\'"><div class="duration_css" style="color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); opacity: 0.5; position: absolute;right: 0px;  bottom: 0px; width: 53px;height:15px;">'+duration+'</div></div></a></li>';//name='+encodeURIComponent(encodeURIComponent(rtmp_play_url_ckplayer))+'&
+                        $("#while_img").append(dom);
+                        $("#while_text").append(dom1);
+                        $("#select_img").append(dom2);
+
+                    }
+                }
+            },
+            error:function()
+            {
+                //top.location.href = "/login.html";
+            }
+        })
+
+        //最新视频
+        $.ajax({
+            type:"GET",
+            url: locationHref+"/rest/client/vodTypes/"+currentPageCount+"/"+currentPage+"/"+currentPageCount+"/latest",//获取最新视频
+            async: false,
+            success:function(data, textStatus, request)
+            {
+                var obj = data;
+                var length =obj.total;
+                var item = obj.items;
+                if(item != null)
+                {
+                    for(var i=0;i<item.length;i++)
+                    {
+                        var allName = item[i].name;
+                        var name = allName.substr(allName.lastIndexOf("/")+1,allName.length);
+                        var name_sub = name.substr(0,name.lastIndexOf("."));
+                        var advertising = item[i].advertising;
+                        if(advertising != null)
+                        {
+                            var ad1Path = advertising.ad1Path;
+                            var ad1Duration = advertising.ad1Duration;
+                            var ad2Path = advertising.ad2Path;
+                        }
+                        var browHistory = item[i].browHistory;
+                        var imgName = "";
+                        var imgResolution = "";
+                        var img_url = "";
+                        var http_play_url = replace_url(item[i].httpUrl);
+                        var rtmp_play_url_ckplayer = replace_url(item[i].rtmpUrl);
+                        var cfg = item[i].cfg;
+                        var bitrate;
+                        var frameRate;
+                        var duration = "";
+                        var format = "";
+                        var resolution = "";
+                        if(cfg != null && cfg != undefined)
+                        {
+                            frameRate = cfg.frameRate;
+                            bitrate = cfg.bitrate;
+                            var img = cfg.img;
+                            duration = cfg.duration;
+                            format = cfg.format;
+                            resolution = cfg.resolution;
+                            if(duration == undefined || format == undefined || resolution == undefined)
+                            {
+                                duration = "";
+                                format = "";
+                                resolution = "";
+                            }
+                            if(img != null)
+                            {
+                                for(var k=0;k<img.length;k++)
+                                {
+                                    imgName = img[0].fileName;
+                                    if(imgName != undefined)
+                                    {
+                                        imgName = replace_url(imgName);
+                                    }
+                                    imgResolution = img[0].resolution;
+                                }
+                            }
+
+                        }
+                        var createTime = item[i].createTime;
+                        var description = item[i].description;
+                        var fileId = item[i].fileId;
+                        var hotFlags = item[i].hotFlags;
+                        var logo = item[i].logo;
+                        if(logo != null)
+                        {
+                            var osdvisible = logo.visible;
+                            var level = logo.level;
+                            var vertical = logo.vertical;
+                            var levelShift = logo.levelShift;
+                            var verticalShift = logo.verticalShift;
+                        }
+                        var mediaTypeId = item[i].mediaTypeId;
+                        var step = item[i].step;
+                        if(step != null)
+                        {
+                            var stepStartPlay = step.stepStartPlay;
+                            var stepStopPlay = step.stepStopPlay;
+                        }
+                        var vodTypeId = item[i].vodTypeId;
+                        //----------------最新视频-------------------
+                        var dom3 = '<div class="tex-content-div">';
+                        dom3 += '<div class="tex-content-left">';
+                        dom3 += '<span class="data">视频分类</span>';
+                        dom3 += '</div>';
+                        dom3 += '<div class="tex-content-right"  style="word-wrap:break-word;word-break:break-all;" >';
+                        dom3 += '<a href="/html/vodInfo.html?cateId='+beforeId+'&allName='+fileId+'&flag=latest&page='+currentPage+'" title="名称 : '+name_sub+'&#10观看 : '+browHistory+'&#10播放时间 : '+duration+'">';//name='+encodeURIComponent(encodeURIComponent(rtmp_play_url_ckplayer))+'&
+                        dom3 += '<span>'+name_sub+'</span>';
+                        dom3 += '</a>';
+                        dom3 += '</div>';
+                        dom3 += '</div>';
+                        $("#new_video").append(dom3);
+                    }
+
+                    aoku_slider();
+                }
+            },
+            error:function()
+            {
+                //top.location.href = "/login.html";
+            }
+        })
+
+        //热点视频
+        $.ajax({
+            type:"GET",
+            url: locationHref+"/rest/client/vodTypes/"+4+"/"+currentPage+"/get/hot",//获取视频热点
+            async: false,
+            success:function(data, textStatus, request)
+            {
+                var obj = data;
+                var length =obj.total;
+                var item = obj.items;
+                if(item != null)
+                {
+                    for(var i=0;i<item.length;i++)
+                    {
+                        var allName = item[i].name;
+                        var name = allName.substr(allName.lastIndexOf("/")+1,allName.length);
+                        var name_sub = name.substr(0,name.lastIndexOf("."));
+                        var advertising = item[i].advertising;
+                        if(advertising != null)
+                        {
+                            var ad1Path = advertising.ad1Path;
+                            var ad1Duration = advertising.ad1Duration;
+                            var ad2Path = advertising.ad2Path;
+                        }
+                        var browHistory = item[i].browHistory;
+                        var imgName = "";
+                        var imgResolution = "";
+                        var img_url = "";
+                        var http_play_url = replace_url(item[i].httpUrl);
+                        var rtmp_play_url_ckplayer = replace_url(item[i].rtmpUrl);
+                        var cfg = item[i].cfg;
+                        var bitrate;
+                        var frameRate;
+                        var duration = "";
+                        var format = "";
+                        var resolution = "";
+                        if(cfg != null && cfg != undefined)
+                        {
+                            frameRate = cfg.frameRate;
+                            bitrate = cfg.bitrate;
+                            var img = cfg.img;
+                            duration = cfg.duration;
+                            format = cfg.format;
+                            resolution = cfg.resolution;
+                            if(duration == undefined || format == undefined || resolution == undefined)
+                            {
+                                duration = "";
+                                format = "";
+                                resolution = "";
+                            }
+                            if(img != null)
+                            {
+                                for(var k=0;k<img.length;k++)
+                                {
+                                    imgName = img[0].fileName;
+                                    if(imgName != undefined)
+                                    {
+                                        imgName = replace_url(imgName);
+                                    }
+                                    imgResolution = img[0].resolution;
+                                }
+                            }
+                        }
+                        var createTime = item[i].createTime;
+                        var description = item[i].description;
+                        var fileId = item[i].fileId;
+                        var hotFlags = item[i].hotFlags;
+                        var logo = item[i].logo;
+                        if(logo != null)
+                        {
+                            var osdvisible = logo.visible;
+                            var level = logo.level;
+                            var vertical = logo.vertical;
+                            var levelShift = logo.levelShift;
+                            var verticalShift = logo.verticalShift;
+                        }
+                        var mediaTypeId = item[i].mediaTypeId;
+                        var step = item[i].step;
+                        if(step != null)
+                        {
+                            var stepStartPlay = step.stepStartPlay;
+                            var stepStopPlay = step.stepStopPlay;
+                        }
+                        var vodTypeId = item[i].vodTypeId;
+
+
+                        //-----------------热点推荐-------------------
+                        var dom4 = '<div class="content-warp">';
+                        dom4 += '<div class="VideoImage">';
+                        dom4 += '<a target="_blank" href="/html/vodInfo.html?cateId='+beforeId+'&allName='+fileId+'&flag=hot&page='+currentPage+'" title="'+name_sub+'" >';//name='+encodeURIComponent(encodeURIComponent(rtmp_play_url_ckplayer))+'&
+                        dom4 += '<img width="100%" border="0" height="100%" src="'+imgName+'" onerror="javascript:this.src=\''+imageurl+'\'">';
+                        dom4 += '<div class="duration_css" style="color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); opacity: 0.5; position: relative;left: 105px;  bottom: 20px; width: 53px;height:15px;">'+duration+'</div>';
+                        dom4 += '<a target="_blank" href="" title="'+name_sub+'" >';
+                        dom4 += '<a target="_blank" href="" title="'+name_sub+'" >';
+                        dom4 += '</a>';
+                        dom4 += '</div>';
+                        dom4 += '<div class="text-wrap" style="word-wrap:break-word;word-break:break-all;" >';
+                        dom4 += '<a target="_blank" href="" title="'+name_sub+'" >';
+                        dom4 += ''+name_sub+'';
+                        dom4 += '</a>';
+                        dom4 += '</div>';
+                        dom4 += '<div class="text-wrap">';
+                        dom4 += '<span class="tip">观看:</span> <span class="data">'+browHistory+'</span>&nbsp;';
+                        dom4 += '</div>';
+                        dom4 += '</div>';
+                        if(i < 4)
+                        {
+                            $("#hot_remmend").append(dom4);
+                        }
+                    }
+                }
+            },
+            error:function()
+            {
+                //top.location.href = "/login.html";
+            }
+        })
+
+        /*
+         * 点播
+         */
+        $.ajax({
+            type: "GET",
+            async: false,
+            url: locationHref+"/rest/client/vodTypes",//获取点播分类
+            success:function(data, textStatus, request)
+            {
+                var obj = data;
+                if(obj != null)
+                {
+                    for (var i = 0; i < obj.length; i++) {
+                        var id = obj[i].id;
+                        var name = obj[i].name;
+                        var visible = obj[i].visible;
+                        var subNames = obj[i].subNames;
+                        var bPublic = obj[i].bPublic;
+                        var vipLevel = obj[i].vipLevel;
+                        var url = "/html/moduleList.html?id=" + id + '&name=' + encodeURIComponent(encodeURIComponent(name));
+                        if (visible && id != "") {
+                            /*var flag = true;
+                        if(bPublic == true)
+                        {
+                            flag = true;
+                        }
+                        else if(bPublic == false && vipLevel <= user_level)
+                        {
+                            flag = true;
+                        }
+                        else
+                        {
+                            flag = false;
+                        }
+                        if(flag)
+                        {*/
+                            var dom2 = '';
+                            var dom = '<div class="index-vod">';
+                            dom += '<div class="vod-div">';
+                            dom += '<div class="hot-head">';
+                            dom += '<div class="div-width3 head-left HeadTitle"><a href="javascript:;">'+name+'</a></div>';
+                            dom += '<div class=" div-width3 head-right text-center notice-right-head"><a href="'+url+'">更多>></a></div>';
+                            dom += '</div>';
+                            dom += '<div class="hot-content">';
+                            $.ajax({
+                                type:"GET",
+                                url: locationHref+ "/rest/client/vodTypes/"+id+"/"+currentPageCount+"/"+currentPage+"/get", //获取一个点播分类详细信息,
+                                async: false,
+                                success:function (edata, textStatus, request)
+                                {
+                                    var obj = edata;
+                                    var length =obj.total;
+                                    var item = obj.items;
+                                    if(item != null)
+                                    {
+                                        for(var j=0; j <item.length; j++)
+                                        {
+                                            var fileId = item[j].fileId;
+                                            var allName = item[j].name;
+                                            var video_name = allName.substr(allName.lastIndexOf("/")+1,allName.length);
+                                            var vodTypeId = item[j].vodTypeId;
+                                            var mediaTypeId = item[j].mediaTypeId;
+                                            var imgName = "";
+                                            var imgResolution = "";
+                                            var img_url = "";
+                                            var http_play_url = replace_url(item[j].httpUrl);
+                                            var rtmp_play_url_ckplayer = replace_url(item[j].rtmpUrl);
+                                            var cfg = item[j].cfg;
+                                            var bitrate;
+                                            var frameRate;
+                                            var duration = "";
+                                            var format = "";
+                                            var resolution = "";
+                                            if(cfg != null && cfg != undefined)
+                                            {
+                                                frameRate = cfg.frameRate;
+                                                bitrate = cfg.bitrate;
+                                                var img = cfg.img;
+                                                duration = cfg.duration;
+                                                format = cfg.format;
+                                                resolution = cfg.resolution;
+                                                if(duration == undefined || format == undefined || resolution == undefined)
+                                                {
+                                                    duration = "";
+                                                    format = "";
+                                                    resolution = "";
+                                                }
+                                                if(img != null)
+                                                {
+                                                    for(var k=0; k<img.length; k++)
+                                                    {
+                                                        imgName = img[0].fileName;
+                                                        if(imgName != undefined)
+                                                        {
+                                                            imgName = replace_url(imgName);
+                                                        }
+                                                        imgResolution = img[0].resolution;
+                                                    }
+                                                }
+                                            }
+
+                                            var description = "";
+                                            var mainTitle = "";
+                                            var subTitle = "";
+                                            var info = item[j].info;
+                                            var name = video_name.substr(0,video_name.lastIndexOf("."));
+                                            if(info != null)
+                                            {
+                                                description = info.description;
+                                                subTitle = info.subTitle;
+                                                mainTitle = info.mainTitle;
+                                                if(mainTitle != "" )
+                                                {
+                                                    name = mainTitle;
+                                                }
+                                                else if(subTitle != "")
+                                                {
+                                                    name = subTitle;
+                                                }
+                                            }
+                                            var browHistory = item[j].browHistory;
+
+                                            dom += '<div class="content-warp">';
+                                            dom += '<div class="VideoImage">';
+                                            dom += '<a target="_blank" href="/html/vodInfo.html?cateId='+id+'&allName='+ fileId +'&page='+ currentPage +'">'; //name='+encodeURIComponent(encodeURIComponent(rtmp_play_url_ckplayer))+'&
+                                            dom += '<img width="100%" border="0" height="100%" src="'+imgName+'" onerror=" javascript: this.src=\''+imageurl+'\'">';
+                                            dom += '<div class="duration_css" style="color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); opacity: 0.5; position: relative;left: 105px;  bottom: 20px; width: 53px;height:15px;">'+duration+'</div>';
+                                            dom += '</a>';
+                                            dom += '</div>';
+                                            dom += '<div class="text-wrap"  style="word-wrap:break-word;word-break:break-all;" >';
+                                            dom += '<a target="_blank" href=" /html/vodInfo.html?cateId='+id+'&allName='+fileId+'&page=' + currentPage +'">'; //name='+encodeURIComponent(encodeURIComponent(rtmp_play_url_ckplayer))+'&
+                                            dom += ''+name+'';
+                                            dom += '</a>';
+                                            dom += '</div>';
+                                            dom += '<div class="text-wrap">';
+                                            dom += '<span class="tip">观看:</span> <span class="data">'+browHistory+'</span>&nbsp;';
+                                            //dom += '<span class="tip">观看:</span> <span class="data">1</span>&nbsp;';
+                                            dom += '</div>';
+                                            dom += '</div>';
+                                        }
+                                        $.ajax({
+                                            type:"GET",
+                                            url: locationHref+"/rest/client/vodTypes/"+id+"/" + 10+"/"+1+ "/orderByHistory", //获取一个点播分类详细信息,通过记录排序
+                                            async: false,
+                                            success:function(hdata, textStatus, request)
+                                            {
+                                                var obj = hdata;
+                                                var items = obj.items;
+                                                var total = obj.total;
+                                                if(items != null)
+                                                {
+                                                    for(var h=0;h<items.length;h++)
+                                                    {
+                                                        var orderFileId = items[h].fileId;
+                                                        var orderBrowHistory = items[h].browHistory;
+
+                                                        var orderAllName = items[h].name;
+                                                        var order_video_name = orderAllName.substr(orderAllName.lastIndexOf("/")+1,orderAllName.length);
+                                                        var orderName = order_video_name.substr(0,order_video_name.lastIndexOf("."));
+                                                        var orderInfo = items[h].info;
+                                                        var orderDescription = "";
+                                                        var orderMainTitle = "";
+                                                        var orderSubTitle = "";
+                                                        if(orderInfo != null)
+                                                        {
+                                                            orderDescription = orderInfo.description;
+                                                            orderSubTitle = orderInfo.subTitle;
+                                                            orderMainTitle = orderInfo.mainTitle;
+                                                            if(orderMainTitle != "" )
+                                                            {
+                                                                orderName = orderMainTitle;
+                                                            }
+                                                            else if(orderSubTitle != "")
+                                                            {
+                                                                orderName = orderSubTitle;
+                                                            }
+                                                        }
+                                                        dom2 += '<div class="ranking-content">';
+                                                        dom2 += '<div class="div-width76 head-left div-height"  style="word-wrap:break-word;word-break:break-all;" >';
+                                                        dom2 += '<a href="/html/vodInfo.html?cateId='+id+'&allName='+orderFileId+'&page=1">'; //name='+encodeURIComponent(encodeURIComponent(rtmp_play_url_ckplayer))+'&
+                                                        dom2 += ''+orderName+'';
+                                                        dom2 += '</a></div>';
+                                                        dom2 += '<div class="div-width24 head-right  notice-right-head">'+orderBrowHistory+'</div>';
+                                                        dom2 += '</div>';
+                                                    }
+                                                }
+                                            }
+                                        })
+
+                                    }
+                                },
+                                error:function()
+                                { //top.location.href = "/login.html";
+                                }
+                            })
+                            dom += '</div>';
+                            dom += '</div>';
+                            dom += '<div class="vod-right-div">';
+                            dom += '<div class="TabTitleBox">';
+                            dom += '<div class="text-float-left TabTitle_Dis" >';
+                            dom += '<a href="javascript:;">浏览排行</a>';
+                            dom += '</div>';
+                            dom += '</div>';
+                            dom += '<div class="ranking-div" id="watch_his">';
+                            dom += '<div class="ranking-content-div">';
+                            dom += '<div style="padding-top:16px;"></div>';
+                            dom += dom2;
+                            dom += '</div>';
+                            dom += '</div>';
+                            dom += '</div>';
+                            dom += '</div>';
+                            if(id != "")
+                            {
+                                $("#vod_content").append(dom);
+                            }
+                       //}
+                    }
+                }
+                }
+            },
+            error:function()
+            {
+                //top.location.href = "/login.html";
+            }
+        })
+    }
+
+
+    function replace_url(url)
+    {
+        var host = window.location.hostname;
+        var before = url.substr(0,url.indexOf("//")+2);
+        var after = "";
+
+        if(url.substring(before.length).lastIndexOf(":") != -1)
+        {
+            after = url.substr(url.lastIndexOf(":"));
+        }
+        else
+        {
+            var temp = url.substring(before.length);
+            after = temp.substring(temp.indexOf("/"));
+        }
+
+        return (before+host+after);
+    }
+</script>
+
+</head>
+<body>
+    <div id="loadHtml_head"></div>
+
+    <!-- 轮播图和最新视频显示 -->
+    <div class="index-focus">
+        <div id="zSlider">
+            <div id="picshow">
+                <div id="picshow_img">
+                    <ul id="while_img">
+
+                    </ul>
+                </div>
+                <div id="picshow_tx">
+                    <ul id="while_text">
+
+                    </ul>
+                </div>
+            </div>
+            <div id="select_btn">
+                <ul id="select_img">
+
+                </ul>
+            </div>
+        </div>
+        <div class="head-newvod">
+            <div class="tex-head">
+                <div class="tex-head-left">
+                    <p>最新视频</p>
+                </div>
+                <div class="tex-head-right"></div>
+            </div>
+
+            <div class="tex-content" id="new_video">
+                <div style="padding-top:10px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 热点推荐,公告,同步直播 -->
+    <div class="index-host">
+        <div class="hot-div">
+            <div class="hot-head HeadTitle">热点推荐</div>
+            <div class="hot-content" id="hot_remmend">
+
+            </div>
+        </div>
+        <div class="notice-live-div">
+            <div class="hot-head">
+                <div class="HeadTitle head-left div-width3">新闻公告</div>
+                <div class="head-right div-width3 text-center notice-right-head"><a href="/html/noticeList.html">更多>></a></div>
+            </div>
+            <div class="notice-content" id="notice_news">
+
+            </div>
+            <hr style="color: #E3E3E3">
+            <div class="hot-head">
+                <div class="HeadTitle head-left div-width3">同步直播</div>
+                <div class="head-right div-width3 text-center notice-right-head"><a href="/html/live.html">更多>></a></div>
+            </div>
+            <div class="notice-content" id="live_content">
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 点播 -->
+    <div class="index-content" id="vod_content">
+
+    </div>
+
+
+    <div style="clear: both;"></div>
+    <div id="loadHtml_bottom"></div>
+</body></html>

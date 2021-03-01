@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<link href="css/dialog.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/jquery.corner.js"></script>
+	<script type="text/javascript" src="js/admin_common.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+
+	<script type="text/javascript">
+		var　BuildingPage ;
+		var Delete ;
+		var DeleteMethod ;
+		var Edit;
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#tab_setting_1').html($.i18n.prop('PrefabricatedBits'));
+					$('#th_1').html($.i18n.prop('SerialNumber'));
+					$('#th_2').html($.i18n.prop('PrefabricatedBitName'));
+					$('#th_3').html($.i18n.prop('PrefabricatedBitToken'));
+					$('#th_4').html($.i18n.prop('Operation'));
+					$('#th_6').html($.i18n.prop('Zoom'));
+					$('#toback').html($.i18n.prop('Back'));
+
+					BuildingPage = $.i18n.prop('BuildingPage') ;
+					Delete = $.i18n.prop('Delete') ;
+					DeleteMethod = $.i18n.prop('DeleteMethod') ;
+					Edit = $.i18n.prop('Edit') ;
+				}
+			});
+		});
+
+		(function($){
+			$.ajaxSetup({ cache: false });
+			$.getUrlParam = function(name)
+			{
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			};
+		})(jQuery);
+		var locationHref =  window.location.protocol+"//"+window.location.host;
+		var deviceIp = $.getUrlParam("deviceIp");
+		var ProfileToken = $.getUrlParam("ProfileToken");
+
+		//点播分类
+		$(function(){
+			$.ajaxSetup({ cache: false });
+			init_onvif();
+		})
+		function init_onvif()
+		{
+			$("#main_body").empty();
+			window.top.art.dialog({id:"wait",content:BuildingPage+"...<img width=20 src='images/loading.gif'>"});
+			 $.ajax({
+				 type: "GET",
+				 async: false,
+				 url: locationHref+"/rest/admin/Onvif/Ptz/preset/"+deviceIp+"/"+ProfileToken+"",
+				 success: function(data)
+				 {
+					 var count = 0;
+					 var obj = data;
+					 if(obj != null)
+					 {
+						 for(var i=0;i<obj.length;i++)
+						 {
+							 count++;
+							 var PresetName = obj[i].PresetName;
+							 var PresetToken = obj[i].PresetToken;
+							 var x = obj[i].x;
+							 var y = obj[i].y;
+							 var zoom = obj[i].zoom;
+
+							 var del = '<a href="javascript:;" onclick="delPreset(\''+deviceIp+'\',\''+ProfileToken+'\',\''+PresetToken+'\')" class="sp_a_but_cir sp_a_but_padding btn btn-info">'+Delete+'</a>&nbsp';
+
+							 var dom ='<tr >';
+							 dom+='<td align="left" >'+count+'</td>';
+							 dom+='<td align="left" >'+PresetName+'</td>';
+							 dom+='<td align="left" >'+PresetToken+'</td>';
+							 dom+='<td align="center" >'+x+'---'+y+'</td>';
+							 dom+='<td align="center" >'+zoom+'</td>';
+							 dom+='<td align="center" >'+del+'</td>';
+							 $("#main_body").append(dom);
+						 }
+					 }
+				 },
+				 error:function(data)
+				 {
+					 var errorObj = data;
+					 var status = data.status;
+					 var statusText = data.statusText
+					 if(status == 401 || status == 400)
+					 {
+						 //top.location.href = "login.html";
+					 }
+					 else if(status == 409)
+					 {
+						 window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					 }
+				 }
+
+			 })
+			 window.top.art.dialog({id:"wait"}).close();
+		}
+
+
+		function delPreset(deviceIp,ProfileToken,PresetToken)
+		{
+			$.ajax({
+				type: "DELETE",
+				async: false,
+				data: stringify(info),
+				url: locationHref+"/rest/admin/Onvif/Ptz/preset/"+deviceIp+"/"+ProfileToken+"/"+PresetToken+"",
+				success:function(data)
+				{
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+					else if(status == 409)
+					{
+						window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					}
+				}
+			})
+		}
+
+		function toBackManager()
+		{
+			window.location.href = "onvifManager.html?deviceIp="+deviceIp+"&ProfileToken="+ProfileToken+"";
+		}
+	</script>
+</head>
+<body scroll="yes" style="overflow-y: scroll;">
+	<div class="pad-10">
+		<div class="col-tab">
+			<ul class="tabBut cu-li">
+				<li onclick="SwapTab('setting','on','',2,1);" class="on" id="tab_setting_1">预制位</li>
+			</ul>
+			<div id="div_setting_1" class="contentList pad-10">
+				<div class="content-menu" >
+					<a href="javascript:;" onclick="toBackManager()" class="ext_btn ext_btn_success" id="toback">返回</a>
+				</div>
+				<table id="tblList" width="100%" border="0" cellpadding="8" cellspacing="0" class="list_table">
+					<thead>
+					<tr>
+						<th align="center" id="th_1" width="20%">序号</th>
+						<th align="center" id="th_2">预制位名称</th>
+						<th align="center" id="th_3">预制位token</th>
+						<th align="center" id="th_5">x---y</th>
+						<th align="center" id="th_6">变焦</th>
+						<th align="center" id="th_4" width="30%">操作</th>
+					</tr>
+					</thead>
+					<tbody id="main_body">
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+<script type="text/javascript">
+	function SwapTab(name,cls_show,cls_hide,cnt,cur){
+
+		for(i=1;i<=cnt;i++){
+			if(i==cur){
+				$('#div_'+name+'_'+i).show();
+				$('#tab_'+name+'_'+i).attr('class',cls_show);
+			}else{
+				$('#div_'+name+'_'+i).hide();
+				$('#tab_'+name+'_'+i).attr('class',cls_hide);
+			}
+		}
+		if(cur == 1)
+		{
+			init_vod_cat();
+		}
+	}
+</script>
+</body>
+</html>
+
+

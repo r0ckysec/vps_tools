@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<title>欢迎登录后台管理系统</title>
+	<link rel="stylesheet" type="text/css" href="css/dialog.css">
+	<link href="css/style.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jbase64.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="js/cloud.js"></script>
+
+
+	<script type="text/javascript" language="javascript">
+		$(function(){
+			$('.loginbox').css({'position':'absolute','left':($(window).width()-692)/2});
+			$(window).resize(function(){
+			$('.loginbox').css({'position':'absolute','left':($(window).width()-692)/2});
+			})
+		});
+		function Admin(uname,pwd)
+		{
+			this.uname = uname;
+			this.pwd = pwd;
+		}
+
+		function make_base_auth(name,pass) {
+			var tok = name + ':' + pass;
+			var hash = encode64(tok);
+			return "Basic " + hash;
+		}
+
+		function login()
+		{
+			var name = $("#uname").val();
+			var pass =$("#pwd").val();
+			var login_auth = make_base_auth(name,pass);
+			var checkVal = parseInt($("input[type='radio']:checked").val());
+			if(checkVal != undefined)
+			{
+				if(checkVal == 1)
+				{
+					$.ajax({
+						type:"PUT",
+						url:locationHref+"/rest/admin/SupperAdminUsers/login",//超级管理员登录
+						beforeSend : function(req) {
+							req.setRequestHeader('Authorization', login_auth);
+							//req.setRequestHeader('AMS_SESSION_ID',auth);
+						},
+						success: function(data, textStatus, request)
+						{
+							/*var aaa = request.getResponseHeader("AMS_SESSION_ID");
+							setcookieAuth("AMS_SESSION_ID",aaa,30);//cookie
+							setcookie("Authorization",login_auth,30);//auth*/
+							setcookie("LOGINTYPE",1,30);
+							setcookie("ADMINNAME",name,30);
+							//var authorization = getcookie("Authorization");//auth
+							$.ajax({
+								type: "GET",
+								async: false,
+								url: locationHref+"/rest/admin/system/getLicenseInfo",//获取授权
+								/*beforeSend : function(req) {
+									req.setRequestHeader('Authorization', authorization);
+									req.setRequestHeader('AMS_SESSION_ID',aaa);
+								},*/
+								success: function(data)
+								{
+									var obj = data;
+									if(obj != '')
+									{
+										var valid = obj.valid;
+										var supportVod = obj.supportVod;
+										var format = obj.formatstr;
+										var formatObj = $.parseJSON(format);
+										var liveCount;
+										for(var p in formatObj){
+											if(p == "直播频道数")
+											{
+												liveCount = formatObj[p];
+												setcookie("LIVECOUNT",liveCount,1);
+											}
+										}
+										if(valid == false)
+										{
+											parent.location.href='/lic_admin.html';
+										}
+										else
+										{
+											if(supportVod == true)
+											{
+												window.location.href='/admin.html';
+											}
+											else
+											{
+												window.location.href='/live_admin.html';
+											}
+
+										}
+									}
+								},
+								error:function(data)
+								{
+									var errorObj = data;
+									var status = data.status;
+									var statusText = data.statusText;
+									if(status == 401 || status == 400)
+									{
+										top.location.href = "login.html";
+									}
+									else if(status == 409)
+									{
+										window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+									}
+								}
+							})
+						},
+						error:function(data)
+						{
+							var status = data.status;
+							var statusText = data.statusText;
+							if(status == 401 || status == 400)
+							{
+								top.location.href = "login.html";
+							}
+							else if(status == 409)
+							{
+								window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+							}
+						}
+					})
+				}
+				else
+				{
+					$.ajax({
+						type:"PUT",
+						url:locationHref+"/rest/admin/AdminUsers/login",//管理员登录
+						beforeSend : function(req) {
+							req.setRequestHeader('Authorization', login_auth);
+							//req.setRequestHeader('AMS_SESSION_ID',auth);
+						},
+						success:function(data, textStatus, request)
+						{
+							/*var aaa = request.getResponseHeader("AMS_SESSION_ID");
+							setcookieAuth("AMS_SESSION_ID",aaa,30);
+							setcookie("Authorization",login_auth,30);*/
+							setcookie("LOGINTYPE",2,30);
+							setcookie("ADMINNAME",name,30);
+							//var authorization = getcookie("Authorization");//auth
+							$.ajax({
+								type: "GET",
+								async: false,
+								url: locationHref+"/rest/admin/system/getLicenseInfo",//获取授权
+								/*beforeSend : function(req) {
+									req.setRequestHeader('Authorization', authorization);
+									req.setRequestHeader('AMS_SESSION_ID',aaa);
+								},*/
+								success: function(data)
+								{
+									var obj = data;
+									if(obj != '')
+									{
+										var valid = obj.valid;
+										var supportVod = obj.supportVod;
+										var format = obj.formatstr;
+										var formatObj = $.parseJSON(format);
+										var liveCount;
+										for(var p in formatObj){
+											if(p == "直播频道数")
+											{
+												liveCount = formatObj[p];
+												setcookie("LIVECOUNT",liveCount,1);
+											}
+										}
+										if(valid == false)
+										{
+											parent.location.href='/lic_admin.html';
+										}
+										else
+										{
+											if(supportVod == true)
+											{
+												window.location.href='/admin.html';
+											}
+											else
+											{
+												window.location.href='/live_admin.html';
+											}
+
+										}
+									}
+								},
+								error:function(data)
+								{
+									var errorObj = data;
+									var status = data.status;
+									var statusText = data.statusText;
+									if(status == 401 || status == 400)
+									{
+										top.location.href = "login.html";
+									}
+									else if(status == 409)
+									{
+										window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+									}
+								}
+							})
+						},
+						error:function(data)
+						{
+							var errorObj = data;
+							var status = data.status;
+							var statusText = data.statusText;
+							if(status == 401 || status == 400)
+							{
+								top.location.href = "login.html";
+							}
+							else if(status == 409)
+							{
+								window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+							}
+						}
+					})
+				}
+			}
+			else
+			{
+				window.top.art.dialog({id:"mesg",content:"请选中登录身份!",time:1});
+			}
+		}
+	</script>
+</head>
+
+<body style="background-color:#1c77ac; background-image:url(); background-repeat:no-repeat; background-position:center top; overflow:hidden;">
+    <div id="mainBody">
+      <div id="cloud1" class="cloud"></div>
+      <div id="cloud2" class="cloud"></div>
+    </div>
+	<div class="logintop">
+    	<span>欢迎登录后台管理界面平台</span>
+		<ul>
+			<li><a target="_blank" href="/html/index.html">回首页</a></li>
+		</ul>
+    </div>
+    <div class="loginbody">
+		<span class="systemlogo"></span>
+		<div class="loginbox">
+			<form id="" method="post" action="">
+				<ul>
+				<li>超级管理员:<input name="loginType" checked type="radio" value="1">   管理员:<input name="loginType" type="radio" value="2" ></li>
+				<li><input id="uname" name="uname" type="text" class="loginuser" value="admin" onclick="JavaScript:this.value=''"/></li>
+				<li><input id="pwd" name="pwd" type="password" class="loginpwd" value="" onclick="JavaScript:this.value=''"  onkeydown="if(event.keyCode==13){login();}"  ></li>
+				<li><input type="button" class="loginbtn" value="登录" onclick="login()" /></li>
+				</ul>
+			</form>
+		</div>
+    </div>
+</body>
+</html>

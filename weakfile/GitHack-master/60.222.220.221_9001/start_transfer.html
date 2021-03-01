@@ -1,0 +1,447 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>开始视频转码</title>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<link href="/css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="/css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="/css/system.css" rel="stylesheet" type="text/css" />
+	<link href="/css/table_form.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="css/dialog.css" />
+	<script type="text/javascript" src="/js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="/js/formvalidator.js"></script>
+	<script type="text/javascript" src="/js/formvalidatorregex.js"></script>
+	<script type="text/javascript" src="/js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="js/changStatus.js"></script>
+	<style type="text/css">
+		.transfer_css
+		{
+			display:block;
+			background-color:#3C86C5;
+			width: 0px;
+			height: 4px;
+		}
+	</style>
+	<script type="text/javascript">
+		var time;
+		var PleaseSelect_A_TranscodingServer ;
+		var VideoNameCannotBeEmpty ;
+		var PleaseSelectTranscodingScheme ;
+		var addTransfer;
+		var TransferIng;
+		var PleaseInputVideoName;
+		var DoNotSameName;
+		var SelectDemandClassification;
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#information').html($.i18n.prop('EssentialInformation'));
+					$('#td_1').html($.i18n.prop('MediaName'));
+					$('#td_2').html($.i18n.prop('NameHints'));
+					$('#td_3').html($.i18n.prop('TranscodingScheme'));
+					$('#td_4').html($.i18n.prop('TranscodingFormat'));
+					$('#td_5').html($.i18n.prop('TranscodingState'));
+					$('#td_6').html($.i18n.prop('VODCategory'));
+
+					PleaseSelect_A_TranscodingServer = $.i18n.prop('PleaseSelect_A_TranscodingServer') ;
+					VideoNameCannotBeEmpty = $.i18n.prop('VideoNameCannotBeEmpty') ;
+					PleaseSelectTranscodingScheme = $.i18n.prop('PleaseSelectTranscodingScheme') ;
+					addTransfer = $.i18n.prop('AddTransfer') ;
+					TransferIng =  $.i18n.prop('TransferIng') ;
+					PleaseInputVideoName = $.i18n.prop('PleaseInputVideoName') ;
+					DoNotSameName = $.i18n.prop('DoNotSameName') ;
+					SelectDemandClassification = $.i18n.prop('SelectDemandClassification') ;
+				}
+			});
+		});
+
+		(function($){
+			$.getUrlParam = function(name)
+			{
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			}
+		})(jQuery);
+
+		function getQueryString(key){
+			var reg = new RegExp("(^|&)"+key+"=([^&]*)(&|$)");
+			var result = window.location.search.substr(1).match(reg);
+			return result?decodeURIComponent(result[2]):null;
+		}
+
+		var name = decodeURI(getQueryString("name"));
+		var beforeName = decodeURI(getQueryString("name"));
+		beforeName = beforeName.substr(0,beforeName.lastIndexOf("."));
+		var datapath = decodeURI($.getUrlParam("url"));
+		var mediaInfo = $.getUrlParam("mediaInfo");
+			mediaInfo = decodeURI(mediaInfo);
+
+		var id = "";
+		var arry_transfer = new Array();
+
+		$(function(){
+
+			if(name == "null")
+			{
+				$("#mediaName_status").css('display','none');
+				$("#mediaName_tip").css('display','none');
+			}
+			else
+			{
+				$("#mediaName_status").css('display','');
+				$("#mediaName_tip").css('display','');
+			}
+			createTfServerSelect("tfServerOuter");
+			createTfServerSelect_type("tfServerOuter_type");
+			$("#mediaName").val(name.substr(0,name.indexOf(".")));
+		});
+
+		String.prototype.replaceAll  = function(s1,s2){
+			return this.replace(new RegExp(s1,"gm"),s2);
+		}
+		var transfer_flag =  true;
+
+		//单个转码状态显示
+		function tranferstatus_simple(session_id)
+		{
+			time = setTimeout(function(){
+				$.ajax({
+					type: "GET",
+					url: locationHref+"/rest/admin/transfer/"+session_id+"/status",//获取转码状态
+					success: function(data)
+					{
+						var obj = data;
+						if(obj != "")
+						{
+							if(obj.percent == 100)
+							{
+								clearTimeout(time);
+								window.location.href = '/transfer_media_list.html';
+								window.top.art.dialog({id:'transfer'}).close();
+							}
+							else
+							{
+								$("#percent").css("width",obj.percent+"%");
+								$("#number").html(obj.percent+"%");
+								tranferstatus_simple(session_id);
+							}
+						}
+
+					},
+					error:function(data)
+					{
+						var errorObj = data;
+						var status = data.status;
+						var statusText = data.statusText
+						if(status == 401 || status == 400)
+						{
+							top.location.href = "login.html";
+						}
+						else if(status == 409)
+						{
+							window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+						}
+					}
+				})
+			},1000);
+		}
+
+
+		function tranferstatus(session_id,count)
+		{
+			transfer_flag = true;
+			setTimeout(function(){
+				$.ajax({
+					type: "GET",
+					url: locationHref+"/rest/admin/transfer/"+session_id+"/status",//获取转码状态
+					success: function(data)
+					{
+						var obj = data;
+						if(obj != '')
+						{
+							if(obj.percent == 100)
+							{
+								arry_transfer[count] = 100;
+							}
+							$("#percent"+count).css("width",obj.percent+"%");
+							$("#number"+count).html(obj.percent+"%");
+							tranferstatus(session_id,count);
+						}
+
+						for(var i=0;i<arry_transfer.length;i++)
+						{
+							if(arry_transfer[i] != 100)
+							{
+								transfer_flag = false;
+							}
+						}
+
+						if(transfer_flag)
+						{
+							window.location.reload();
+							window.top.art.dialog({id:'transfers'}).close();
+						}
+					},
+					error:function(data)
+					{
+						var errorObj = data;
+						var status = data.status;
+						var statusText = data.statusText
+						if(status == 401 || status == 400)
+						{
+							top.location.href = "login.html";
+						}
+						else if(status == 409)
+						{
+							window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+						}
+					}
+				})
+			},3000);
+		}
+
+
+
+		//转码
+		function startTransfer()
+		{
+			var mediaName = $("#mediaName").val();
+			var tf_select = $("#tf_select").val();
+			if(tf_select == "-1")
+			{
+				tf_select = "";
+			}
+			var tf_select_id = $("#tf_select_id").val();
+			if(tf_select_id == "-1")
+			{
+				tf_select_id = "";
+			}
+			var format = "";
+			$("input[name='format']").each(function(){
+				var formatChecked = $(this).attr("checked");
+				if(formatChecked == true || formatChecked == "true")
+				{
+					format = $(this).val();
+				}
+			})
+
+
+			var startTime = 0;
+			var endTime = 0;
+			var waterMark = "";
+			var waterWidth = 0;
+			var waterHeight = 0;
+
+			var dataPathNew = "";
+			var url = "";
+			var outFile1 = "";
+			var outFile = "";
+
+			if(mediaName == "" && mediaInfo != '' && mediaInfo != "null")
+			{
+				if(arry_transfer != '' && arry_transfer.length >0)
+				{
+					alert(TransferIng+"!!");
+					return false;
+				}
+				$("#percent_div").empty();
+				var obj = $.parseJSON(mediaInfo)
+				for(var i=0;i<obj.length;i++)
+				{
+					var name = obj[i].name;
+					var data_path = obj[i].description;
+					if(data_path != '' &&　data_path.indexOf("/")!=-1 )
+					{
+						var media_name = data_path.substring(data_path.lastIndexOf("/")+1,data_path.lastIndexOf("."));
+						url = data_path.replaceAll("/","\\");
+						dataPathNew = data_path.substr(0,data_path.lastIndexOf("/"));
+						outFile1 = dataPathNew + "/" + media_name +"_(1)."+ format;
+						outFile = outFile1.replaceAll("/","\\");
+						var tranfers = new transfer(tf_select,startTime,endTime,url,outFile,waterMark,waterWidth,waterHeight,tf_select_id);
+						var dom ='<div id="percent'+i+'" class="transfer_css" style="width: 100%;margin-top: 20px;">';
+							dom+='<div id="percent_name'+i+'" style="float: left;width:40%;height:12px;color: #CC0000;min-width: 20px;">'+media_name+'';
+							dom+='</div>';
+							dom+='<div id="number'+i+'" style="float: right;width:40%;height:12px;min-width: 20px;">';
+							dom+='</div>';
+							dom+='</div>';
+
+						arry_transfer[i] = i;
+						$("#percent_div").append(dom);
+						$.ajax({
+							type: "POST",
+							url: locationHref + "/rest/admin/transfer",//视频转码
+							async: false,
+							data: stringify(tranfers),
+							success: function (data) {
+								var statusObj = data;
+								var statusId = statusObj.id;
+								tranferstatus(statusId, i);
+
+							},
+							error: function (data) {
+								var errorObj = data;
+								var status = data.status;
+								var statusText = data.statusText
+								if (status == 401 || status == 400) {
+									top.location.href = "login.html";
+								}
+								else if (status == 409) {
+									window.top.art.dialog({
+										id: "mesg",
+										content: statusText + "!",
+										time: 2
+									});
+								}
+							}
+						});
+					}
+				}
+			}
+			else
+			{
+				if(datapath != '' &&　datapath.indexOf("/")!=-1 )
+				{
+					url = datapath.replaceAll("/","\\");
+					dataPathNew = datapath.substr(0,datapath.lastIndexOf("/"));
+					outFile1 = dataPathNew + "/" + mediaName +"."+ format;
+					outFile = outFile1.replaceAll("/","\\");
+				}
+				else
+				{
+					url = "";
+					dataPathNew = "";
+					outFile1 = "";
+					outFile = "";
+				}
+
+				var tranfers_info = new transfer(tf_select,startTime,endTime,url,outFile,waterMark,waterWidth,waterHeight,tf_select_id);
+
+				if(mediaName == "")
+				{
+					window.top.art.dialog({id:"mesg",content:PleaseInputVideoName+"!",time:1});
+				}
+				else
+				{
+					if(mediaName == beforeName)
+					{
+						window.top.art.dialog({id:"mesg",content:DoNotSameName+"!",time:1});
+					}
+					else
+					{
+						$.ajax({
+							type: "POST",
+							url: locationHref + "/rest/admin/transfer",//视频转码
+							async: false,
+							data: stringify(tranfers_info),
+							success: function (data) {
+								var statusObj = data;
+								var statusId = statusObj.id;
+								tranferstatus_simple(statusId);
+
+							},
+							error: function (data) {
+								var errorObj = data;
+								var status = data.status;
+								var statusText = data.statusText
+								if (status == 401 || status == 400) {
+									top.location.href = "login.html";
+								}
+								else if (status == 409) {
+									window.top.art.dialog({id: "mesg", content: statusText + "!", time: 2});
+								}
+							}
+						});
+					}
+				}
+
+			}
+
+		}
+	</script>
+</head>
+
+<body>
+	<div class="pad-10">
+		<div class="common-form">
+			<form id="myform" method="post" action="" name="myform">
+				<input type="hidden" name="id" id="id" value="">
+				<input type="hidden" name="name" id="name" value="">
+				<fieldset>
+					<legend id="information">基本信息</legend>
+					<table width="100%" class="table_form">
+						<tbody>
+							<div id="tips" style="color: #990000;text-indent: 10px"></div>
+							<tr id="mediaName_status" style="display: none;">
+								<td width="80" id="td_1">视频名称</td>
+								<td>
+									<div id="mediaName_outer">
+										<input type="text" name="mediaName" id="mediaName" class="input-text" size="40" value="">
+									</div>
+								</td>
+							</tr>
+							<tr id="mediaName_tip" style="display: none;">
+								<td width="80"></td>
+								<td colspan="2" style="color:red"id="td_2">若不修改名称,并且文件格式相同,则会覆盖原文件<td>
+							</tr>
+							<tr>
+								<td width="80" id="td_3">转码方案</td>
+								<td>
+									<div id="tfServerOuter" style="display:inline;"></div>
+								</td>
+							</tr>
+							<tr>
+								<td width="80" id="td_6">点播分类</td>
+								<td>
+									<div id="tfServerOuter_type" style="display:inline;"></div>
+								</td>
+							</tr>
+							<tr>
+								<td width="80" id="td_4">转码格式</td>
+								<td>
+									<input type="radio" name="format" value="mp4">mp4</input>
+									<input type="radio" name="format" value="flv" checked="checked">flv</input>
+									<input type="radio" name="format" value="m3u8">m3u8</input>
+								</td>
+							</tr>
+							<tr>
+								<td width="80" id="td_5">转码状态</td>
+								<td>
+									<div id="percent_div">
+										<div id="percent" class="transfer_css">
+											<div id="number">
+
+											</div>
+										</div>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</fieldset>
+				<input type="button" class="dialog" value="确定" id="transferMedia" name="transferMedia" onclick="startTransfer()">
+			</form>
+		</div>
+	</div>
+</body>
+</html>

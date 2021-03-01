@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;" name="viewport" />
+    <title>视频列表</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/ionicons.css" rel="stylesheet">   
+    <link href="css/jquery.bxslider.css" rel="stylesheet">   
+    <link href="css/style.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div id="container">
+    	<div id="header_load" style="width:100%;"></div>
+          <div class="row" id="loadMedia" style="margin-left:0px;margin-right:0px;">
+            
+          </div><!-- End Row -->
+          <div style="text-align: center;display:none" id="loading"><img src="images/loading.gif"/>&nbsp;&nbsp;数据正在加载中...</div>
+          
+      	<div id="bottom_load" style="width:100%;"></div>
+      <!-- End Footer -->
+    </div><!-- Container -->
+    <script src="js/jquery-1.11.2.min.js"></script>
+    <script src="js/jquery.bxslider.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/jquery.json-2.4.js"></script>
+	<script src="js/cookie.js"></script>
+	<script src="js/common.js"></script>
+    <script type="text/javascript">
+
+	$.getUrlParam = function(name)
+	{
+		var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+		var r = window.location.search.substr(1).match(reg);
+		if (r!=null) return unescape(r[2]); return null;
+	}
+	var vod_id = $.getUrlParam("id");//分类id
+	var host = window.location.hostname;
+	var port = window.location.port;
+
+	var vodCount = 1;
+	$(function(){
+		initData(vodCount);
+			
+		$("#header_load").load("header.html");
+		$("#bottom_load").load("bottom.html");
+	
+	});
+
+	function initData(count)
+	{
+		$("#loading").show();
+		$.ajax({
+			type:"GET",
+			url: locationHref+"/rest/client/vodTypes/"+vod_id+"/"+6+"/"+count+"/get",//获取一个点播分类详细信息,
+			async: false,
+			success:function(data, textStatus, request)
+			{
+				$("#loading").hide();
+				var obj = data;
+				var length =obj.total;
+				var item = obj.items;
+				if(item != null)
+				{
+					for(var i=0;i<item.length;i++)
+					{
+						var fileId = item[i].fileId;
+						var allName = item[i].name;
+						var video_name = allName.substr(allName.lastIndexOf("/")+1,allName.length);
+						var vodTypeId = item[i].vodTypeId;
+						var mediaTypeId = item[i].mediaTypeId;
+						var createTime = item[i].createTime;
+						var browHistory = item[i].browHistory;
+						var hotFlags = item[i].hotFlags;
+						var step = item[i].step;
+						if(step != null)
+						{
+							var stepStartPlay = step.stepStartPlay;
+							var stepStopPlay = step.stepStopPlay;
+						}
+						var advertising = item[i].advertising;
+						if(advertising != null)
+						{
+							var ad1Path = advertising.ad1Path;
+							var ad1Duration = advertising.ad1Duration;
+							var ad2Path = advertising.ad2Path;
+						}
+						var logo = item[i].logo;
+						if(logo != null)
+						{
+							var osdvisible = logo.visible;
+							var level = logo.level;
+							var vertical = logo.vertical;
+							var levelShift = logo.levelShift;
+							var verticalShift = logo.verticalShift;
+						}
+
+						var imgName;
+						var imgResolution;
+						var img_url;
+						var http_play_url;
+						var rtmp_play_url_ckplayer;
+						var cfg = item[i].cfg;
+						var bitrate;
+						var frameRate;
+						var duration = "";
+						var format = "";
+						var resolution = "";
+						if(cfg != null && cfg != undefined)
+						{
+							frameRate = cfg.frameRate;
+							bitrate = cfg.bitrate;
+							var img = cfg.img;
+							duration = cfg.duration;
+							format = cfg.format;
+							resolution = cfg.resolution;
+							if(duration == undefined || format == undefined || resolution == undefined)
+							{
+								duration = "";
+								format = "";
+								resolution = "";
+							}
+							if(img != null)
+							{
+								for(var k=0;k<img.length;k++)
+								{
+									imgName = img[0].fileName;
+									if(imgName != undefined)
+									{
+										imgName = replace_url(imgName);
+									}
+									imgResolution = img[k].resolution;
+								}
+							}
+						}
+
+						var description = "";
+						var mainTitle = "";
+						var subTitle = "";
+						var info = item[i].info;
+						var name = video_name.substr(0,video_name.lastIndexOf("."));
+						if(info != null)
+						{
+							description = info.description;
+							subTitle = info.subTitle;
+							mainTitle = info.mainTitle;
+							if(mainTitle != "" )
+							{
+								name = mainTitle;
+							}
+							else if(subTitle != "")
+							{
+								name = subTitle;
+							}
+						}
+
+						$("#loadMedia").append("<div class='video-item col-xs-6'>"+
+							"<dl>"+
+							"<dt>"+
+							"<a href='/html/mobile/detail.html?name="+fileId+"&catId="+vod_id+"'><img width='680' height='480px;' src='"+imgName+"' title='"+name+"'  class='img-responsive' /></a>"+
+							"<span class='time'>"+duration+"</span>"+
+							"</dt>"+
+							"<dd>"+
+							"<h4 style='overflow: hidden;height: 14px;'><a href='/html/mobile/detail.html?name="+fileId+"&catId="+vod_id+"'>"+name+"</a></h4>"+
+							"<p>"+
+							"<span><i class='icon ion-social-youtube'></i>"+browHistory+"</span>"+
+							"</p>"+
+							"</dd>"+
+							"</dl>"+
+							"</div>");
+
+					}
+				}
+
+				if(vodCount*6<length)
+				{
+					vodCount++;
+				}
+
+			},
+			error:function()
+			{
+				//top.location.href = "/login.html";
+			}
+		})
+
+	}
+	
+	var totalheight = 0;     //定义一个总的高度变量
+	function loadData_page()
+	{
+		totalheight = $(document).height();
+		var domtotalheight = parseFloat($(window).height()) + parseFloat($(window).scrollTop());     //浏览器的高度加上滚动条的高度
+/*		alert("windowheight:"+$(window).height()+"--windowscrollTop:"+$(window).scrollTop());
+		alert("totalheight:"+totalheight);
+		alert("documentheight:"+$(document).height());*/
+	    if (totalheight == domtotalheight)     //当文档的高度小于或者等于总的高度的时候，开始动态加载数据
+	    {
+			var vodStartCount = $("#loadMedia div").length;
+			var vodStartpage  = Math.ceil(vodStartCount/6);
+			//alert(vodCount+"--"+vodStartpage);
+			if(vodCount>vodStartpage)
+			{
+				$("#loading").show();
+
+				$.ajax({
+					type:"GET",
+					url: locationHref+"/rest/client/vodTypes/"+vod_id+"/6/"+vodCount+"/get",//获取一个点播分类详细信息,
+					async: false,
+					success:function(data, textStatus, request)
+					{
+						$("#loading").hide();
+						var obj = data;
+						var length =obj.total;
+						var item = obj.items;
+						if(item != null)
+						{
+							for(var i=0;i<item.length;i++)
+							{
+								var fileId = item[i].fileId;
+								var allName = item[i].name;
+								var video_name = allName.substr(allName.lastIndexOf("/")+1,allName.length);
+								var vodTypeId = item[i].vodTypeId;
+								var mediaTypeId = item[i].mediaTypeId;
+								var createTime = item[i].createTime;
+								var browHistory = item[i].browHistory;
+								var hotFlags = item[i].hotFlags;
+								var step = item[i].step;
+								if(step != null)
+								{
+									var stepStartPlay = step.stepStartPlay;
+									var stepStopPlay = step.stepStopPlay;
+								}
+								var advertising = item[i].advertising;
+								if(advertising != null)
+								{
+									var ad1Path = advertising.ad1Path;
+									var ad1Duration = advertising.ad1Duration;
+									var ad2Path = advertising.ad2Path;
+								}
+								var logo = item[i].logo;
+								if(logo != null)
+								{
+									var osdvisible = logo.visible;
+									var level = logo.level;
+									var vertical = logo.vertical;
+									var levelShift = logo.levelShift;
+									var verticalShift = logo.verticalShift;
+								}
+
+								var imgName;
+								var imgResolution;
+								var cfg = item[i].cfg;
+								var bitrate;
+								var frameRate;
+								var duration = "";
+								var format = "";
+								var resolution = "";
+								if(cfg != null && cfg != undefined)
+								{
+									frameRate = cfg.frameRate;
+									bitrate = cfg.bitrate;
+									var img = cfg.img;
+									duration = cfg.duration;
+									format = cfg.format;
+									resolution = cfg.resolution;
+									if(duration == undefined || format == undefined || resolution == undefined)
+									{
+										duration = "";
+										format = "";
+										resolution = "";
+									}
+									if(img != null)
+									{
+										for(var k=0;k<img.length;k++)
+										{
+											imgName = img[0].fileName;
+											if(imgName != undefined)
+											{
+												imgName = replace_url(imgName);
+											}
+											imgResolution = img[k].resolution;
+										}
+									}
+								}
+
+								var description = "";
+								var mainTitle = "";
+								var subTitle = "";
+								var info = item[i].info;
+								var name = video_name.substr(0,video_name.lastIndexOf("."));
+								if(info != null)
+								{
+									description = info.description;
+									subTitle = info.subTitle;
+									mainTitle = info.mainTitle;
+									if(mainTitle != "" )
+									{
+										name = mainTitle;
+									}
+									else if(subTitle != "")
+									{
+										name = subTitle;
+									}
+								}
+
+								$("#loadMedia").append("<div class='video-item col-xs-6'>"+
+									"<dl>"+
+									"<dt>"+
+									"<a href='/html/mobile/detail.html?name="+fileId+"&catId="+vod_id+"'><img width='680' height='480px;' src='"+imgName+"' title='"+name+"'  class='img-responsive' /></a>"+
+									"<span class='time'>"+duration+"</span>"+
+									"</dt>"+
+									"<dd>"+
+									"<h4 style='overflow: hidden;height: 14px;'><a href='/html/mobile/detail.html?name="+fileId+"&catId="+vod_id+"'>"+name+"</a></h4>"+
+									"<p>"+
+									"<span><i class='icon ion-social-youtube'></i>"+browHistory+"</span>"+
+									"</p>"+
+									"</dd>"+
+									"</dl>"+
+									"</div>");
+
+							}
+
+						}
+
+						if(vodCount*6<length)
+						{
+							vodCount++;
+						}
+					},
+					error:function()
+					{
+						//top.location.href = "/login.html";
+					}
+				})
+			}
+	    }
+	} 
+	
+	$(window).scroll( function() {
+	    loadData_page();
+	});
+
+
+	function replace_url(url)
+	{
+		var host = window.location.hostname;
+		var before = url.substr(0,url.indexOf("//")+2);
+		var after = "";
+
+		if(url.substring(before.length).lastIndexOf(":") != -1)
+		{
+			after = url.substr(url.lastIndexOf(":"));
+		}
+		else
+		{
+			var temp = url.substring(before.length);
+			after = temp.substring(temp.indexOf("/"));
+		}
+
+		return (before+host+after);
+	}
+	</script> 
+  </body>
+</html>

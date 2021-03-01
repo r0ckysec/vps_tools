@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title></title>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="css/dialog.css" />
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="ckplayer/ckplayer.js" charset="UTF-8"></script>
+	<script type="text/javascript" src="js/player.js"></script>
+	<script type="text/javascript" src="ckplayer/ckplayer.js" charset="utf-8"></script>
+	<script type="text/javascript" src="ckplayer/js/barrage.js" charset="utf-8"></script>
+
+	<script type="text/javascript">
+		var InformationIsNotCorrect ;
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#information').html($.i18n.prop('EssentialInformation'));
+					$('#td_1').html($.i18n.prop('VideoTitle'));
+					$('#td_2').html($.i18n.prop('Endtime'));
+					$('#td_3').html($.i18n.prop('Starttime'));
+					$('#dosubmit').val($.i18n.prop('Determine'));
+
+					InformationIsNotCorrect = $.i18n.prop('InformationIsNotCorrect')
+				}
+			});
+
+		});
+
+		(function($){
+			$.getUrlParam = function(name)
+			{
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			}
+		})(jQuery);
+
+
+		function auto_set_time(obj)
+		{
+			var time = $("#curtime").text();
+			var tformat = parseSecond(time)
+			$(obj).val(tformat)	;
+		}
+
+		//将秒数格式化为00:00:00
+		function parseSecond(seconds)
+		{
+			  var sec_num = parseInt(seconds);
+			  var hours   = Math.floor(sec_num / 3600);
+			  var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+			  var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+			  if (hours   < 10) {hours   = "0"+hours;}
+			  if (minutes < 10) {minutes = "0"+minutes;}
+			  if (seconds < 10) {seconds = "0"+seconds;}
+			  if(hours === "00")
+			  {
+				var time = "00:"+minutes+':'+seconds;
+			  }
+			  else
+			  {
+				 var time = hours+':'+minutes+':'+seconds;
+			  }
+			  return time;
+		}
+
+		/**
+		 *  将00:00:00转换为秒数
+		 */
+		function parseSecondNumber(str)
+		{
+
+			var hour = parseInt(str.substring(0,str.indexOf(":")));
+
+			var minute = parseInt(str.substring(str.indexOf(":")+1,str.lastIndexOf(":")));
+			var second = parseInt(str.substring(str.lastIndexOf(":")+1));
+
+			var total_second = hour* 3600 + minute * 60 + second;
+
+			return total_second;
+
+		}
+	</script>
+</head>
+
+<body>
+
+<div class="pad-10">
+
+<div class="video-outer" style="width: 400px;float: left;">
+<div id="main_player" style="width: 400px;height: 300px;float: left"></div>
+	<script type="text/javascript">
+		String.prototype.replaceAll  = function(s1,s2){
+			return this.replace(new RegExp(s1,"gm"),s2);
+		}
+		var beforeName = decodeURI($.getUrlParam("name"));
+		var beforeFileId = $.getUrlParam("fileId");//文件ID
+		var url = decodeURI($.getUrlParam("url"));
+		var beforeTypeId = $.getUrlParam("typeId");//分类ID
+
+		var player;
+		var headEndTime_str = 0;
+		var tailStartTime_str = 1000000000000000000000000000000000000000000000000000000000000;
+		$(function(){
+			$("#mediaName").text(beforeName);
+			var headEndTime = "";
+			var tailStartTime = "";
+
+			$.ajax({
+				type: "GET",
+				url: locationHref+"/rest/admin/vodTypes/"+beforeTypeId+"/"+beforeFileId+"/fileInfo",//获取文件标注广告等信息
+				async: false,
+				success: function (data) {
+					if(data != null)
+					{
+						var obj = data;
+						headEndTime = obj.step.stepStartPlay;
+						tailStartTime = obj.step.stepStopPlay;
+						headEndTime_str = parseSecondNumber(obj.step.stepStartPlay);
+						tailStartTime_str = parseSecondNumber(obj.step.stepStopPlay);
+					}
+
+					$("#tailStartTime").val(tailStartTime);
+					$("#headEndTime").val(headEndTime);
+
+					if(url.substr(url.lastIndexOf(".")+1,url.length) == 'm3u8')
+					{
+						var flashvars={
+							f : '/ckplayer/m3u8.swf',//插件地址
+							a : url, //文件地址
+							s : 4,
+							p : 1,
+							g : headEndTime,
+							j : tailStartTime,
+							loaded : 'loadedHandler',//当播放器加载完成后发送该js函数loaded
+							wh:'16:9'
+						};
+						var params= {bgcolor:'#FFF',allowFullScreen:true,allowScriptAccess:'always',wmode:'transparent'};
+						var video=[url];
+						CKobject.embed('/ckplayer/ckplayer.swf','main_player' ,'main_player_object','100%','100%',false, flashvars ,video, params);
+					}
+					else
+					{
+						var flashvars = get_flash_var(url, "", "", "", "", headEndTime,tailStartTime, "", "", "", "","",3);
+						CKobject.embed('ckplayer/ckplayer.swf','main_player','main_player_object','100%','100%',false,flashvars,null,null);
+						//player = embed_live_player(url,"","","",null,headEndTime_str,tailStartTime_str,"","","","",false,true);
+					}
+				},
+				error: function () {
+					if(url.substr(url.lastIndexOf(".")+1,url.length) == 'm3u8')
+					{
+						var flashvars={
+							f : '/ckplayer/m3u8.swf',//插件地址
+							a : url, //文件地址
+							s : 4,
+							p : 1,
+							g : headEndTime,
+							j : tailStartTime,
+							loaded : 'loadedHandler',//当播放器加载完成后发送该js函数loaded
+							wh:'16:9'
+						};
+						var params= {bgcolor:'#FFF',allowFullScreen:true,allowScriptAccess:'always',wmode:'transparent'};
+						var video=[url];
+						CKobject.embed('/ckplayer/ckplayer.swf','main_player' ,'main_player_object','100%','100%',false, flashvars ,video, params);
+					}
+					else
+					{
+						var flashvars = get_flash_var(url, "", "", "", "", headEndTime,tailStartTime, "", "", "", "","",3);
+						CKobject.embed('ckplayer/ckplayer.swf','main_player','main_player_object','100%','100%',false,flashvars,null,null);
+						//player = embed_live_player(url,"","","",null,headEndTime_str,tailStartTime_str,"","","","",false,true);
+					}
+				}
+			})
+
+		 })
+
+		function step(stepStartPlay,stepStopPlay)
+		{
+			this.stepStartPlay = stepStartPlay;
+			this.stepStopPlay = stepStopPlay;
+		}
+
+		function loadedHandler()
+		{
+			if(CKobject.getObjectById('main_player_object').getType())
+			{
+				CKobject.getObjectById('main_player_object').addListener('time',timeHandler);
+			}
+			else
+			{
+				CKobject.getObjectById('main_player_object').addListener('time','timeHandler');
+			}
+		}
+		function timeHandler(t)
+		{
+			alert(t)
+			$("#curtime").text(t)
+		}
+
+		/*function loadedHandler()
+		 {
+		 player.addListener('time', timeHandler); //监听播放时间
+		 }*/
+		/*var isFirst = true;
+		function timeHandler(t)
+		{
+			$("#curtime").text(t);
+			if(t >= tailStartTime_str && isFirst == true)
+			{
+				player = embed_live_player(url,"","","",null,'864000000',"","","","","",false,false);
+				isFirst = false ;
+				return;
+			}
+		}*/
+
+		function add_step()
+		{
+			var headEndTime = $("#headEndTime").val();
+			var tailStartTime = $("#tailStartTime").val();
+
+			var step_obj = new step(headEndTime,tailStartTime);
+
+			$.ajax({
+				type: "PUT",
+				url: locationHref+"/rest/admin/vodTypes/"+beforeFileId+"/step",//设置跳播
+				async: false,
+				data: stringify(step_obj),
+				success: function (data) {
+					window.location.reload();
+
+
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+					else if(status == 409)
+					{
+						window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					}
+				}
+			})
+		}
+	</script>
+  	<div id="curtime" style="display:none;float:left;" ></div>
+</div>
+
+
+<div class="common-form" style="float: left;width: 310px;">
+
+    <form id="myform" method="post" action="" name="myform">
+
+
+        <table width="100%" class="table_form">
+            <tbody>
+            <tr>
+                <td colspan="2"><div style="display:inline; font-size:14px; font-weight:bold"><span id="td_1">视频标题</span>:<span id="mediaName"></span></div></td>
+            </tr>
+
+            <tr>
+                <td colspan="2"><span id="td_2">片头结束时间</span>:<input class="input-text" type="text" name="headEndTime" id="headEndTime" onclick="auto_set_time(this)"  /></td>
+            </tr>
+            <tr>
+                <td colspan="2"><sapn id="td_3">片尾开始时间</sapn>:<input class="input-text" type="text" name="tailStartTime" id="tailStartTime" onclick="auto_set_time(this)" /></td>
+            </tr>
+
+
+        </tbody></table>
+
+		<input type="submit" class="dialog" value="确定" id="dosubmit" name="dosubmit">
+    </form>
+</div>
+
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>直播编排</title>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<!--<link rel="stylesheet" href="css/main.css">-->
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<link href="css/dialog.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="js/dialog/jquery.ui.all.css"/>
+
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/dialog/jquery.bgiframe-2.1.2.js"></script>
+	<script type="text/javascript" src="js/dialog/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="js/dialog/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="js/dialog/jquery.ui.mouse.js"></script>
+	<script type="text/javascript" src="js/dialog/jquery.ui.draggable.js"></script>
+	<script type="text/javascript" src="js/dialog/jquery.ui.position.js"></script>
+	<script type="text/javascript" src="js/dialog/jquery.ui.resizable.js"></script>
+	<script type="text/javascript" src="js/dialog/jquery.ui.dialog.js"></script>
+	<script type="text/javascript" src="js/ref_encode.js"></script>
+	<script type="text/javascript" src="js/admin_common.js"></script>
+	<script type="text/javascript" src="js/jquery.form.js"></script>
+	<script type="text/javascript" src="js/encoder.js" ></script>
+	<script type="text/javascript" src="js/time.js" ></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+	<script type="text/javascript" src="js/timeTrans.js"></script>
+	<script type="text/javascript" src="js/excel.js"></script>
+	<style type="text/css">
+		.weekStatus
+		{
+			display: none;
+		}
+		.title{height:20px}
+		.title .t{width: 70px;text-align: center;}
+		.title .i{width:323px;text-align:center}
+		.item{height:30px;width:1000px;}
+		.item a{display:block;float:left;margin-right:5px; width:23px;height:23px;background:#ededed;border:1px solid #e0e0e0;cursor:pointer;text-align:center;line-height: 23px;font-size:18px;font-weight: bold;}
+		.item a:hover{text-decoration:none;}
+		.f{float: left;}
+		.c{text-align: center}
+		.fname{display:block;width:75px;height:25px;line-height:25px;float:left;margin-left:26px;text-align:center;}
+		.ftstart{display:block;width:65px;height:25px;line-height:25px;float:left;text-align:center;}
+		.id{display:block;width:185px;height:25px;line-height:25px;float:left;text-align:center;}
+		.startTime{display:block;width:75px;height:25px;line-height:25px;float:left;text-align:center;}
+		.stopTime{display:block;width:75px;height:25px;line-height:25px;float:left;text-align:center;}
+		.fpath{display:block;width:300px;height:25px;line-height:25px;float:left;text-align:center;}
+		.ftime{display:block;width:110px;height:25px;line-height:25px;float:left;text-align:center;}
+		.item-name{width:200px;}
+		.item-path{width:300px;}
+		.item-time{width:110px;}
+		.item-type{width:60px;}
+		.item-startTime{width:60px;}
+		.item-stopTime{width:60px;}
+		.ui-dialog-titlebar{
+			background: rgba(0, 0, 0, 0) -moz-linear-gradient(center top , #3580cf, #85b2e3) repeat scroll 0 0;
+			box-shadow: none;
+			border:none;
+			color:#fff;
+			border-bottom-style: none;
+			background:url('js/dialog/dialog/images/dialog_bar_bg.jpg') repeat-x;
+		}
+	</style>
+	<script type="text/javascript">
+		var FLV_FileIsNotAllowedToEmpty ; //  FLV 文件不允许为空 !
+		var VideoStartTimeFormatIsNotCorrect ; //  视频开始时间格式不正确
+		var VideoDurationIsNotCorrect ; //  视频持续时间格式不正确
+		var FailedToGetData ; // 获取数据失败
+		var SelectVideo ; // 选择视频
+		var Add ; // 添加
+		var UpwardShift ; // 上移
+		var DownwardMovement ; // 下移
+		var Remove ; // 移除
+		var SelectMedia ;// 选择媒体
+		var objSub ="";
+		var openStatus;
+		var getresolution = "-1";
+		var maxId = 0;
+		var allItemsWeek;
+		var host = window.location.hostname;
+		var port = window.location.port;
+		(function($){
+			$.getUrlParam = function(name)
+			{
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			};
+		})(jQuery);
+
+		var select_tab_val;
+		var select_tab_cur;
+		var select_tab_listId;
+		//获取之后几天
+		function tab(dayNum){
+			//var oDate = new Date();   //获取当前时间
+			var now = new Date();		//获取当前时间
+			var oDate=new Date(now - (now .getDay() - 1 ) * 86400000);	//获取本周第一天
+			select_tab_val = getCurrentTime(oDate);
+			var dayArr = new Array();     //定义一个数组存储所以时间
+			for(var i=0;i<dayNum;i++){
+				dayArr.push(new Date(oDate.getFullYear(),oDate.getMonth(),oDate.getDate() + i));   //把未来几天的时间放到数组里
+			}
+			return dayArr;   //返回一个数组。
+		}
+
+		var whileLiveId = $.getUrlParam("id");
+		var whileRight = $.getUrlParam("right");
+		var EditList;
+		var AddList
+		var Delete;
+		var Edit;
+		var PlayingNow;
+		var Manualmode;
+		var Timingmode;
+		var Topplayer;
+		var DataNotEmpty;
+
+
+		var Name;
+		var StartTime;
+		var EndTime;
+		var Type;
+		var VideoDuration;
+		var VideoPath;
+		var Save;
+		var Sunday;
+		var Monday;
+		var Tuesday;
+		var Wednesday;
+		var Thursday;
+		var Friday;
+		var Saturday;
+		var DateOOutOf;
+		$(function(){
+			Init_license(authorization);
+			$.ajaxSetup({ cache: false });
+			var Languages = $.cookie('internationalization');
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#OpenTranscoding').html($.i18n.prop('VideoTranscoding'));
+					$('#open_Transfer').html($.i18n.prop('Open'));
+					$('#close_1').html($.i18n.prop('Close'));
+					$('#open_1').html($.i18n.prop('Open'));
+					$('#close_Transfer').html($.i18n.prop('Close'));
+					$('#transfer_button').val($.i18n.prop('CarouselConfiguration'));
+					$('#cli_button').val($.i18n.prop('SliceConfiguration'));
+					$('#video_path').html($.i18n.prop('VideoPath'));
+					$('#SelectVideo').val($.i18n.prop('VideoOnDemand'));
+					$('#add').attr("title",$.i18n.prop('Add'));
+					$('#Remove').attr("title",$.i18n.prop('Remove'));
+					$('#Upward').attr("title",$.i18n.prop('UpwardShift'));
+					$('#down').attr("title",$.i18n.prop('DownwardMovement'));
+					$('#td_1').html($.i18n.prop('Sort'));
+					$('#td_2').html($.i18n.prop('Mode'));
+					$('#td_3').html($.i18n.prop('Name'));
+					$('#td_4').html($.i18n.prop('Time'));
+					$('#td_5').html($.i18n.prop('Operation'));
+					$("#addList").html($.i18n.prop('AddList'));
+					$("#sort").val($.i18n.prop('Topplayer'))
+					$("#mydialogform").val($.i18n.prop('Determine'));
+					$("#mydialogform_1").val($.i18n.prop('Cancel'));
+					$('#back').html($.i18n.prop('Back'));
+					$('#save').val($.i18n.prop('Save'));
+					$('#thisWeek').html($.i18n.prop('thisWeek'));
+					$('#secondWeek').html($.i18n.prop('secondWeek'));
+					$('#thirdWeek').html($.i18n.prop('thirdWeek'));
+					$('#fourthWeek').html($.i18n.prop('fourthWeek'));
+
+					FLV_FileIsNotAllowedToEmpty = $.i18n.prop('FLV_FileIsNotAllowedToEmpty') ;
+					VideoStartTimeFormatIsNotCorrect = $.i18n.prop('VideoStartTimeFormatIsNotCorrect') ;
+					VideoDurationIsNotCorrect = $.i18n.prop('VideoDurationIsNotCorrect') ;
+					FailedToGetData = $.i18n.prop('FailedToGetData') ;
+					SelectVideo = $.i18n.prop('SelectVideo') ;
+					SelectMedia = $.i18n.prop('SelectMedia') ;
+					Delete = $.i18n.prop('Delete') ;
+					AddList = $.i18n.prop('AddList') ;
+					EditList = $.i18n.prop('EditList') ;
+					Edit = $.i18n.prop('Edit') ;
+					PlayingNow = $.i18n.prop('PlayingNow') ;
+					Manualmode = $.i18n.prop('Manualmode') ;
+					Timingmode = $.i18n.prop('Timingmode') ;
+					Topplayer =  $.i18n.prop('Topplayer') ;
+					DataNotEmpty = $.i18n.prop('DataNotEmpty') ;
+					Name = $.i18n.prop('Name');
+					StartTime = $.i18n.prop('StartTime');
+					EndTime = $.i18n.prop('EndTime');
+					Type = $.i18n.prop('Type');
+					VideoDuration = $.i18n.prop('VideoDuration');
+					VideoPath = $.i18n.prop('VideoPath');
+					Save = $.i18n.prop('Save');
+					Sunday = $.i18n.prop('Sunday');
+					Monday = $.i18n.prop('Monday');
+					Tuesday = $.i18n.prop('Tuesday');
+					Wednesday = $.i18n.prop('Wednesday');
+					Thursday = $.i18n.prop('Thursday');
+					Friday = $.i18n.prop('Friday');
+					Saturday = $.i18n.prop('Saturday');
+					DateOOutOf = $.i18n.prop('DateOOutOf');
+				}
+			});
+
+			var liveId = $.getUrlParam("id");
+			//初始加载页面ul li的,还有div
+			$.ajax({
+				type:"GET",
+				url:locationHref+"/rest/admin/lives/"+whileLiveId+'/lunbo/oneList',//获取一个轮播任务
+				success: function (data) {
+					objSub = data;
+					var obj = data;
+					if(objSub.transfId == "-1" || objSub.transfId == "")
+					{
+						openStatus = false;
+					}
+					//init_whole_page(data,j);
+					//checkA(openStatus);
+					var array = tab(28);
+					for(var j=0;j<array.length;j++)
+					{
+						select_tab_cur = j;
+						var current = getCurrentTime(array[j]);
+						var li_dom = '';
+						var j_str = Monday;
+						if(j < 7)
+						{
+							if(j == 0)
+							{
+								li_dom = '<li class="on" onclick="SwapTab(\'setting\',\'on\',\'\',\''+array.length+'\',\''+j+'\',\''+current+'\');" weekTime="'+current+'" id="tab_setting_'+j+'"><span>'+j_str+'   </span>'+current+'</li>';
+							}
+							else
+							{
+								if(j == 1)
+								{
+									j_str = Tuesday;
+								}
+								else if(j == 2)
+								{
+									j_str = Wednesday;
+								}
+								else if(j == 3)
+								{
+									j_str = Thursday;
+								}
+								else if(j == 4)
+								{
+									j_str = Friday;
+								}
+								else if(j == 5)
+								{
+									j_str = Saturday;
+								}
+								else if(j == 6)
+								{
+									j_str = Sunday;
+								}
+								li_dom = '<li onclick="SwapTab(\'setting\',\'on\',\'\',\''+array.length+'\',\''+j+'\',\''+current+'\');" weekTime="'+current+'" id="tab_setting_'+j+'"><span>'+j_str+'   </span>'+current+'</li>';
+							}
+						}
+						else
+						{
+							if(j == 7 || j == 14 || j == 21)
+							{
+								j_str = Monday;
+							}
+							else if(j == 8 || j == 15 || j == 22)
+							{
+								j_str = Tuesday;
+							}
+							else if(j == 9 || j == 16 || j == 23)
+							{
+								j_str = Wednesday;
+							}
+							else if(j == 10|| j == 17 || j == 24)
+							{
+								j_str = Thursday;
+							}
+							else if(j == 11 || j == 18 || j == 25)
+							{
+								j_str = Friday;
+							}
+							else if(j == 12 || j == 19 || j == 26)
+							{
+								j_str = Saturday;
+							}
+							else if(j == 13 || j == 20 || j == 27)
+							{
+								j_str = Sunday;
+							}
+							li_dom = '<li onclick="SwapTab(\'setting\',\'on\',\'\',\''+array.length+'\',\''+j+'\',\''+current+'\');" class="weekStatus" weekTime="'+current+'" id="tab_setting_'+j+'"><span>'+j_str+'   </span>'+current+'</li>';
+						}
+						$("#week_li").append(li_dom);
+
+						var currentTime = getCurrentTime(new Date());
+						var div_dom = '';
+						if(j == 0)
+						{
+							div_dom += '<div class="contentList pad-10" id="div_setting_'+j+'">';
+						}
+						else
+						{
+							div_dom += '<div class="contentList hidden pad-10" id="div_setting_'+j+'">';
+						}
+						div_dom += '<table width="100%" class="table_form">';
+						div_dom += '<tbody>';
+						div_dom += '<tr>';
+						div_dom += '<td colspan="2">';
+						div_dom += '<div style="float: left">';
+						div_dom += '<span class="id" id="td_4">'+Name+'</span>';
+						div_dom += '<span class="startTime" id="td_5">'+StartTime+'</span>';
+						div_dom += '<span class="stopTime" id="td_6">'+EndTime+'</span>';
+						div_dom += '<span class="ftstart" id="video_start">'+Type+'</span>';
+						div_dom += '<span class="fpath" id="video_path">'+VideoPath+'</span>';
+						div_dom += '<span class="ftime" id="video_duration">'+VideoDuration+'</span>';
+						div_dom += '</div>';
+						div_dom += '<div id="items">';
+						div_dom += '<div id="main_body_'+j+'">';
+						div_dom += '<div class="item">';
+						div_dom += '<div class="f c">';
+						div_dom += '<input type="hidden" id="itemid" value="0" size="10" class="input-text" readonly="readonly"/>';
+						div_dom += '<input type="text" id="itemname" value="" size="30" class="input-text item-name"/>';
+						div_dom += '<input type="text" name="time" id="itemStartTime" value="00:00:00" size="10" class="input-text item-startTime"/>';
+						div_dom += '<input type="text" name="time" id="itemStopTime" value="" size="10" class="input-text item-stopTime"/>';
+						div_dom += '<input type="text" name="type" value="file" size="10" class="input-text item-type"  style="background-color: #90a2bc;" readonly="readonly">';
+						div_dom += '<input type="text" id="flv" name="flv" class="input-text item-path" value="" size="50" readonly="readonly">';
+						div_dom += '<input type="hidden" id="flv1" name="flv1" class="input-text item-path" value="" size="50">';
+						div_dom += '<input type="text" id="time" name="time" class="input-text item-time" value="" size="15" readonly="readonly">';
+						div_dom += '<input type="button" class="button"  onclick="chooseDialog_week(this,'+j+',111)" id="selectVideo" value="'+SelectVideo+'" style="margin-left:18px;"/><br/>';
+						div_dom+= '<input type="hidden" id="listId" value="" size="10" class="input-text" readonly="readonly"/>';
+						div_dom += '</div>';
+						//div_dom += '<a href="javascript:;" onclick="m_add_week(this,'+j+')" name="add" title="添加" id="add">+</a>';
+						div_dom += '<a href="javascript:;" onclick="m_remove_week(this)" name="Remove" title="移除" id="Remove">-</a>';
+						div_dom+= '<a href="javascript:;" style="display: inline;" onclick="m_up(this)" title="上移" id="Upward">U</a>';
+						div_dom+= '<a href="javascript:;" style="display: inline;" onclick="m_down(this)" title="下移" id="down">D</a>';
+						div_dom += '</div>';
+						div_dom += '</div>';
+						div_dom += '</div>';
+						div_dom += '</td>';
+						div_dom += '</tr>';
+						div_dom += '</tbody>';
+						div_dom += '</table>';
+						div_dom += '</div>';
+
+						var div_dom1 = '';
+						if(j == 0)
+						{
+							div_dom1 += '<div class="contentList pad-10" id="div_setting_'+j+'">';
+						}
+						else
+						{
+							div_dom1 += '<div class="contentList hidden pad-10" id="div_setting_'+j+'">';
+						}
+						div_dom1 += '<table width="100%" class="table_form">';
+						div_dom1 += '<h1>'+DateOOutOf+'</h1>';
+						div_dom1 += '</table>';
+						div_dom1 += '</div>';
+
+						if(current < currentTime)
+						{
+							$("#week_li").after(div_dom1);
+						}
+						else
+						{
+							$("#week_li").after(div_dom);
+						}
+						init_whole_page(data,j,getCurrentTime(array[j]));
+					}
+
+
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+					else if(status == 409)
+					{
+						window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					}
+				}
+			})
+		});
+
+		var localItems;
+		function init_whole_page(obj,index,get_date)
+		{
+			var object = obj;
+			var tran = object.transfId;
+			var type = object.type;
+			var mode = object.mode;
+			var mvlist = object.mvlist;
+			if(mvlist != undefined)
+			{
+				allItemsWeek = mvlist;   //mvlsit数据结构
+				var dom = "";
+				for(var j=0;j<mvlist.length;j++)
+				{
+					var week = mvlist[j].week;
+					var date = mvlist[j].date;
+					var dayLoop = mvlist[j].dayLoop;
+					var items = mvlist[j].items;
+					var listId = mvlist[j].listId;
+					select_tab_listId = listId;
+					localItems = items;
+					if(get_date == date)
+					{
+						if(items != '')
+						{
+							for(var k=0;k<items.length;k++)
+							{
+								var mvId = items[k].id;
+								var mvName = items[k].name;
+								var mvType = items[k].type;
+								var mvValue = items[k].value;
+								var mvValue_show = mvValue.substr(mvValue.lastIndexOf("/")+1,mvValue.length);
+								var mvTime = items[k].duration;
+								var startTime = items[k].startTime;
+								var stopTime = items[k].stopTime;
+								dom+= '<div class="item">';
+								dom+= '<div class="f c">';
+								dom+= '<input type="hidden" id="itemid" value="'+mvId+'" size="10" class="input-text" readonly="readonly"/>';
+								dom+= '<input type="text" id="itemname" value="'+mvName+'" size="30" class="input-text item-name"/>';
+								dom+= '<input type="text" name="time" id="itemStartTime" value="'+startTime+'" size="10" class="input-text item-startTime"/>';
+								dom+= '<input type="text" name="time" id="itemStopTime" value="'+stopTime+'" size="10" class="input-text item-stopTime"/>';
+								dom+= '<input type="text" id="type" name="type" value="'+mvType+'" size="10" class="input-text item-type" readonly="readonly" style="background-color: #90a2bc;">';
+								dom+= '<input type="text" id="flv" name="flv[]" class="input-text item-path" value="'+mvValue_show+'" readonly size="50">';
+								dom+= '<input type="hidden" id="flv1" name="flv1" class="input-text item-path" value="'+mvValue+'" size="50">';
+								dom+= '<input type="text" id="time" name="time" class="input-text item-time" value="'+mvTime+'" readonly size="15">';
+								if(k==0)
+								{
+									dom+= '<input type="button" class="button" onclick="chooseDialog_week(this,\''+index+'\',\''+startTime+'\',\''+get_date+'\',\''+listId+'\')" id="SelectVideo"  value="'+SelectVideo+'" style="margin-left:18px;"/><br/>';
+								}
+								else
+								{
+									dom+= '<input type="button" class="button" onclick="chooseDialog_week(this,\''+index+'\',\''+stopTime+'\',\''+get_date+'\',\''+listId+'\')" id="SelectVideo"  value="'+SelectVideo+'" style="margin-left:18px;"/><br/>';
+								}
+								dom+= '<input type="hidden" id="listId" value="'+listId+'" size="10" class="input-text" readonly="readonly"/>';
+								dom+= '</div>';
+								//dom+= '<a href="javascript:;" onclick="m_add_week(this,\''+index+'\')" name="add" title="添加" id="add">+</a>';
+								dom+= '<a href="javascript:;" onclick="m_remove_week(this,\''+listId+'\')" name="Remove" title="移除" id="Remove">-</a>';
+								dom+= '<a href="javascript:;" style="display: inline;" onclick="m_up(this)" title="上移" id="Upward">U</a>';
+								dom+= '<a href="javascript:;" style="display: inline;" onclick="m_down(this)" title="下移" id="down">D</a>';
+								dom+= '</div>';
+							}
+						}
+						else
+						{
+							dom+= '<div class="item">';
+							dom+= '<div class="f c">';
+							dom+= '<input type="hidden" id="itemid" value="0" size="10" class="input-text" readonly="readonly"/>';
+							dom+= '<input type="text" id="itemname" value="" size="30" class="input-text item-name"/>';
+							dom+= '<input type="text" name="time" id="itemStartTime" value="00:00:00" size="10" class="input-text item-startTime"/>';
+							dom+= '<input type="text" name="time" id="itemStopTime" value="" size="10" class="input-text item-stopTime"/>';
+							dom+= '<input type="text" id="type" name="type" value="file" size="10" class="input-text item-type" readonly="readonly" style="background-color: #90a2bc;">';
+							dom+= '<input type="text" id="flv" name="flv[]" class="input-text item-path" value="" readonly size="50">';
+							dom+= '<input type="hidden" id="flv1" name="flv1" class="input-text item-path" value="" size="50">';
+							dom+= '<input type="text" id="time" name="time" class="input-text item-time" value="" readonly size="15">';
+							dom+= '<input type="button" class="button"  onclick="chooseDialog_week(this,\''+index+'\',111,\''+get_date+'\',\''+listId+'\')" id="SelectVideo"  value="'+SelectVideo+'" style="margin-left:18px;"/><br/>';
+							dom+= '<input type="hidden" id="listId" value="'+listId+'" size="10" class="input-text" readonly="readonly"/>';
+							dom+= '</div>';
+							//dom+= '<a href="javascript:;" onclick="m_add_week(this,\''+index+'\')" name="add" title="添加" id="add">+</a>';
+							dom+= '<a href="javascript:;" onclick="m_remove_week(this)" name="Remove" title="移除" id="Remove">-</a>';
+							dom+= '<a href="javascript:;" style="display: inline;" onclick="m_up(this)" title="上移" id="Upward">U</a>';
+							dom+= '<a href="javascript:;" style="display: inline;" onclick="m_down(this)" title="下移" id="down">D</a>';
+							dom+= '</div>';
+						}
+						//dom += '<input type="button" class="button"  onclick="addWhileWeekList(\''+index+'\',\''+listId+'\')" value="'+Save+'" style="margin-left:820px;"/>';
+						//dom += '<input type="button" class="button"  onclick="exportWhileWeek(\''+get_date+'\')" value="导出" style="margin-left:10px;"/>';
+
+						$("#main_body_"+index).html(dom);
+					}
+				}
+			}
+			changeTimeForWhile_week(index);
+
+			var weekCurrentTab = getcookie('NoCurrentTab');
+			var weekCurrentTime = getcookie('NoCurrentTime');
+			var weekSave = getcookie('WeekSave');
+			var weekSelected = getcookie('WeekSelected');
+			if (weekCurrentTab != null && weekCurrentTime != undefined && weekSave == "Save" && weekSelected != undefined)
+			{
+				$("#weekSelected").val(weekSelected);
+				select_week(weekSelected);
+				SwapTab('setting','on','',28,weekCurrentTab,weekCurrentTime);
+			}
+			else
+			{
+				var newDate = new Date();
+				var currentDay = newDate.getDay();
+				var currentDay_str;
+				if(currentDay == 0)
+				{
+					currentDay_str = 6;
+				}
+				else if(currentDay == 1)
+				{
+					currentDay_str = 0;
+				}
+				else if(currentDay == 2)
+				{
+					currentDay_str = 1;
+				}
+				else if(currentDay == 3)
+				{
+					currentDay_str = 2;
+				}
+				else if(currentDay == 4)
+				{
+					currentDay_str = 3;
+				}
+				else if(currentDay == 5)
+				{
+					currentDay_str = 4;
+				}
+				else if(currentDay == 6)
+				{
+					currentDay_str = 5;
+				}
+
+				var currentDate = getCurrentTime(newDate);
+				SwapTab('setting','on','',28,currentDay_str,currentDate);
+			}
+		}
+
+		function checkA(status) {
+			if (openStatus == "false") {
+				$("#asize").hide();
+			}
+		}
+
+		function m_add_week(obj,index)
+		{
+			var content = $("#main_body_"+index).find(".item").first().clone();
+			$(content).find("input[type='text']").val("");
+			$(content).find("input[name='type']").val("file");
+			$(content).find("input[name='time']").val("");
+			$(content).find("input[type='button']").show();
+			$(content).find("input[id='itemid']").val(randomNum(30));
+			$(obj).parent("div").after(content);
+		}
+
+		function m_remove_week(obj,listId)
+		{
+			var id =  $(obj).parent("div").parent("div").attr("id");
+			//if(id != "templ")
+			{
+				$(obj).parent("div").remove();
+			}
+			//清空轮播任务
+			select_tab_listId = listId;
+		}
+
+		function m_up(obj)
+		{
+			$(obj).parent("div").insertBefore($(obj).parent("div").prev());
+			$(obj).parent("div").find("input").css("color","#990000")
+			setTimeout(function(){
+				$(obj).parent("div").find("input").css("color","#000")
+			},800)
+		}
+		function m_down(obj)
+		{
+			$(obj).parent("div").insertAfter($(obj).parent("div").next());
+
+			$(obj).parent("div").find("input").css("color","#990000")
+			setTimeout(function(){
+				$(obj).parent("div").find("input").css("color","#000")
+			},800)
+		}
+
+		function changeTimeForWhile_week(index)
+		{
+			$("#main_body_"+index).find(".item").each(function(i){
+				var startTime = $(this).find("div").find(".item-startTime").val();//[style='display: block']
+				var mediaTime= $(this).find("div").find(".item-time").val();
+				if(mediaTime != null && mediaTime != "")
+				{
+					var stopTime = formatSecond(parseSecond(startTime) + parseSecond(mediaTime));
+					$(this).find("div").find(".item-stopTime").val(stopTime);
+					$(this).next(".item").find("div").find(".item-startTime").val(stopTime);
+				}
+			})
+
+			var stopTime_flag = 0;
+			$("#main_body_"+index).find(".item").each(function(i){
+				var stopTime = parseSecond($(this).find("div").find(".item-stopTime").val());
+				var startTime = parseSecond($(this).find("div").find(".item-startTime").val());
+				if(!isNaN(stopTime))
+				{
+					if(stopTime> stopTime_flag)
+					{
+						stopTime_flag = stopTime;
+					}
+				}
+				if(stopTime_flag > 86399)
+				{
+					$("#main_body_"+index).find(".item").each(function(i){
+						$(this).find("a[name='add']").hide();
+					})
+					$(this).find("div").find(".item-stopTime").val("23:59:59");
+				}
+				else
+				{
+					$("#main_body_"+index).find(".item").each(function(i){
+						$(this).find("a[name='add']").show();
+					})
+				}
+				if (startTime > 86399)
+				{
+					$(this).prev("input").prev("input").prev("input").prev("input").prev("input").prev("input").val("23:59:59");
+					$(this).remove();
+				}
+			})
+		}
+
+
+		var path_url = "";
+		//选择视频
+		function chooseDialog_week(obj,index,startTime,get_date,listId)
+		{
+			var startTimeSave = startTime;
+			startTime = $(obj).prev("input").prev("input").prev("input").prev("input").prev("input").prev("input").val();//开始时间
+			if(startTime == "")
+			{
+				startTime = startTimeSave;
+			}
+			window.top.art.dialog
+			(
+					{
+						id:'choose',iframe:"/media_while_choose_no.html?type="+openStatus+"&path="+encodeURI(encodeURI(path_url))+"&liveId="+whileLiveId+"&startTime="+startTime+"&currentDate="+get_date, title:SelectVideo, width:'800', height:'520', lock:true
+						//id:'choose',iframe:"/media_while_choose.html?type="+openStatus, title:'选择视频', width:'800', height:'520', lock:true
+					},
+					function()
+					{
+						var d = window.top.art.dialog({id:'choose'}).data.iframe;
+						var data = d.select_media_validate();
+						window.top.art.dialog({id:'choose'}).close();
+						initWhileMedia(obj,data,index,get_date,listId);
+						return false;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'24fsf5'}).close()
+					}
+			);void(0);
+		}
+
+		function randomNum(n){
+			var t='';
+			for(var i=0;i<n;i++){
+				t+=Math.floor(Math.random()*10);
+			}
+			return t;
+		}
+
+		var itemOneStopTime;
+		function initWhileMedia(obj,data,index,get_date,listId)
+		{
+			var object = data;
+			if(object.length>0 && $("#main_body_"+index).find(".item").size()==1)
+			{
+				var name = $("#main_body_"+index).find(".item").first().find("#flv").val();
+				if(name == "")
+				{
+					$("#main_body_"+index).empty();
+				}
+			}
+			var dom = "";
+			var stopTimeSecond = 0;
+			var startTimeSecond = 0;
+			for (var y = 0; y < object.length; y++)
+			{
+				var fileId = object[y].fileId;
+				var itemStartTime = object[y].startTime;
+				var itemStopTime = object[y].stopTime;
+				startTimeSecond =  parseSecond(itemStartTime);
+				stopTimeSecond = parseSecond(itemStopTime);
+				itemOneStopTime = itemStopTime;
+				var itemid = randomNum(30);
+				var itemtype = "file";
+				var itemvalue = object[y].name;
+				var itemvalue_show = itemvalue.substr(itemvalue.lastIndexOf('/') + 1, itemvalue.length);
+				var itemname = itemvalue_show.substr(0, itemvalue_show.lastIndexOf('.'));
+				var itemTime = object[y].duration;
+
+				dom += '<div class="item">';
+				dom += '<div class="f c">';
+				dom += '<input type="hidden" id="itemid" value="' + itemid + '" size="10" class="input-text" readonly="readonly"/>';
+				dom += '<input type="text" id="itemname" value="' + itemname + '" size="30" class="input-text item-name"/>';
+				dom += '<input type="text" name="time" id="itemStartTime" value="' + itemStartTime + '" size="10" class="input-text item-startTime"/>';
+				dom += '<input type="text" name="time" id="itemStopTime" value="' + itemStopTime + '" size="10" class="input-text item-stopTime"/>';
+				dom += '<input type="text" id="type" name="type" value="' + itemtype + '" size="10" class="input-text item-type" readonly="readonly" style="background-color: #90a2bc;">';
+				dom += '<input type="text" id="flv" name="flv[]" class="input-text item-path" value="' + itemvalue_show + '" readonly size="50">';
+				dom += '<input type="hidden" id="flv1" name="flv1" class="input-text item-path" value="' + itemvalue + '" size="50">';
+				dom += '<input type="text" id="time" name="time" class="input-text item-time" value="' + itemTime + '" readonly size="15">';
+				dom += '<input type="button" class="button"  onclick="chooseDialog_week(this,\''+index+'\',\'' + itemOneStopTime + '\',\''+get_date+'\',\''+listId+'\')" id="SelectVideo"  value="' + SelectVideo + '" style="margin-left:18px;"/><br/>';
+				dom+= '<input type="hidden" id="listId" value="'+listId+'" size="10" class="input-text" readonly="readonly"/>';
+				dom += '</div>';
+				//dom += '<a href="javascript:;" onclick="m_add_week(this,\''+index+'\')" name="add" title="添加" id="add">+</a>';
+				dom += '<a href="javascript:;" onclick="m_remove_week(this,\''+listId+'\')" name="Remove" title="移除" id="Remove">-</a>';
+				dom+= '<a href="javascript:;" style="display: inline;" onclick="m_up(this)" title="上移" id="Upward">U</a>';
+				dom+= '<a href="javascript:;" style="display: inline;" onclick="m_down(this)" title="下移" id="down">D</a>';
+				dom += '</div>';
+			}
+			$("#main_body_"+index).append(dom);
+			changeTimeForWhile_week(index);
+		}
+
+		function whileBack()
+		{
+			if(whileRight == "4")
+			{
+				redirect('live_while_list.html');
+			}
+		}
+
+		function addWhileWeekList()
+		{
+			var flag = true;
+			var listItem = objSub;
+			var transfId = listItem.transfId;
+			var whileType = listItem.type;
+			var whileMode = listItem.mode;
+			var mvlist = listItem.mvlist;
+			var itemId,itemname,type,value,media_time,itemStartTime,itemStopTime,listId;
+			var arr = new Array();
+			$("#main_body_"+select_tab_cur).find(".item").each(function(e) {
+				$(this).find("input").each(function (f) {
+					if (f == 0) {
+						itemId = $(this).val();
+					}
+					else if (f == 1) {
+						itemname = $(this).val();
+					}
+					else if(f == 2){
+						itemStartTime = $(this).val();
+					}
+					else if(f == 3){
+						itemStopTime = $(this).val();
+					}
+					else if (f == 4) {
+						type = $(this).val();
+					}
+					else if (f == 6) {
+						value = $(this).val();
+						if(value == "")
+						{
+							flag = false;
+						}
+					}
+					else if(f == 7)
+					{
+						media_time = $(this).val();
+					}
+					else if(f == 9)
+					{
+						listId = $(this).val();
+					}
+				})
+				var items = new ItemsWhilePlayInfo(itemId,itemname,type,value,media_time,itemStartTime,itemStopTime);
+				arr[e] = items;
+			})
+
+			var mvMaxID = 0;
+			var mvlistInfo;
+			if(arr != "")
+			{
+				mvlist = new Array();
+				if(listId != "" && listId != "undefined")
+				{
+					mvlistInfo = new MvListTime(-1,select_tab_val,false,arr,listId);
+				}
+				else
+				{
+					mvlistInfo = new MvListTime_noId(-1,select_tab_val,false,arr);
+				}
+				mvlist[0] = mvlistInfo;
+			}
+			else
+			{
+				mvlist = new Array();
+				mvlistInfo = new MvListTime(-1,select_tab_val,false,arr,select_tab_listId);
+				mvlist[0] = mvlistInfo;
+			}
+			var listItemSub = new PlayWhileItem(mvlist,transfId,whileType,whileMode);
+			if(arr == "")
+			{
+				$.ajax({
+					type:"PUT",
+					url:locationHref+"/rest/admin/lives/"+whileLiveId+'/lunbo/oneList',//编辑一个直播频道
+					async: false,
+					data: stringify(listItemSub),
+					dataType:"json",
+					success:function(data)
+					{
+						setcookie("NoCurrentTab",select_tab_cur,30);
+						setcookie("NoCurrentTime",select_tab_val,30);
+						setcookie("WeekSave","Save",30);
+						setcookie("WeekSelected",weekSelected_val,30);
+						window.location.reload();
+					},
+					error:function(data)
+					{
+						var errorObj = data;
+						var status = data.status;
+						var statusText = data.statusText
+						if(status == 401 || status == 400)
+						{
+							top.location.href = "login.html";
+						}
+						else if(status == 409)
+						{
+							window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+						}
+					}
+
+				});
+			}
+			else
+			{
+				if(flag == true && arr.length != 0)
+				{
+					$.ajax({
+						type:"PUT",
+						url:locationHref+"/rest/admin/lives/"+whileLiveId+'/lunbo/oneList',//编辑一个直播频道
+						async: false,
+						data: stringify(listItemSub),
+						dataType:"json",
+						success:function(data)
+						{
+							setcookie("NoCurrentTab",select_tab_cur,30);
+							setcookie("NoCurrentTime",select_tab_val,30);
+							setcookie("WeekSave","Save",30);
+							setcookie("WeekSelected",weekSelected_val,30);
+							window.location.reload();
+						},
+						error:function(data)
+						{
+							var errorObj = data;
+							var status = data.status;
+							var statusText = data.statusText
+							if(status == 401 || status == 400)
+							{
+								top.location.href = "login.html";
+							}
+							else if(status == 409)
+							{
+								window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+							}
+						}
+
+					});
+				}
+				else
+				{
+					window.top.art.dialog({id:"tishi",content:DataNotEmpty+"!",time:1});
+				}
+			}
+		}
+
+		function select_week(value)
+		{
+			if(value == "thisWeek")//本周
+			{
+				$("#week_li").find("li").each(function(i){
+					if(i<7)
+					{
+						if(i == 0)
+						{
+							$(this).attr('class','on');
+							$('#div_setting_' + i).show();
+						}
+						else
+						{
+							$(this).attr('class','');
+							$('#div_setting_' + i).hide();
+						}
+					}
+					else
+					{
+						$(this).attr('class','weekStatus');
+						$('#div_setting_' + i).hide();
+					}
+				})
+				select_tab_val = $("#tab_setting_0").attr('weekTime');
+				weekSelected_val = "thisWeek";
+				select_tab_cur = 0;
+			}
+			else if(value == "secondWeek")//第二周
+			{
+				$("#week_li").find("li").each(function(i){
+					if(i < 7 || i > 13)
+					{
+						$(this).attr('class','weekStatus');
+						$('#div_setting_' + i).hide();
+					}
+					else if(i >= 7 && i <= 13)
+					{
+						if(i == 7)
+						{
+							$(this).attr('class','on');
+							$('#div_setting_' + i).show();
+						}
+						else
+						{
+							$(this).attr('class','');
+							$('#div_setting_' + i).hide();
+						}
+					}
+				})
+				select_tab_val = $("#tab_setting_7").attr('weekTime');
+				weekSelected_val = "secondWeek";
+				select_tab_cur = 7;
+			}
+			else if(value == "thirdWeek")
+			{
+				$("#week_li").find("li").each(function(i){
+					if( i < 14 || i > 20)
+					{
+						$(this).attr('class','weekStatus');
+						$('#div_setting_' + i).hide();
+					}
+					else if(i >= 14 && i <= 20)
+					{
+						if(i == 14)
+						{
+							$(this).attr('class','on');
+							$('#div_setting_' + i).show();
+						}
+						else
+						{
+							$(this).attr('class','');
+							$('#div_setting_' + i).hide();
+						}
+					}
+				})
+				select_tab_val = $("#tab_setting_14").attr('weekTime');
+				weekSelected_val = "thirdWeek";
+				select_tab_cur = 14;
+			}
+			else if(value == "fourthWeek")
+			{
+				$("#week_li").find("li").each(function(i){
+					if( i < 21 || i > 27)
+					{
+						$(this).attr('class','weekStatus');
+						$('#div_setting_' + i).hide();
+					}
+					else if(i >= 21 && i <= 27)
+					{
+						if(i == 21)
+						{
+							$(this).attr('class','on');
+							$('#div_setting_' + i).show();
+						}
+						else
+						{
+							$(this).attr('class','');
+							$('#div_setting_' + i).hide();
+						}
+					}
+				})
+				select_tab_val = $("#tab_setting_22").attr('weekTime');
+				weekSelected_val = "fourthWeek";
+				select_tab_cur = 21;
+			}
+		}
+
+		function exportWhileWeek()
+		{
+			var items;
+			for(var i=0;i<allItemsWeek.length;i++)
+			{
+				if(allItemsWeek[i].date == select_tab_val)
+				{
+					items = allItemsWeek[i].items;
+				}
+			}
+			//excel 表格输出顺序及标题
+			var title=[{name:'名称'},{startTime:'开始时间'},{stopTime:'结束时间'}];
+			toExcel(select_tab_val, items, title);
+		}
+	</script>
+</head>
+
+<body>
+<div class="pad-10">
+	<div class="content-menu ib-a line-x" >
+		<select id="weekSelected" onchange="select_week(this.value)">
+			<option id="thisWeek" value="thisWeek">本周</option>
+			<option id="secondWeek" value="secondWeek">第二周</option>
+			<option id="thirdWeek" value="thirdWeek">第三周</option>
+			<option id="fourthWeek" value="fourthWeek">第四周</option>
+		</select>
+		<a href="javascript:;" onclick="whileBack()" id="back" class="sp_but_cir sp_but_padding btn btn-info">返回</a>
+	</div>
+	<div class="col-tab">
+		<ul class="tabBut cu-li" id="week_li">
+
+		</ul>
+	</div>
+	<input type="button" class="button"  onclick="addWhileWeekList()" value="保存" style="margin-left:820px;"/>
+	<input type="button" class="button"  onclick="exportWhileWeek()" value="导出" style="margin-left:10px;"/>
+</div>
+
+
+<script type="text/javascript">
+	var weekSelected_val = $("#weekSelected").val();
+	function SwapTab(name,cls_show,cls_hide,cnt,cur,dateStr)
+	{
+		for (i = 0; i <= cnt; i++)
+		{
+			if(weekSelected_val == "thisWeek" && cur<7)//判断本周
+			{
+				if(i>=7)//下周的隐藏
+				{
+					$('#tab_' + name + '_' + i).attr('class','weekStatus');
+				}
+				else//本周做判断
+				{
+					if (i == cur) {
+						$('#div_' + name + '_' + i).show();
+						$('#tab_' + name + '_' + i).attr('class', cls_show);
+					} else {
+						$('#div_' + name + '_' + i).hide();
+						$('#tab_' + name + '_' + i).attr('class', cls_hide);
+					}
+				}
+			}
+			else if(weekSelected_val == "secondWeek" && (cur >= 7 || cur <= 13))//判断第二周
+			{
+				if(i<7 || i>13)//本周 及 不是第二周的隐藏
+				{
+					$('#tab_' + name + '_' + i).attr('class','weekStatus');
+				}
+				else//下周做判断
+				{
+					if (i == cur) {
+						$('#div_' + name + '_' + i).show();
+						$('#tab_' + name + '_' + i).attr('class', cls_show);
+					} else {
+						$('#div_' + name + '_' + i).hide();
+						$('#tab_' + name + '_' + i).attr('class', cls_hide);
+					}
+				}
+			}
+			else if(weekSelected_val == "thirdWeek" && (cur >= 14 || cur <= 20 ))//判断第三周
+			{
+				if(i<14 || i>20)//本周 及 不是第二周的隐藏
+				{
+					$('#tab_' + name + '_' + i).attr('class','weekStatus');
+				}
+				else//下周做判断
+				{
+					if (i == cur) {
+						$('#div_' + name + '_' + i).show();
+						$('#tab_' + name + '_' + i).attr('class', cls_show);
+					} else {
+						$('#div_' + name + '_' + i).hide();
+						$('#tab_' + name + '_' + i).attr('class', cls_hide);
+					}
+				}
+			}
+			else if(weekSelected_val == "fourthWeek" && (cur >= 21 || cur <= 27 ))//判断第二四周
+			{
+				if(i<21)//本周 及 不是第四周的隐藏
+				{
+					$('#tab_' + name + '_' + i).attr('class','weekStatus');
+				}
+				else//下周做判断
+				{
+					if (i == cur) {
+						$('#div_' + name + '_' + i).show();
+						$('#tab_' + name + '_' + i).attr('class', cls_show);
+					} else {
+						$('#div_' + name + '_' + i).hide();
+						$('#tab_' + name + '_' + i).attr('class', cls_hide);
+					}
+				}
+			}
+		}
+		select_tab_val = dateStr;
+		select_tab_cur = cur;
+	}
+</script>
+</body>
+</html>

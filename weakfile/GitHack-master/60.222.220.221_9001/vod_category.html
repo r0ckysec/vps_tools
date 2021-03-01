@@ -1,0 +1,429 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<link href="css/dialog.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/jquery.corner.js"></script>
+	<script type="text/javascript" src="js/admin_common.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/add_edit_live.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+	<script type="text/javascript">
+		var　BuildingPage ;
+		var FailedToGetData ;
+		var Delete ;
+		var AddOnDemandDirectory ;
+		var ExpressionCannotBeAdded ;
+		var DeleteMethod ;
+		var DeleteOnDemandDirectory ;
+		var Edit;
+		var AddSubClass;
+		var AddVodCategory;
+		var EditVodCategory;
+		var DelVodCategory;
+		var NoVODCategory;
+
+		var EditToMediaCategory;
+		var AddToMediaCategory;
+		var DeleteMediaCategory;
+		var NoMediaCategory;
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#addCatalog').html($.i18n.prop('AddVodCategory'));
+					$('#addMediaCatalog').html($.i18n.prop('AddMediaCategory'));
+					$('#th_1').html($.i18n.prop('SerialNumber'));
+					$('#th_2').html($.i18n.prop('Name'));
+					$('#th_3').html($.i18n.prop('Status'));
+					$('#th_4').html($.i18n.prop('Operation'));
+					$('#th_5').html($.i18n.prop('SerialNumber'));
+					$('#th_6').html($.i18n.prop('Name'));
+					$('#th_7').html($.i18n.prop('Status'));
+					$('#th_8').html($.i18n.prop('Operation'));
+					$('#tab_setting_1').html($.i18n.prop('VODCategory'));
+					$('#tab_setting_2').html($.i18n.prop('MediaLibCategory'));
+
+					BuildingPage = $.i18n.prop('BuildingPage') ;
+					FailedToGetData = $.i18n.prop('FailedToGetData') ;
+					Delete = $.i18n.prop('Delete') ;
+					AddOnDemandDirectory = $.i18n.prop('AddOnDemandDirectory') ;
+					ExpressionCannotBeAdded = $.i18n.prop('ExpressionCannotBeAdded') ;
+					DeleteMethod = $.i18n.prop('DeleteMethod') ;
+					DeleteOnDemandDirectory = $.i18n.prop('DeleteOnDemandDirectory') ;
+					Edit = $.i18n.prop('Edit') ;
+					AddSubClass = $.i18n.prop('AddSubClass');
+					AddVodCategory = $.i18n.prop('AddVodCategory');
+					EditVodCategory = $.i18n.prop('EditVodCategory');
+					DelVodCategory = $.i18n.prop('DelVodCategory');
+					NoVODCategory = $.i18n.prop('NoVODCategory');
+
+
+					EditToMediaCategory = $.i18n.prop('EditToMediaCategory');
+					AddToMediaCategory = $.i18n.prop('AddToMediaCategory');
+					DeleteMedia = $.i18n.prop('DeleteMediaCategory');
+					NoMediaCategory = $.i18n.prop('NoMediaCategory');
+				}
+			});
+		});
+
+		//点播分类
+		$(function(){
+			$.ajaxSetup({ cache: false });
+			init_vod_cat();
+		})
+		function init_vod_cat()
+		{
+			$("#main_body").empty();
+			window.top.art.dialog({id:"wait",content:BuildingPage+"...<img width=20 src='images/loading.gif'>"});
+			 $.ajax({
+				 type: "GET",
+				 async: false,
+				 url: locationHref+"/rest/admin/vodTypes",//获取点播分类
+				 success: function(data)
+				 {
+					 var count = 1;
+					 var obj = data;
+					 if(obj == null)
+					 {
+						 window.top.art.dialog({id:"show",content:NoVODCategory+"!",time:1});
+					 }
+					 for(var i=0;i<obj.length;i++)
+					 {
+						 var id = obj[i].id;
+						 var name = obj[i].name;
+						 var subNames = obj[i].subNames;
+						 var visible = obj[i].visible;
+						 var bPublic = obj[i].bPublic;
+						 var bPublic_str;
+						 if(bPublic == true)
+						 {
+							 bPublic_str = "公开";
+						 }
+						 else
+						 {
+							 bPublic_str = "私密";
+						 }
+						 var vipLevel = obj[i].vipLevel;
+						 var vipLevel_str;
+						 if(vipLevel == 0)
+						 {
+							 vipLevel_str = "无等级";
+						 }
+						 else if(vipLevel == 1)
+						 {
+							 vipLevel_str = "等级一";
+						 }
+						 else if(vipLevel == 2)
+						 {
+							 vipLevel_str = "等级二";
+						 }
+						 else if(vipLevel == 3)
+						 {
+							 vipLevel_str = "等级三";
+						 }
+						 var visible_str;
+						 if(visible)
+						 {
+							 visible_str = '<font id="font1'+i+'" style="font-size:14px;font-weight: bold; color: green">√</font>';
+						 }
+						 else
+						 {
+							 visible_str = '<font id="font1'+i+'" style="font-size:14px;font-weight: bold; color: red">×</font>';
+						 }
+						 var addsub = '<a href="javascript:;" onclick="addSubDialog(\''+id+'\')" title="'+AddSubClass+'" class="ext_btn ext_btn_submit ext_btn_size">'+AddSubClass+'</a>&nbsp;';
+						 var edit = '<a href="javascript:;" onclick="editDialog(\''+id+'\',222)" title="'+Edit+'" class="sp_a_but_cir sp_a_but_padding btn btn-info">'+Edit+'</a>&nbsp;';
+						 var del = '<a href="javascript:;" onclick="delDialog(\''+id+'\')" title="'+Delete+'" class="ext_btn_red ext_btn_size">'+Delete+'</a>&nbsp;';
+						 var dom ='<tr >';
+						 dom+='<td align="left" >'+count+'</td>';
+						 dom+='<td align="left" >'+name+'</td>';
+						 dom+='<td align="center" >'+visible_str+'</td>';
+						 dom+='<td align="center" >'+bPublic_str+'</td>';
+						 dom+='<td align="center" >'+vipLevel_str+'</td>';
+						 dom+='<td align="center">';
+						 if(id == "" || id.indexOf("lu_") != "-1")
+						 {
+							 dom+="";
+						 }
+						 else
+						 {
+							 dom+=''+addsub+' '+edit+' '+del+'';
+						 }
+						 dom+='</td>';
+						 dom+='</tr>';
+						 count++;
+						 $("#main_body").append(dom);
+
+						 if(subNames != '' && subNames != undefined)
+						 {
+							 for(var j=0;j<subNames.length;j++)
+							 {
+								 var subName = subNames[j].name;
+								 var subId = subNames[j].id;
+								 var subVisible = subNames[j].visible;
+								 var subvisible_str = "";
+								 //alert(subName+"----"+subVisible);
+								 if(subVisible)
+								 {
+									 subvisible_str = '<font id="font1'+j+'" style="font-size:14px;font-weight: bold; color: green">√</font>';
+								 }
+								 else
+								 {
+									 subvisible_str = '<font id="font1'+j+'" style="font-size:14px;font-weight: bold; color: red">×</font>';
+								 }
+								 var subBPublic = subNames[j].bPublic;
+								 var subBPublic_str;
+								 if(subBPublic == true)
+								 {
+									 subBPublic_str = "公开";
+								 }
+								 else
+								 {
+									 subBPublic_str = "私密";
+								 }
+								 var subVipLevel = subNames[j].vipLevel;
+								 var subVipLevel_str;
+								 if(subVipLevel == 0)
+								 {
+									 subVipLevel_str = "无等级";
+								 }
+								 else if(subVipLevel == 1)
+								 {
+									 subVipLevel_str = "等级一";
+								 }
+								 else if(subVipLevel == 2)
+								 {
+									 subVipLevel_str = "等级二";
+								 }
+								 else if(subVipLevel == 3)
+								 {
+									 subVipLevel_str = "等级三";
+								 }
+
+								 var edit1 = '<a href="javascript:;" onclick="editDialog(\''+subId+'\',111)" title="'+Edit+'" class="sp_a_but_cir sp_a_but_padding btn btn-info">'+Edit+'</a>&nbsp';
+								 var del1 = '<a href="javascript:;" onclick="delDialog(\''+subId+'\')" title="'+Delete+'" class="ext_btn_red ext_btn_size">'+Delete+'</a>&nbsp';
+								 var dom1 ='<tr >';
+								 dom1+='<td align="left" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─'+count+'</td>';
+								 dom1+='<td align="left" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─'+subName+'</td>';
+								 dom1+='<td align="center" >'+subvisible_str+'</td>';
+								 dom1+='<td align="center" >'+subBPublic_str+'</td>';
+								 dom1+='<td align="center" >'+subVipLevel_str+'</td>';
+								 dom1+='<td align="center">';
+								 if(subId == "" || subId.indexOf("lu_") != "-1")
+								 {
+									 dom1+="";
+								 }
+								 else
+								 {
+									 dom1+=''+edit1+' '+del1+'';
+								 }
+								 dom1+='</td>';
+								 dom1+='</tr>';
+								 count++;
+								 $("#main_body").append(dom1);
+							 }
+						 }
+	 				 }
+
+				 },
+				 error:function(data)
+				 {
+					 var errorObj = data;
+					 var status = data.status;
+					 var statusText = data.statusText
+					 if(status == 401 || status == 400)
+					 {
+						 top.location.href = "login.html";
+					 }
+					 else if(status == 409)
+					 {
+						 window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					 }
+				 }
+
+			 })
+			 window.top.art.dialog({id:"wait"}).close();
+		}
+		function addDialog()
+		{
+			window.top.art.dialog
+			(
+					{
+						id:'add',iframe:'add_vod_category.html', title: AddVodCategory, width:'500', height:'250', lock:true,window:'top'
+					},
+					function(){
+						var d = window.top.art.dialog({id:'add'}).data.iframe;
+						d.addVodCategory();
+						window.top.art.dialog({id:'add'}).close()
+						init_vod_cat();
+						return false;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'add'}).close()
+					}
+			);void(0);
+		}
+		function addSubDialog(id)
+		{
+			window.top.art.dialog
+			(
+					{
+						id:'add',iframe:'add_vod_category.html?id='+id, title:AddVodCategory, width:'500', height:'250', lock:true,window:'top'
+					},
+					function(){
+						var d = window.top.art.dialog({id:'add'}).data.iframe;
+						d.addVodCategory();
+						window.top.art.dialog({id:'add'}).close()
+						init_vod_cat();
+						return false;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'add'}).close()
+					}
+			);void(0);
+		}
+		function editDialog(id,flag)
+		{
+			window.top.art.dialog
+			(
+					{
+						id:'edit',iframe:'edit_vod_category.html?id='+id+'&flag='+flag, title:EditVodCategory, width:'500', height:'250', lock:true,window:'top'
+					},
+					function(){
+						var d = window.top.art.dialog({id:'edit'}).data.iframe;
+						d.editVodCategory();
+						window.top.art.dialog({id:'edit'}).close()
+						init_vod_cat();
+						return false;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'edit'}).close()
+					}
+			);void(0);
+		}
+		function delDialog(id)
+		{
+			window.top.art.dialog
+			(
+					{
+						id:'del',content:DeleteMethod, title:DelVodCategory,lock:true
+					},
+					function(){
+						delVod(id);
+						window.top.art.dialog({id:'del'}).close()
+						init_vod_cat();
+						return true;
+					},
+					function()
+					{
+						window.top.art.dialog({id:'del'}).close()
+					}
+			)
+		}
+		function delVod(id)
+		{
+			$.ajax({
+				type:"DELETE",
+				url: locationHref+"/rest/admin/vodTypes/"+id,//删除一个点播分类
+				async: false,
+				contentType: "application/json; charset=utf-8",
+				success:function(data){
+
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+					else if(status == 409)
+					{
+						window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					}
+				}
+			})
+		}
+
+	</script>
+</head>
+<body scroll="yes" style="overflow-y: scroll;">
+	<div class="pad-10">
+		<div class="col-tab">
+			<ul class="tabBut cu-li">
+				<li onclick="SwapTab('setting','on','',2,1);" class="on" id="tab_setting_1">点播分类</li>
+			</ul>
+			<div id="div_setting_1" class="contentList pad-10">
+				<div class="content-menu" >
+					<a href="javascript:;" onclick="addDialog()" class="ext_btn ext_btn_success" id="addCatalog">添加点播分类</a>
+				</div>
+				<table id="tblList" width="100%" border="0" cellpadding="8" cellspacing="0" class="list_table">
+					<thead>
+					<tr>
+						<th align="center" id="th_1" width="20%">序号</th>
+						<th align="center" id="th_2">名称</th>
+						<th align="center" id="th_3">状态</th>
+						<th align="center" id="th_9">公开状态</th>
+						<th align="center" id="th_10">分类等级</th>
+						<th align="center" id="th_4" width="30%">操作</th>
+					</tr>
+					</thead>
+					<tbody id="main_body">
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+<script type="text/javascript">
+	function SwapTab(name,cls_show,cls_hide,cnt,cur){
+
+		for(i=1;i<=cnt;i++){
+			if(i==cur){
+				$('#div_'+name+'_'+i).show();
+				$('#tab_'+name+'_'+i).attr('class',cls_show);
+			}else{
+				$('#div_'+name+'_'+i).hide();
+				$('#tab_'+name+'_'+i).attr('class',cls_hide);
+			}
+		}
+		if(cur == 1)
+		{
+			init_vod_cat();
+		}
+	}
+</script>
+</body>
+</html>
+
+

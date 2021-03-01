@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+
+	<link rel="stylesheet" href="css/common.css">
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link href="css/sp.css" rel="stylesheet" type="text/css" />
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/system.css" rel="stylesheet" type="text/css" />
+	<link href="css/table_form.css" rel="stylesheet" type="text/css" />
+	<link href="css/dialog.css" rel="stylesheet" type="text/css" />
+
+	<script type="text/javascript" src="js/jquery-1.4.1.js"></script>
+	<script type="text/javascript" src="js/jquery.corner.js"></script>
+	<script type="text/javascript" src="js/admin_common.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/cookie.js"></script>
+	<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+	<script type="text/javascript" src="js/bean.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			Init_license(authorization);
+			var Languages = $.cookie('internationalization');
+
+			if ( Languages == null || Languages == "" )
+			{
+				Languages = 'zh' ;
+			}
+			jQuery.i18n.properties({
+				name : 'strings', //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : Languages,
+				encoding : 'UTF-8', // 必须写 否则中文乱码
+				callback : function() {//加载成功后设置显示内容
+					$('#restart').html($.i18n.prop('TimeStartSystem'));//频道目录方式
+					$("#td_1").html($.i18n.prop('Date')+" :");
+					$("#Sunday").html($.i18n.prop('Sunday'));
+					$("#Monday").html($.i18n.prop('Monday'));
+					$("#Tuesday").html($.i18n.prop('Tuesday'));
+					$("#Wednesday").html($.i18n.prop('Wednesday'));
+					$("#Thursday").html($.i18n.prop('Thursday'));
+					$("#Friday").html($.i18n.prop('Friday'));
+					$("#Saturday").html($.i18n.prop('Saturday'));
+					$("#minSec").html($.i18n.prop('minSec'));
+				}
+			});
+		});
+
+		$.ajax({
+			type: "GET",
+			url: locationHref+"/rest/admin/system/timeRestart",//获取定时重启配置
+			success:function(data)
+			{
+				data = data.time;
+				var day = data.substr(0,data.lastIndexOf(",")+1);
+				if(day == "0,1,2,3,4,5,6,")
+				{
+					$("#day").val("0,1,2,3,4,5,6");
+					$("#oneday").hide();
+				}
+				else
+				{
+					$("#day").val("8");
+					$("#oneday").show();
+					$('input[name="day"]').each(function(i){
+						if(day.indexOf($(this).val()+',') != -1)
+						{
+							$(this).attr("checked","true");
+						}
+					});
+				}
+				var time = data.substr(data.lastIndexOf(",")+1,data.length-1);
+				$("#time").val(time);
+
+			},
+			error:function(data)
+			{
+				var errorObj = data;
+				var status = data.status;
+				var statusText = data.statusText
+				if(status == 401 || status == 400)
+				{
+					top.location.href = "login.html";
+				}
+				else if(status == 409)
+				{
+					window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+				}
+			}
+		})
+
+
+		function restatSys()
+		{
+			var textday = $("#day").val();
+			var day = "";
+			if(textday != "8")
+			{
+				day = "0,1,2,3,4,5,6,";
+			}
+			else
+			{
+				$('input[name="day"]:checked').each(function(i){
+					day += $(this).val()+",";
+				});
+			}
+			var time = $("#time").val();
+			var info = day+time;
+
+			var arr = new TimeRestart(info);
+
+			$.ajax({
+				type: "POST",
+				async: false,
+				url: locationHref+"/rest/admin/system/timeRestart",//获取定时重启配置
+				data:stringify(arr),
+				success:function(data)
+				{
+
+
+				},
+				error:function(data)
+				{
+					var errorObj = data;
+					var status = data.status;
+					var statusText = data.statusText
+					if(status == 401 || status == 400)
+					{
+						top.location.href = "login.html";
+					}
+					else if(status == 409)
+					{
+						window.top.art.dialog({id:"mesg",content:statusText+"!",time:2});
+					}
+				}
+			})
+
+		}
+
+		function changeDay(obj)
+		{
+			if(obj.value == "8")
+			{
+				$("#oneday").show();
+			}
+			else
+			{
+				$("#oneday").hide();
+			}
+		}
+	</script>
+	<title></title>
+</head>
+<body>
+<fieldset>
+	<legend id="restart">定时重启</legend>
+	<table>
+		<tr >
+			<td align="left" width="10%">
+				重复
+			</td>
+			<td align="left" >
+				<select id="day" onchange="changeDay(this)">
+					<option id="everyday" value="0,1,2,3,4,5,6">每天</option>
+					<option id="every" value="8">每周</option>
+				</select>
+				<div id="oneday" style="display: none;">
+					<label><input type="checkbox" id="Sunday" name="day" value="0">星期日</label>
+					<label><input type="checkbox" id="Monday" name="day" value="1">星期一</label>
+					<label><input type="checkbox" id="Tuesday" name="day" value="2">星期二</label>
+					<label><input type="checkbox" id="Wednesday" name="day" value="3">星期三</label>
+					<label><input type="checkbox" id="Thursday" name="day" value="4">星期四</label>
+					<label><input type="checkbox" id="Friday" name="day" value="5">星期五</label>
+					<label><input type="checkbox" id="Saturday" name="day" value="6">星期六</label>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" width="10%" id="td_2">
+				时间:
+			</td>
+			<td align="left" >
+				<input type='text' name='time' id="time" value='00:00' size='14' class='input-text'>
+				<span id="minSec" style="color: red;display: inline;">时分格式</span>
+			</td>
+		</tr>
+	</table>
+</fieldset>
+
+</body>
+</html>
+
+
